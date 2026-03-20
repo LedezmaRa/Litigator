@@ -1,0 +1,605 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Command Center | Weekly Analysis</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+        <style>
+:root {
+    --bg-color: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --card-border: 1px solid rgba(255, 255, 255, 0.1);
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --accent-optimal: #4ade80; /* Green-400 */
+    --accent-good: #34d399;    /* Emerald-400 */
+    --accent-marginal: #fbbf24; /* Amber-400 */
+    --accent-poor: #f87171;    /* Red-400 */
+    --accent-info: #38bdf8;    /* Sky-400 */
+    --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+    --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    background-image: 
+        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Glassmorphism Card */
+.glass-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: var(--card-border);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--glass-shadow);
+}
+
+/* Typography */
+h1, h2, h3, h4 { margin-top: 0; color: #fff; font-weight: 600; }
+.text-muted { color: var(--text-secondary); }
+.text-sm { font-size: 0.875rem; }
+.text-xs { font-size: 0.75rem; }
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+
+/* Status Badges */
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.badge-optimal { background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
+.badge-good { background: rgba(52, 211, 153, 0.2); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+.badge-marginal { background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
+.badge-poor { background: rgba(248, 113, 113, 0.2); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
+.badge-info { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+
+/* Score Gauge Ring */
+.score-ring-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.score-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #fff;
+    z-index: 10;
+}
+.score-circle-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 8; }
+.score-circle-fg { 
+    fill: none; 
+    stroke-width: 8; 
+    stroke-linecap: round; 
+    transform: rotate(-90deg); 
+    transform-origin: 50% 50%;
+    transition: stroke-dashoffset 1s ease-out;
+}
+
+/* Grid Layouts */
+.grid-cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.grid-cols-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+@media (max-width: 1024px) {
+    .grid-cols-3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+    .grid-cols-3, .grid-cols-2 { grid-template-columns: 1fr; }
+}
+
+/* HUD Metrics */
+.metric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.metric-item:last-child { border-bottom: none; }
+.progress-bar-bg {
+    width: 100px;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+.progress-bar-fg {
+    height: 100%;
+    border-radius: 3px;
+}
+
+/* Table */
+.modern-table { width: 100%; border-collapse: separate; border-spacing: 0 0.5rem; }
+.modern-table th { padding: 1rem; color: var(--text-secondary); font-weight: 500; font-size: 0.875rem; text-align: left; }
+.modern-table td { padding: 1rem; background: rgba(30, 41, 59, 0.5); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
+.modern-table td:first-child { border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; border-left: 1px solid rgba(255,255,255,0.05); }
+.modern-table td:last-child { border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; border-right: 1px solid rgba(255,255,255,0.05); }
+.modern-table tr:hover td { background: rgba(30, 41, 59, 0.8); cursor: pointer; transform: scale(1.005); transition: all 0.2s; }
+
+/* Links */
+a { color: inherit; text-decoration: none; }
+.back-link { 
+    display: inline-flex; align-items: center; gap: 0.5rem; 
+    color: var(--text-secondary); margin-bottom: 1.5rem; 
+    transition: color 0.2s;
+}
+.back-link:hover { color: #fff; }
+
+/* Sortable Table Headers */
+.modern-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-right: 1.5rem;
+}
+.modern-table th.sortable:hover {
+    color: var(--text-primary);
+}
+.modern-table th.sortable::after {
+    content: '⇅';
+    position: absolute;
+    right: 0.5rem;
+    opacity: 0.4;
+    font-size: 0.7rem;
+}
+.modern-table th.sortable.asc::after {
+    content: '↑';
+    opacity: 1;
+    color: var(--accent-optimal);
+}
+.modern-table th.sortable.desc::after {
+    content: '↓';
+    opacity: 1;
+    color: var(--accent-optimal);
+}
+
+/* Search Input */
+.search-input {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+    width: 100%;
+    max-width: 400px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-input:focus {
+    border-color: var(--accent-info);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+}
+.search-input::placeholder {
+    color: var(--text-secondary);
+}
+
+/* Filter Controls */
+.filter-bar {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+.filter-btn {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.filter-btn:hover {
+    background: rgba(30, 41, 59, 0.9);
+    color: var(--text-primary);
+}
+.filter-btn.active {
+    background: rgba(74, 222, 128, 0.2);
+    border-color: rgba(74, 222, 128, 0.3);
+    color: var(--accent-optimal);
+}
+
+/* Chart Tooltip */
+.chart-tooltip {
+    position: fixed;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    display: none;
+}
+.chart-tooltip.visible {
+    display: block;
+}
+
+/* Stock Card Hover Enhancement */
+.glass-card.stock-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.glass-card.stock-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Hidden class for filtering */
+.hidden {
+    display: none !important;
+}
+/* Top Navigation Menu */
+.top-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    margin-bottom: 2rem;
+}
+.top-nav-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.nav-item {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+.nav-item:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+.nav-item.active {
+    color: var(--accent-optimal);
+    background: rgba(74, 222, 128, 0.1);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+}
+</style>
+    </head>
+    <body>
+        
+    <nav class="top-nav">
+        <ul class="top-nav-list">
+            <li><a href="index.html" class="nav-item active">Command Center</a></li><li><a href="sector_analysis.html" class="nav-item">Sector Analysis</a></li><li><a href="macro_drivers.html" class="nav-item">Macro Drivers</a></li><li><a href="ai_memo.html" class="nav-item">AI Strategy</a></li><li><a href="ai_macro_memo.html" class="nav-item">Macro AI</a></li>
+        </ul>
+    </nav>
+    
+        <div class="container">
+            <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3rem;">
+                <div>
+                    <h1 style="margin-bottom:0.5rem; background: linear-gradient(to right, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Command Center</h1>
+                    <p class="text-muted">EMA-ADX-ATR Optimized Framework 2.0</p>
+                </div>
+                <div>
+                  <span class="badge badge-avg">2026-03-18</span>
+                </div>
+            </header>
+            
+            
+        <div class="glass-card" style="margin-bottom:2rem; background: linear-gradient(135deg, rgba(30,41,59,0.8) 0%, rgba(15,23,42,0.9) 100%); border: 1px solid rgba(74, 222, 128, 0.2);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <span class="badge badge-optimal" style="margin-bottom:0.5rem; display:inline-block;">Top Pick of the Week</span>
+                    <h1 style="font-size:3.5rem; margin-bottom:0rem;">UUUU</h1>
+                    <p class="text-muted text-lg">Score: <span style="color:var(--accent-optimal); font-weight:bold;">56</span> • High Volatility</p>
+                </div>
+                
+    <div class="score-ring-container" style="width:140px; height:140px">
+        <svg width="140" height="140">
+            <circle class="score-circle-bg" cx="70" cy="70" r="66"></circle>
+            <circle class="score-circle-fg" cx="70" cy="70" r="66" 
+                    stroke="var(--accent-marginal)" stroke-dasharray="414.68987999999996" stroke-dashoffset="182.46354719999997"></circle>
+        </svg>
+        <div class="score-value">56</div>
+    </div>
+    
+            </div>
+            <div style="margin-top:1.5rem; display:flex; gap:2rem;">
+                <div><span class="text-xs text-muted block">Price</span><span class="text-xl font-mono">$18.95</span></div>
+                <div><span class="text-xs text-muted block">EMA20</span><span class="text-xl font-mono">$18.55</span></div>
+                <div><span class="text-xs text-muted block">R:R</span><span class="text-xl font-mono">2.4</span></div>
+            </div>
+        </div>
+        
+            
+            <div class="glass-card" style="padding:0; overflow:hidden;">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Ticker</th>
+                            <th>Score</th>
+                            <th>Rating</th>
+                            <th>ADX</th>
+                            <th>Vol</th>
+                            <th>R:R</th>
+                            <th>Regime</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+        <tr onclick="window.location='UUUU_analysis.html'">
+            <td>
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <div style="width:40px; height:40px; background:rgba(255,255,255,0.05); border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                        U
+                    </div>
+                    <div>
+                        <div class="font-bold">UUUU</div>
+                        <div class="text-xs text-muted">$18.95</div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <span style="font-size:1.25rem; font-weight:700; color:var(--text-primary)">56</span>
+            </td>
+            <td><span class="badge badge-poor">Poor</span></td>
+            <td class="font-mono text-sm">44.1</td>
+            <td class="font-mono text-sm">0.4x</td>
+            <td class="font-mono text-sm">2.4</td>
+            <td><span class="badge" style="background:rgba(255,255,255,0.1); color:#cbd5e1;">HIGH</span></td>
+            <td><span class="text-muted">&rarr;</span></td>
+        </tr>
+        
+        <tr onclick="window.location='NEE_analysis.html'">
+            <td>
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <div style="width:40px; height:40px; background:rgba(255,255,255,0.05); border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                        N
+                    </div>
+                    <div>
+                        <div class="font-bold">NEE</div>
+                        <div class="text-xs text-muted">$91.22</div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <span style="font-size:1.25rem; font-weight:700; color:var(--text-primary)">55</span>
+            </td>
+            <td><span class="badge badge-poor">Poor</span></td>
+            <td class="font-mono text-sm">33.3</td>
+            <td class="font-mono text-sm">0.4x</td>
+            <td class="font-mono text-sm">1.6</td>
+            <td><span class="badge" style="background:rgba(255,255,255,0.1); color:#cbd5e1;">NORMAL</span></td>
+            <td><span class="text-muted">&rarr;</span></td>
+        </tr>
+        
+        <tr onclick="window.location='USAR_analysis.html'">
+            <td>
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <div style="width:40px; height:40px; background:rgba(255,255,255,0.05); border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                        U
+                    </div>
+                    <div>
+                        <div class="font-bold">USAR</div>
+                        <div class="text-xs text-muted">$18.86</div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <span style="font-size:1.25rem; font-weight:700; color:var(--text-primary)">51</span>
+            </td>
+            <td><span class="badge badge-poor">Poor</span></td>
+            <td class="font-mono text-sm">39.2</td>
+            <td class="font-mono text-sm">0.4x</td>
+            <td class="font-mono text-sm">2.4</td>
+            <td><span class="badge" style="background:rgba(255,255,255,0.1); color:#cbd5e1;">NORMAL</span></td>
+            <td><span class="text-muted">&rarr;</span></td>
+        </tr>
+        
+        <tr onclick="window.location='HAL_analysis.html'">
+            <td>
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <div style="width:40px; height:40px; background:rgba(255,255,255,0.05); border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                        H
+                    </div>
+                    <div>
+                        <div class="font-bold">HAL</div>
+                        <div class="text-xs text-muted">$36.11</div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <span style="font-size:1.25rem; font-weight:700; color:var(--text-primary)">50</span>
+            </td>
+            <td><span class="badge badge-poor">Poor</span></td>
+            <td class="font-mono text-sm">34.8</td>
+            <td class="font-mono text-sm">0.8x</td>
+            <td class="font-mono text-sm">1.3</td>
+            <td><span class="badge" style="background:rgba(255,255,255,0.1); color:#cbd5e1;">HIGH</span></td>
+            <td><span class="text-muted">&rarr;</span></td>
+        </tr>
+        
+        <tr onclick="window.location='GOOGL_analysis.html'">
+            <td>
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <div style="width:40px; height:40px; background:rgba(255,255,255,0.05); border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                        G
+                    </div>
+                    <div>
+                        <div class="font-bold">GOOGL</div>
+                        <div class="text-xs text-muted">$308.67</div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <span style="font-size:1.25rem; font-weight:700; color:var(--text-primary)">48</span>
+            </td>
+            <td><span class="badge badge-poor">Poor</span></td>
+            <td class="font-mono text-sm">36.6</td>
+            <td class="font-mono text-sm">0.3x</td>
+            <td class="font-mono text-sm">2.0</td>
+            <td><span class="badge" style="background:rgba(255,255,255,0.1); color:#cbd5e1;">HIGH</span></td>
+            <td><span class="text-muted">&rarr;</span></td>
+        </tr>
+        
+        <tr onclick="window.location='NVDA_analysis.html'">
+            <td>
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <div style="width:40px; height:40px; background:rgba(255,255,255,0.05); border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                        N
+                    </div>
+                    <div>
+                        <div class="font-bold">NVDA</div>
+                        <div class="text-xs text-muted">$182.20</div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <span style="font-size:1.25rem; font-weight:700; color:var(--text-primary)">46</span>
+            </td>
+            <td><span class="badge badge-poor">Poor</span></td>
+            <td class="font-mono text-sm">15.7</td>
+            <td class="font-mono text-sm">0.6x</td>
+            <td class="font-mono text-sm">2.5</td>
+            <td><span class="badge" style="background:rgba(255,255,255,0.1); color:#cbd5e1;">NORMAL</span></td>
+            <td><span class="text-muted">&rarr;</span></td>
+        </tr>
+        
+        <tr onclick="window.location='HLT_analysis.html'">
+            <td>
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <div style="width:40px; height:40px; background:rgba(255,255,255,0.05); border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                        H
+                    </div>
+                    <div>
+                        <div class="font-bold">HLT</div>
+                        <div class="text-xs text-muted">$299.77</div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <span style="font-size:1.25rem; font-weight:700; color:var(--accent-poor)">38</span>
+            </td>
+            <td><span class="badge badge-poor">Poor</span></td>
+            <td class="font-mono text-sm">25.7</td>
+            <td class="font-mono text-sm">0.5x</td>
+            <td class="font-mono text-sm">2.1</td>
+            <td><span class="badge" style="background:rgba(255,255,255,0.1); color:#cbd5e1;">HIGH</span></td>
+            <td><span class="text-muted">&rarr;</span></td>
+        </tr>
+        
+        <tr onclick="window.location='AVGO_analysis.html'">
+            <td>
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <div style="width:40px; height:40px; background:rgba(255,255,255,0.05); border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                        A
+                    </div>
+                    <div>
+                        <div class="font-bold">AVGO</div>
+                        <div class="text-xs text-muted">$318.08</div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <span style="font-size:1.25rem; font-weight:700; color:var(--accent-poor)">33</span>
+            </td>
+            <td><span class="badge badge-poor">Poor</span></td>
+            <td class="font-mono text-sm">21.0</td>
+            <td class="font-mono text-sm">0.6x</td>
+            <td class="font-mono text-sm">3.2</td>
+            <td><span class="badge" style="background:rgba(255,255,255,0.1); color:#cbd5e1;">HIGH</span></td>
+            <td><span class="text-muted">&rarr;</span></td>
+        </tr>
+        
+        <tr onclick="window.location='MP_analysis.html'">
+            <td>
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <div style="width:40px; height:40px; background:rgba(255,255,255,0.05); border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                        M
+                    </div>
+                    <div>
+                        <div class="font-bold">MP</div>
+                        <div class="text-xs text-muted">$58.35</div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <span style="font-size:1.25rem; font-weight:700; color:var(--accent-poor)">31</span>
+            </td>
+            <td><span class="badge badge-poor">Poor</span></td>
+            <td class="font-mono text-sm">24.8</td>
+            <td class="font-mono text-sm">0.3x</td>
+            <td class="font-mono text-sm">2.7</td>
+            <td><span class="badge" style="background:rgba(255,255,255,0.1); color:#cbd5e1;">NORMAL</span></td>
+            <td><span class="text-muted">&rarr;</span></td>
+        </tr>
+        
+        <tr onclick="window.location='AMZN_analysis.html'">
+            <td>
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <div style="width:40px; height:40px; background:rgba(255,255,255,0.05); border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                        A
+                    </div>
+                    <div>
+                        <div class="font-bold">AMZN</div>
+                        <div class="text-xs text-muted">$210.88</div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <span style="font-size:1.25rem; font-weight:700; color:var(--accent-poor)">8</span>
+            </td>
+            <td><span class="badge badge-poor">Poor</span></td>
+            <td class="font-mono text-sm">14.8</td>
+            <td class="font-mono text-sm">0.5x</td>
+            <td class="font-mono text-sm">3.7</td>
+            <td><span class="badge" style="background:rgba(255,255,255,0.1); color:#cbd5e1;">HIGH</span></td>
+            <td><span class="text-muted">&rarr;</span></td>
+        </tr>
+        
+                    </tbody>
+                </table>
+            </div>
+            
+            <footer style="margin-top:3rem; text-align:center; color:var(--text-secondary); font-size:0.875rem;">
+                <p>Generated by Antigravity Agent. Market data is delayed.</p>
+            </footer>
+        </div>
+    </body>
+    </html>
+    

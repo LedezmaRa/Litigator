@@ -1,0 +1,977 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>HD | The Home Depot, Inc. | Stock Analysis</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+        <style>
+            
+:root {
+    --bg-color: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --card-border: 1px solid rgba(255, 255, 255, 0.1);
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --accent-optimal: #4ade80; /* Green-400 */
+    --accent-good: #34d399;    /* Emerald-400 */
+    --accent-marginal: #fbbf24; /* Amber-400 */
+    --accent-poor: #f87171;    /* Red-400 */
+    --accent-info: #38bdf8;    /* Sky-400 */
+    --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+    --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    background-image: 
+        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Glassmorphism Card */
+.glass-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: var(--card-border);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--glass-shadow);
+}
+
+/* Typography */
+h1, h2, h3, h4 { margin-top: 0; color: #fff; font-weight: 600; }
+.text-muted { color: var(--text-secondary); }
+.text-sm { font-size: 0.875rem; }
+.text-xs { font-size: 0.75rem; }
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+
+/* Status Badges */
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.badge-optimal { background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
+.badge-good { background: rgba(52, 211, 153, 0.2); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+.badge-marginal { background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
+.badge-poor { background: rgba(248, 113, 113, 0.2); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
+.badge-info { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+
+/* Score Gauge Ring */
+.score-ring-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.score-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #fff;
+    z-index: 10;
+}
+.score-circle-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 8; }
+.score-circle-fg { 
+    fill: none; 
+    stroke-width: 8; 
+    stroke-linecap: round; 
+    transform: rotate(-90deg); 
+    transform-origin: 50% 50%;
+    transition: stroke-dashoffset 1s ease-out;
+}
+
+/* Grid Layouts */
+.grid-cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.grid-cols-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+@media (max-width: 1024px) {
+    .grid-cols-3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+    .grid-cols-3, .grid-cols-2 { grid-template-columns: 1fr; }
+}
+
+/* HUD Metrics */
+.metric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.metric-item:last-child { border-bottom: none; }
+.progress-bar-bg {
+    width: 100px;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+.progress-bar-fg {
+    height: 100%;
+    border-radius: 3px;
+}
+
+/* Table */
+.modern-table { width: 100%; border-collapse: separate; border-spacing: 0 0.5rem; }
+.modern-table th { padding: 1rem; color: var(--text-secondary); font-weight: 500; font-size: 0.875rem; text-align: left; }
+.modern-table td { padding: 1rem; background: rgba(30, 41, 59, 0.5); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
+.modern-table td:first-child { border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; border-left: 1px solid rgba(255,255,255,0.05); }
+.modern-table td:last-child { border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; border-right: 1px solid rgba(255,255,255,0.05); }
+.modern-table tr:hover td { background: rgba(30, 41, 59, 0.8); cursor: pointer; transform: scale(1.005); transition: all 0.2s; }
+
+/* Links */
+a { color: inherit; text-decoration: none; }
+.back-link { 
+    display: inline-flex; align-items: center; gap: 0.5rem; 
+    color: var(--text-secondary); margin-bottom: 1.5rem; 
+    transition: color 0.2s;
+}
+.back-link:hover { color: #fff; }
+
+/* Sortable Table Headers */
+.modern-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-right: 1.5rem;
+}
+.modern-table th.sortable:hover {
+    color: var(--text-primary);
+}
+.modern-table th.sortable::after {
+    content: '⇅';
+    position: absolute;
+    right: 0.5rem;
+    opacity: 0.4;
+    font-size: 0.7rem;
+}
+.modern-table th.sortable.asc::after {
+    content: '↑';
+    opacity: 1;
+    color: var(--accent-optimal);
+}
+.modern-table th.sortable.desc::after {
+    content: '↓';
+    opacity: 1;
+    color: var(--accent-optimal);
+}
+
+/* Search Input */
+.search-input {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+    width: 100%;
+    max-width: 400px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-input:focus {
+    border-color: var(--accent-info);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+}
+.search-input::placeholder {
+    color: var(--text-secondary);
+}
+
+/* Filter Controls */
+.filter-bar {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+.filter-btn {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.filter-btn:hover {
+    background: rgba(30, 41, 59, 0.9);
+    color: var(--text-primary);
+}
+.filter-btn.active {
+    background: rgba(74, 222, 128, 0.2);
+    border-color: rgba(74, 222, 128, 0.3);
+    color: var(--accent-optimal);
+}
+
+/* Chart Tooltip */
+.chart-tooltip {
+    position: fixed;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    display: none;
+}
+.chart-tooltip.visible {
+    display: block;
+}
+
+/* Stock Card Hover Enhancement */
+.glass-card.stock-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.glass-card.stock-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Hidden class for filtering */
+.hidden {
+    display: none !important;
+}
+/* Top Navigation Menu */
+.top-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    margin-bottom: 2rem;
+}
+.top-nav-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.nav-item {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+.nav-item:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+.nav-item.active {
+    color: var(--accent-optimal);
+    background: rgba(74, 222, 128, 0.1);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+}
+
+            
+/* Stock Narrative Page Specific Styles */
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+}
+
+.metric-card {
+    background: rgba(30, 41, 59, 0.5);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.text-positive { color: var(--accent-optimal); }
+.text-negative { color: var(--accent-poor); }
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.breadcrumb a {
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    color: var(--text-primary);
+}
+
+.breadcrumb span {
+    color: var(--text-secondary);
+}
+
+.hero-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .grid-cols-2 {
+        grid-template-columns: 1fr !important;
+    }
+    .hero-header {
+        flex-direction: column;
+    }
+    .metric-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+        </style>
+    </head>
+    <body>
+        
+    <nav class="top-nav">
+        <ul class="top-nav-list">
+            <li><a href="index.html" class="nav-item">Command Center</a></li><li><a href="sector_analysis.html" class="nav-item">Sector Analysis</a></li><li><a href="macro_drivers.html" class="nav-item">Macro Drivers</a></li><li><a href="ai_memo.html" class="nav-item">AI Strategy</a></li><li><a href="ai_macro_memo.html" class="nav-item">Macro AI</a></li>
+        </ul>
+    </nav>
+    
+        <div class="container">
+            <!-- Breadcrumb Navigation -->
+            <nav class="breadcrumb">
+                <a href="sector_analysis.html">Sector Overview</a>
+                <span>/</span>
+                <a href="sector_XLY.html">Consumer Discretionary</a>
+                <span>/</span>
+                <span style="color: var(--text-primary);">HD</span>
+            </nav>
+
+            <!-- Hero Header -->
+            <header class="glass-card" style="margin-bottom: 2rem;">
+                <div class="hero-header">
+                    <div>
+                        <h1 style="margin-bottom: 0.5rem;">The Home Depot, Inc.</h1>
+                        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                            <span class="text-xl font-mono">HD</span>
+                            <span class="badge badge-good">Consumer Cyclical</span>
+                            <span class="text-muted">Home Improvement Retail</span>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 2rem; font-weight: bold;">$328.21</div>
+                        <span style="color: var(--accent-poor); font-size: 1rem;">-0.82%</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Two-Column Layout -->
+            <div class="grid-cols-2" style="display: grid; gap: 2rem; margin-bottom: 2rem;">
+                <!-- Left Column: Company Story -->
+                <div>
+                    
+    <section class="glass-card" style="margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+            <h2 style="margin: 0;">Company Overview</h2>
+            <a href="https://www.homedepot.com" target="_blank" class="text-sm" style="color: var(--accent-info);">Visit Website</a>
+        </div>
+        <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem;">The Home Depot, Inc. operates as a home improvement retailer in the United States and internationally. It sells various building materials, home improvement products, lawn and garden products, and décor products, as well as facilities maintenance, repair, and operations products. The company also offers installation services for flooring, water heaters, baths, garage doors, cabinets, cabinet makeovers, countertops, sheds, furnaces and central air systems, and windows. In addition, it provides tool and equipment rental services. The company serves consumers, such as do-it-yourself homeowners...</p>
+        <div style="display: flex; gap: 2rem;">
+            <div>
+                <span class="text-xs text-muted">Employees</span><br>
+                <b>470K</b>
+            </div>
+            <div>
+                <span class="text-xs text-muted">Industry</span><br>
+                <b>Home Improvement Retail</b>
+            </div>
+        </div>
+    </section>
+    
+                    
+    <section class="glass-card">
+        <h2>Leadership</h2>
+        
+        <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem;">
+            <div style="font-weight: 600;">Mr. Edward P. Decker</div>
+            <div class="text-sm text-muted">Chairman, President & CEO, Age 62</div>
+            <span class="text-xs text-muted">Compensation:</span> $4.3M
+        </div>
+        
+        <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem;">
+            <div style="font-weight: 600;">Mr. Richard V. McPhail</div>
+            <div class="text-sm text-muted">Executive VP & CFO, Age 53</div>
+            <span class="text-xs text-muted">Compensation:</span> $1.9M
+        </div>
+        
+        <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem;">
+            <div style="font-weight: 600;">Ms. Teresa Wynn Roseborough J.D.</div>
+            <div class="text-sm text-muted">Executive VP, General Counsel & Corporate Secretary, Age 66</div>
+            <span class="text-xs text-muted">Compensation:</span> $1.6M
+        </div>
+        
+        <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem;">
+            <div style="font-weight: 600;">Ms. Ann-Marie  Campbell</div>
+            <div class="text-sm text-muted">Senior Executive Vice President, Age 59</div>
+            <span class="text-xs text-muted">Compensation:</span> $2.3M
+        </div>
+        
+        <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem;">
+            <div style="font-weight: 600;">Mr. William D. Bastek</div>
+            <div class="text-sm text-muted">Executive Vice President of Merchandising, Age 58</div>
+            <span class="text-xs text-muted">Compensation:</span> $1.5M
+        </div>
+        
+    </section>
+    
+                </div>
+
+                <!-- Right Column: Metrics & Data -->
+                <div>
+                    
+    <section class="glass-card" style="margin-bottom: 1.5rem;">
+        <h2>Key Metrics</h2>
+        
+    <div style="margin-bottom: 1.5rem;">
+        <h3 class="text-sm text-muted" style="margin-bottom: 0.75rem;">Valuation</h3>
+        <div class="metric-grid">
+            
+        <div class="metric-card">
+            <span class="text-xs text-muted">Market Cap</span>
+            <div class="text-lg font-bold ">$326.74B</div>
+        </div>
+        
+            
+        <div class="metric-card">
+            <span class="text-xs text-muted">P/E Ratio</span>
+            <div class="text-lg font-bold ">23.0</div>
+        </div>
+        
+            
+        <div class="metric-card">
+            <span class="text-xs text-muted">Forward P/E</span>
+            <div class="text-lg font-bold ">20.1</div>
+        </div>
+        
+            
+        <div class="metric-card">
+            <span class="text-xs text-muted">P/B Ratio</span>
+            <div class="text-lg font-bold ">25.4</div>
+        </div>
+        
+            
+        <div class="metric-card">
+            <span class="text-xs text-muted">PEG Ratio</span>
+            <div class="text-lg font-bold ">N/A</div>
+        </div>
+        
+            
+        <div class="metric-card">
+            <span class="text-xs text-muted">EV</span>
+            <div class="text-lg font-bold ">$389.87B</div>
+        </div>
+        
+        </div>
+    </div>
+    
+        
+    <div style="margin-bottom: 1.5rem;">
+        <h3 class="text-sm text-muted" style="margin-bottom: 0.75rem;">Growth</h3>
+        <div class="metric-grid">
+            
+        <div class="metric-card">
+            <span class="text-xs text-muted">Revenue</span>
+            <div class="text-lg font-bold ">$164.7B</div>
+        </div>
+        
+            
+        <div class="metric-card">
+            <span class="text-xs text-muted">Revenue Growth</span>
+            <div class="text-lg font-bold text-negative">-3.8%</div>
+        </div>
+        
+            
+        <div class="metric-card">
+            <span class="text-xs text-muted">Earnings Growth</span>
+            <div class="text-lg font-bold text-negative">-14.5%</div>
+        </div>
+        
+        </div>
+    </div>
+    
+        
+    <div style="margin-bottom: 1.5rem;">
+        <h3 class="text-sm text-muted" style="margin-bottom: 0.75rem;">Profitability</h3>
+        <div class="metric-grid">
+            
+        <div class="metric-card">
+            <span class="text-xs text-muted">Gross Margin</span>
+            <div class="text-lg font-bold ">33.3%</div>
+        </div>
+        
+            
+        <div class="metric-card">
+            <span class="text-xs text-muted">Operating Margin</span>
+            <div class="text-lg font-bold ">10.1%</div>
+        </div>
+        
+            
+        <div class="metric-card">
+            <span class="text-xs text-muted">Net Margin</span>
+            <div class="text-lg font-bold ">8.6%</div>
+        </div>
+        
+            
+        <div class="metric-card">
+            <span class="text-xs text-muted">ROE</span>
+            <div class="text-lg font-bold ">145.5%</div>
+        </div>
+        
+            
+        <div class="metric-card">
+            <span class="text-xs text-muted">ROA</span>
+            <div class="text-lg font-bold ">13.0%</div>
+        </div>
+        
+        </div>
+    </div>
+    
+        
+    <div>
+        <h3 class="text-sm text-muted" style="margin-bottom: 0.75rem;">Risk & Other</h3>
+        <div class="metric-grid">
+            
+        <div class="metric-card">
+            <span class="text-xs text-muted">Beta</span>
+            <div class="text-lg font-bold ">1.04</div>
+        </div>
+        
+            
+        <div class="metric-card">
+            <span class="text-xs text-muted">Debt/Equity</span>
+            <div class="text-lg font-bold ">510.0</div>
+        </div>
+        
+            
+        <div class="metric-card">
+            <span class="text-xs text-muted">Current Ratio</span>
+            <div class="text-lg font-bold ">1.06</div>
+        </div>
+        
+            
+        <div class="metric-card">
+            <span class="text-xs text-muted">Dividend Yield</span>
+            <div class="text-lg font-bold ">284.0%</div>
+        </div>
+        
+            
+        <div class="metric-card">
+            <span class="text-xs text-muted">52W High</span>
+            <div class="text-lg font-bold ">$426.75</div>
+        </div>
+        
+            
+        <div class="metric-card">
+            <span class="text-xs text-muted">52W Low</span>
+            <div class="text-lg font-bold ">$324.65</div>
+        </div>
+        
+        </div>
+    </div>
+    
+    </section>
+    
+                    
+    <section class="glass-card">
+        <h2>Analyst Sentiment</h2>
+        
+        <div style="margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <span class="text-sm text-muted">Analyst Ratings (37 analysts)</span>
+                <span class="badge badge-optimal">Buy</span>
+            </div>
+            <div style="display: flex; height: 24px; border-radius: 4px; overflow: hidden;">
+                <div style="width: 59.5%; background: var(--accent-optimal);" title="Buy: 22"></div>
+                <div style="width: 40.5%; background: var(--accent-marginal);" title="Hold: 15"></div>
+                <div style="width: 0.0%; background: var(--accent-poor);" title="Sell: 0"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 0.5rem;">
+                <span class="text-xs" style="color: var(--accent-optimal);">Buy 22</span>
+                <span class="text-xs" style="color: var(--accent-marginal);">Hold 15</span>
+                <span class="text-xs" style="color: var(--accent-poor);">Sell 0</span>
+            </div>
+        </div>
+        
+        
+        <div style="margin-bottom: 1.5rem;">
+            <h4 class="text-sm text-muted" style="margin-bottom: 0.5rem;">Price Targets</h4>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="font-mono text-sm">$335</span>
+                <div style="flex: 1; margin: 0 1rem; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; position: relative;">
+                    <div style="position: absolute; left: -6%; width: 3px; height: 16px; background: var(--accent-info); top: -4px;" title="Current: $328.21"></div>
+                    <div style="position: absolute; left: 63%; width: 3px; height: 12px; background: var(--accent-optimal); top: -2px;" title="Mean: $410.27"></div>
+                </div>
+                <span class="font-mono text-sm">$454</span>
+            </div>
+            <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 0.75rem;">
+                <div style="text-align: center;">
+                    <span class="text-xs text-muted">Mean Target</span><br>
+                    <span class="font-bold" style="color: var(--accent-optimal);">$410.27</span>
+                </div>
+                <div style="text-align: center;">
+                    <span class="text-xs text-muted">Upside</span><br>
+                    <span class="font-bold" style="color: var(--accent-optimal);">+25.0%</span>
+                </div>
+            </div>
+        </div>
+        
+        
+        <div>
+            <h4 class="text-sm text-muted" style="margin-bottom: 0.5rem;">Recent Analyst Actions</h4>
+            <table class="modern-table" style="font-size: 0.8rem;">
+                <thead>
+                    <tr><th>Date</th><th>Firm</th><th>Action</th><th>Rating</th></tr>
+                </thead>
+                <tbody>
+                    
+            <tr>
+                <td class="text-xs">2026-02-25</td>
+                <td class="text-sm">UBS</td>
+                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
+                <td class="text-sm">Buy</td>
+            </tr>
+            
+            <tr>
+                <td class="text-xs">2026-02-25</td>
+                <td class="text-sm">Bernstein</td>
+                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
+                <td class="text-sm">Market Perform</td>
+            </tr>
+            
+            <tr>
+                <td class="text-xs">2026-02-25</td>
+                <td class="text-sm">RBC Capital</td>
+                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
+                <td class="text-sm">Sector Perform</td>
+            </tr>
+            
+            <tr>
+                <td class="text-xs">2026-02-25</td>
+                <td class="text-sm">Morgan Stanley</td>
+                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
+                <td class="text-sm">Overweight</td>
+            </tr>
+            
+            <tr>
+                <td class="text-xs">2026-02-25</td>
+                <td class="text-sm">Guggenheim</td>
+                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
+                <td class="text-sm">Buy</td>
+            </tr>
+            
+            <tr>
+                <td class="text-xs">2026-02-25</td>
+                <td class="text-sm">Wells Fargo</td>
+                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
+                <td class="text-sm">Overweight</td>
+            </tr>
+            
+            <tr>
+                <td class="text-xs">2026-02-25</td>
+                <td class="text-sm">Telsey Advisory Grou</td>
+                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
+                <td class="text-sm">Outperform</td>
+            </tr>
+            
+            <tr>
+                <td class="text-xs">2026-02-24</td>
+                <td class="text-sm">Jefferies</td>
+                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
+                <td class="text-sm">Buy</td>
+            </tr>
+            
+                </tbody>
+            </table>
+        </div>
+        
+    </section>
+    
+                </div>
+            </div>
+
+            <!-- Catalysts Section (Full Width) -->
+            
+    <section class="glass-card" style="margin-bottom: 2rem;">
+        <h2>Upcoming Catalysts</h2>
+        <div class="grid-cols-2" style="gap: 2rem;">
+            
+        <div>
+            <h3 class="text-sm text-muted" style="margin-bottom: 1rem;">Next Earnings</h3>
+            <div class="glass-card" style="background: rgba(56, 189, 248, 0.1); border-color: rgba(56, 189, 248, 0.2);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-size: 1.25rem; font-weight: bold;">2026-05-19</div>
+                    <span class="text-sm text-muted">60 days away</span>
+                </div>
+                <div style="margin-top: 1rem; display: flex; gap: 2rem;">
+                    <div>
+                        <span class="text-xs text-muted">EPS Estimate</span><br>
+                        <b>$3.42</b>
+                    </div>
+                    <div>
+                        <span class="text-xs text-muted">Revenue Estimate</span><br>
+                        <b>$41.5B</b>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+            
+        <div>
+            <h3 class="text-sm text-muted" style="margin-bottom: 1rem;">Recent News</h3>
+            <div>
+            <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <a href="https://finance.yahoo.com/markets/stocks/articles/time-reassess-home-depot-hd-180646401.html" target="_blank" style="color: var(--text-primary); text-decoration: none;">
+                    <div style="font-weight: 500; margin-bottom: 0.25rem;">Is It Time To Reassess Home Depot (HD) After Recent Share Price Weakness?</div>
+                </a>
+                <div class="text-xs text-muted">Simply Wall St. · 2026-03-19</div>
+            </div>
+            
+            <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <a href="https://finance.yahoo.com/markets/stocks/articles/home-depot-builds-pro-loyalty-140000443.html" target="_blank" style="color: var(--text-primary); text-decoration: none;">
+                    <div style="font-weight: 500; margin-bottom: 0.25rem;">Home Depot Builds Pro Loyalty With New AI & Project Management Tools</div>
+                </a>
+                <div class="text-xs text-muted">Zacks · 2026-03-19</div>
+            </div>
+            
+            <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <a href="https://www.retail-insight-network.com/news/home-depot-open-12-us-stores/" target="_blank" style="color: var(--text-primary); text-decoration: none;">
+                    <div style="font-weight: 500; margin-bottom: 0.25rem;">Home Depot to open 12 US stores in 2026 expansion</div>
+                </a>
+                <div class="text-xs text-muted">Retail Insight Network · 2026-03-18</div>
+            </div>
+            
+            <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <a href="https://finance.yahoo.com/news/home-depot-hd-real-time-191217304.html" target="_blank" style="color: var(--text-primary); text-decoration: none;">
+                    <div style="font-weight: 500; margin-bottom: 0.25rem;">Should Home Depot’s (HD) Real‑Time Pro Delivery Tracker Require Action From...</div>
+                </a>
+                <div class="text-xs text-muted">Simply Wall St. · 2026-03-17</div>
+            </div>
+            
+            <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <a href="https://www.fool.com/investing/2026/03/17/the-top-2-retail-stocks-to-buy-right-now/" target="_blank" style="color: var(--text-primary); text-decoration: none;">
+                    <div style="font-weight: 500; margin-bottom: 0.25rem;">The Top 2 Retail Stocks to Buy Right Now</div>
+                </a>
+                <div class="text-xs text-muted">Motley Fool · 2026-03-17</div>
+            </div>
+            </div>
+        </div>
+        
+        </div>
+    </section>
+    
+
+            <!-- Technical Context Section -->
+            
+    <section class="glass-card">
+        <h2>Technical Context</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                <div>
+                    <span class="text-xs text-muted">Current Price</span>
+                    <div style="font-size: 1.5rem; font-weight: bold;">$328.21</div>
+                </div>
+                <div>
+                    <span class="text-xs text-muted">Composite Score</span>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent-marginal);">36</div>
+                </div>
+                <div>
+                    <span class="text-xs text-muted">Entry Score</span>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--text-secondary);">N/A</div>
+                </div>
+                <div>
+                    <span class="text-xs text-muted">Trend</span>
+                    <div style="margin-top: 0.25rem;"><span class="badge badge-good">Steady</span></div>
+                </div>
+            </div>
+            <a href="sector_XLY.html" class="filter-btn" style="text-decoration: none;">
+                View Full Chart in Sector Dashboard
+            </a>
+        </div>
+    </section>
+    
+
+            <!-- Footer -->
+            <footer style="margin-top: 3rem; text-align: center; color: var(--text-secondary);">
+                <p>Macro Watch 2.1 · Stock Narrative Page</p>
+                <p class="text-xs">Fundamental data via yfinance · Last updated: 2026-03-19 21:35</p>
+            </footer>
+        </div>
+        
+<script>
+// Sortable Tables
+function initSortableTables() {
+    document.querySelectorAll('.modern-table').forEach(table => {
+        const headers = table.querySelectorAll('th.sortable');
+        headers.forEach((header, colIndex) => {
+            header.addEventListener('click', () => {
+                const tbody = table.querySelector('tbody');
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                const isAsc = header.classList.contains('asc');
+
+                // Clear other headers
+                headers.forEach(h => h.classList.remove('asc', 'desc'));
+                header.classList.add(isAsc ? 'desc' : 'asc');
+
+                rows.sort((a, b) => {
+                    const aCell = a.cells[colIndex];
+                    const bCell = b.cells[colIndex];
+                    let aVal = aCell.textContent.trim();
+                    let bVal = bCell.textContent.trim();
+
+                    // Try numeric sort
+                    const aNum = parseFloat(aVal.replace(/[^0-9.-]/g, ''));
+                    const bNum = parseFloat(bVal.replace(/[^0-9.-]/g, ''));
+
+                    if (!isNaN(aNum) && !isNaN(bNum)) {
+                        return isAsc ? bNum - aNum : aNum - bNum;
+                    }
+                    return isAsc ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
+                });
+
+                rows.forEach(row => tbody.appendChild(row));
+            });
+        });
+    });
+}
+
+// Search/Filter for Stock Cards
+function initSearch() {
+    const searchInput = document.getElementById('stock-search');
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        document.querySelectorAll('.stock-card').forEach(card => {
+            const ticker = card.dataset.ticker?.toLowerCase() || '';
+            const name = card.dataset.name?.toLowerCase() || '';
+            const matches = ticker.includes(query) || name.includes(query);
+            card.classList.toggle('hidden', !matches);
+        });
+
+        // Update visible count
+        const visible = document.querySelectorAll('.stock-card:not(.hidden)').length;
+        const countEl = document.getElementById('visible-count');
+        if (countEl) countEl.textContent = visible;
+    });
+}
+
+// Filter Buttons
+function initFilterButtons() {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const filter = btn.dataset.filter;
+            const isActive = btn.classList.contains('active');
+
+            // Toggle active state
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            if (!isActive) btn.classList.add('active');
+
+            // Apply filter
+            document.querySelectorAll('.stock-card').forEach(card => {
+                if (!filter || isActive) {
+                    card.classList.remove('hidden');
+                } else if (filter === 'top5') {
+                    card.classList.toggle('hidden', parseInt(card.dataset.rank) > 5);
+                } else if (filter === 'trade-ready') {
+                    card.classList.toggle('hidden', card.dataset.tradeReady !== 'true');
+                }
+            });
+
+            // Update count
+            const visible = document.querySelectorAll('.stock-card:not(.hidden)').length;
+            const countEl = document.getElementById('visible-count');
+            if (countEl) countEl.textContent = visible;
+        });
+    });
+}
+
+// Chart Tooltip (for SVG charts)
+function initChartTooltips() {
+    const tooltip = document.createElement('div');
+    tooltip.className = 'chart-tooltip';
+    document.body.appendChild(tooltip);
+
+    document.querySelectorAll('svg.interactive-chart').forEach(chart => {
+        chart.addEventListener('mousemove', (e) => {
+            const rect = chart.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const data = chart.dataset.values ? JSON.parse(chart.dataset.values) : null;
+
+            if (data && data.length > 0) {
+                const idx = Math.floor((x / rect.width) * data.length);
+                const point = data[Math.min(idx, data.length - 1)];
+
+                if (point) {
+                    tooltip.innerHTML = `
+                        <div><strong>${point.date || ''}</strong></div>
+                        <div>Price: $${point.price?.toFixed(2) || 'N/A'}</div>
+                        ${point.ema20 ? `<div style="color:#f59e0b">EMA20: $${point.ema20.toFixed(2)}</div>` : ''}
+                        ${point.ema50 ? `<div style="color:#8b5cf6">EMA50: $${point.ema50.toFixed(2)}</div>` : ''}
+                    `;
+                    tooltip.style.left = (e.clientX + 15) + 'px';
+                    tooltip.style.top = (e.clientY - 10) + 'px';
+                    tooltip.classList.add('visible');
+                }
+            }
+        });
+
+        chart.addEventListener('mouseleave', () => {
+            tooltip.classList.remove('visible');
+        });
+    });
+}
+
+// Initialize on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+    initSortableTables();
+    initSearch();
+    initFilterButtons();
+    initChartTooltips();
+});
+</script>
+
+    </body>
+    </html>
+    
