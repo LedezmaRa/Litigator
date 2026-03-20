@@ -127,8 +127,20 @@ def main():
     parser.add_argument('--sector', type=str, help='Focus on a single sector (e.g., XLK, XLF, XLV). Use with --sectors.')
     parser.add_argument('--ai-memo', action='store_true', help='Generate AI Investment Strategy Memo of top candidates.')
     parser.add_argument('--ai-macro-memo', action='store_true', help='Generate Macro AI Strategy Memo of sector drivers.')
+    parser.add_argument('--news', action='store_true', help='Generate Market Themes News Dashboard.')
 
     args = parser.parse_args()
+
+    if args.news:
+        from src.news import fetch_thematic_news
+        from src.news_dashboard import generate_news_dashboard
+        from src.config import MARKET_THEMES
+        print("Fetching thematic news...")
+        news_data = fetch_thematic_news(MARKET_THEMES)
+        path = generate_news_dashboard(news_data)
+        print(f"Market News Dashboard generated at: {path}")
+        webbrowser.open(f"file://{os.path.abspath(path)}")
+        return
 
     if args.sectors or args.sector or args.ai_memo or args.ai_macro_memo:
         from src.sectors.dashboard import run_sector_analysis

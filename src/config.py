@@ -140,3 +140,28 @@ REGIME_PERCENTILES = {
     'low': 30,
     'high': 70
 }
+
+# =============================================================================
+# Thematic Market News Context
+# =============================================================================
+MARKET_THEMES = [
+    "War in Middle East",
+    "Private Credit Concerns",
+    "Stagflation",
+    "Global Stock Market Trends"
+]
+
+# =============================================================================
+# Legal Disclaimers
+# =============================================================================
+DISCLAIMER_TOP = """This content, which contains security-related opinions and/or information, is provided for informational purposes only and should not be relied upon in any manner as professional advice, or an endorsement of any practices, products or services. There can be no guarantees or assurances that the views expressed here will be applicable for any particular facts or circumstances, and should not be relied upon in any manner. You should consult your own advisers as to legal, business, tax, and other related matters concerning any investment."""
+
+DISCLAIMER_BOTTOM = """The commentary in this report reflects the personal opinions, viewpoints, and analyses of the author(s), and should not be regarded as official investment advice or relied upon in any manner as professional advice.
+
+Any opinions expressed herein do not constitute or imply endorsement, sponsorship, or recommendation by the author or its affiliates. The author and its affiliates may invest in any technology company or asset discussed. The views reflected in the commentary are subject to change at any time without notice.
+
+Nothing on this website or report constitutes investment advice, performance data or any recommendation that any particular security, portfolio of securities, transaction or investment strategy is suitable for any specific person. It also should not be construed as an offer soliciting the purchase or sale of any security mentioned. 
+
+Any mention of a particular security and related performance data is not a recommendation to buy or sell that security. Investments in securities involve the risk of loss. Past performance is no guarantee of future results.
+
+Any charts provided here are for informational purposes only, and should also not be relied upon when making any investment decision. Any indices referenced for comparison are unmanaged and cannot be invested into directly. As always please remember investing involves risk and possible loss of principal capital; please seek advice from a licensed professional. Any projections, estimates, forecasts, targets, prospects and/or opinions expressed in these materials are subject to change without notice and may differ or be contrary to opinions expressed by others. Information in charts have been obtained from third-party sources and data. While taken from sources believed to be reliable, the author has not independently verified such information and makes no representations about the enduring accuracy of the information or its appropriateness for a given situation. All content speaks only as of the date indicated."""

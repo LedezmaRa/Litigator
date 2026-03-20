@@ -448,6 +448,7 @@ def generate_top_nav(active_page: str = "command_center") -> str:
         {"id": "command_center", "name": "Command Center", "url": "index.html"},
         {"id": "sector_analysis", "name": "Sector Analysis", "url": "sector_analysis.html"},
         {"id": "macro_drivers", "name": "Macro Drivers", "url": "macro_drivers.html"},
+        {"id": "market_news", "name": "Market News", "url": "market_news.html"},
         {"id": "ai_memo", "name": "AI Strategy", "url": "ai_memo.html"},
         {"id": "ai_macro_memo", "name": "Macro AI", "url": "ai_macro_memo.html"}
     ]

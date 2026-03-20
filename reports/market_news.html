@@ -1,0 +1,686 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Market Themes News | Command Center</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+        <style>
+:root {
+    --bg-color: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --card-border: 1px solid rgba(255, 255, 255, 0.1);
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --accent-optimal: #4ade80; /* Green-400 */
+    --accent-good: #34d399;    /* Emerald-400 */
+    --accent-marginal: #fbbf24; /* Amber-400 */
+    --accent-poor: #f87171;    /* Red-400 */
+    --accent-info: #38bdf8;    /* Sky-400 */
+    --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+    --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    background-image: 
+        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Glassmorphism Card */
+.glass-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: var(--card-border);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--glass-shadow);
+}
+
+/* Typography */
+h1, h2, h3, h4 { margin-top: 0; color: #fff; font-weight: 600; }
+.text-muted { color: var(--text-secondary); }
+.text-sm { font-size: 0.875rem; }
+.text-xs { font-size: 0.75rem; }
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+
+/* Status Badges */
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.badge-optimal { background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
+.badge-good { background: rgba(52, 211, 153, 0.2); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+.badge-marginal { background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
+.badge-poor { background: rgba(248, 113, 113, 0.2); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
+.badge-info { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+
+/* Score Gauge Ring */
+.score-ring-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.score-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #fff;
+    z-index: 10;
+}
+.score-circle-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 8; }
+.score-circle-fg { 
+    fill: none; 
+    stroke-width: 8; 
+    stroke-linecap: round; 
+    transform: rotate(-90deg); 
+    transform-origin: 50% 50%;
+    transition: stroke-dashoffset 1s ease-out;
+}
+
+/* Grid Layouts */
+.grid-cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.grid-cols-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+@media (max-width: 1024px) {
+    .grid-cols-3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+    .grid-cols-3, .grid-cols-2 { grid-template-columns: 1fr; }
+}
+
+/* HUD Metrics */
+.metric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.metric-item:last-child { border-bottom: none; }
+.progress-bar-bg {
+    width: 100px;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+.progress-bar-fg {
+    height: 100%;
+    border-radius: 3px;
+}
+
+/* Table */
+.modern-table { width: 100%; border-collapse: separate; border-spacing: 0 0.5rem; }
+.modern-table th { padding: 1rem; color: var(--text-secondary); font-weight: 500; font-size: 0.875rem; text-align: left; }
+.modern-table td { padding: 1rem; background: rgba(30, 41, 59, 0.5); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
+.modern-table td:first-child { border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; border-left: 1px solid rgba(255,255,255,0.05); }
+.modern-table td:last-child { border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; border-right: 1px solid rgba(255,255,255,0.05); }
+.modern-table tr:hover td { background: rgba(30, 41, 59, 0.8); cursor: pointer; transform: scale(1.005); transition: all 0.2s; }
+
+/* Links */
+a { color: inherit; text-decoration: none; }
+.back-link { 
+    display: inline-flex; align-items: center; gap: 0.5rem; 
+    color: var(--text-secondary); margin-bottom: 1.5rem; 
+    transition: color 0.2s;
+}
+.back-link:hover { color: #fff; }
+
+/* Sortable Table Headers */
+.modern-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-right: 1.5rem;
+}
+.modern-table th.sortable:hover {
+    color: var(--text-primary);
+}
+.modern-table th.sortable::after {
+    content: '⇅';
+    position: absolute;
+    right: 0.5rem;
+    opacity: 0.4;
+    font-size: 0.7rem;
+}
+.modern-table th.sortable.asc::after {
+    content: '↑';
+    opacity: 1;
+    color: var(--accent-optimal);
+}
+.modern-table th.sortable.desc::after {
+    content: '↓';
+    opacity: 1;
+    color: var(--accent-optimal);
+}
+
+/* Search Input */
+.search-input {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+    width: 100%;
+    max-width: 400px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-input:focus {
+    border-color: var(--accent-info);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+}
+.search-input::placeholder {
+    color: var(--text-secondary);
+}
+
+/* Filter Controls */
+.filter-bar {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+.filter-btn {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.filter-btn:hover {
+    background: rgba(30, 41, 59, 0.9);
+    color: var(--text-primary);
+}
+.filter-btn.active {
+    background: rgba(74, 222, 128, 0.2);
+    border-color: rgba(74, 222, 128, 0.3);
+    color: var(--accent-optimal);
+}
+
+/* Chart Tooltip */
+.chart-tooltip {
+    position: fixed;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    display: none;
+}
+.chart-tooltip.visible {
+    display: block;
+}
+
+/* Stock Card Hover Enhancement */
+.glass-card.stock-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.glass-card.stock-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Hidden class for filtering */
+.hidden {
+    display: none !important;
+}
+/* Top Navigation Menu */
+.top-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    margin-bottom: 2rem;
+}
+.top-nav-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.nav-item {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+.nav-item:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+.nav-item.active {
+    color: var(--accent-optimal);
+    background: rgba(74, 222, 128, 0.1);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+}
+</style>
+    </head>
+    <body>
+        
+    <nav class="top-nav">
+        <ul class="top-nav-list">
+            <li><a href="index.html" class="nav-item">Command Center</a></li><li><a href="sector_analysis.html" class="nav-item">Sector Analysis</a></li><li><a href="macro_drivers.html" class="nav-item">Macro Drivers</a></li><li><a href="market_news.html" class="nav-item active">Market News</a></li><li><a href="ai_memo.html" class="nav-item">AI Strategy</a></li><li><a href="ai_macro_memo.html" class="nav-item">Macro AI</a></li>
+        </ul>
+    </nav>
+    
+        <div class="container">
+            <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3rem;">
+                <div>
+                    <h1 style="margin-bottom:0.5rem; background: linear-gradient(to right, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Market Themes News</h1>
+                    <p class="text-muted">Key Drivers & Macro Themes Tracker</p>
+                </div>
+                <div>
+                  <span class="badge badge-info">2026-03-20</span>
+                </div>
+            </header>
+
+            <div class="grid-cols-2" style="gap: 2rem; align-items: start;">
+                
+        <div class="glass-card" style="margin-bottom: 2rem;">
+            <h2 style="font-size: 1.5rem; border-left: 4px solid var(--accent-optimal); padding-left: 1rem; margin-bottom: 1.5rem;">War in Middle East</h2>
+            
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                        <span class="text-xs text-muted font-mono">Fri, 20 Mar 2026 07:33:06</span>
+                        <span class="badge badge-info">Al Jazeera</span>
+                    </div>
+                    <a href="https://news.google.com/rss/articles/CBMiwgFBVV95cUxQaVFhaFNpSGtlOXp1TXVIcl9pRWY0b2lZYjlUUDJGQzNZNnBoMmZBSGo3R2tneWRJdGZwbHBBM2tuY3pPVDFMRnIyNG85amtrLXJlZHlnRzRPRThtUVpWUkEtTlNnYkxaYkE2dXZuYTV4QnVCNHdFWkFOQ2E4YkZXUXRDU0E5WnpEdUQ0Rmk4SXFWZkdSZE0yM2pTc1Z4R0lkRXBqenpTZmxJSGcyOWloc3M3ci1KWksxUU4waHRONlFqZ9IBxwFBVV95cUxPcEJXeFBPNnNhRUdVUzRTZWlyOVkwM3htYkJFME1xQ2tCaGI1bE8yWk12THduR1JiYmp5SW9jWV9fQjF6MUNTVWlqX0Y1N09QLWc2NUxWV2lJS3FYdHNVVDBUd1NxcmluWFFrNEhfQjBUeVFCemtFZjJaYjZpa3MyWEJocVhmQ3AtOTVjUm9rMnRtSTZ0YnJkTW5nVVpWWmxISGp3bVhGRjV5RU1oSEFZcDVfWUJzalJWRmI1bmNUeGxrd0gtMzNr?oc=5" target="_blank" style="display: block; text-decoration: none;">
+                        <h3 style="font-size: 1.1rem; line-height: 1.4; color: var(--text-primary); transition: color 0.2s;" onmouseover="this.style.color='var(--accent-info)'" onmouseout="this.style.color='var(--text-primary)'">Iran war live: Supreme leader denounces US-Israel ‘delusion’ of domination - Al Jazeera</h3>
+                    </a>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                        <span class="text-xs text-muted font-mono">Fri, 20 Mar 2026 17:21:00</span>
+                        <span class="badge badge-info">The Guardian</span>
+                    </div>
+                    <a href="https://news.google.com/rss/articles/CBMi0gFBVV95cUxNUG1oWXgwZHM4d0VnZXAtN0JfbWV2dFFIU0FXejVyZjh4QnB3SGdabWtTQTZmTWxIX0Q4NGdIQlNLRHM2QTFYM0dodTBhWmRQSGhfQ3VFQXNEdzFvZnpYMHI5cHZUTEJGSUV5TkNWc1FSTGcxYXhDd0ZydUVrQi1hTDJQYjB3MWpFTWs0c2xhZDVIZXVTTFk0X0lRc3R0cGZGR0RDSDhSVG94Vzktdzg1dWVjanBYclFncWd6YXJBazVMWU5PT3d0Q0N5eGFwZk9YSmc?oc=5" target="_blank" style="display: block; text-decoration: none;">
+                        <h3 style="font-size: 1.1rem; line-height: 1.4; color: var(--text-primary); transition: color 0.2s;" onmouseover="this.style.color='var(--accent-info)'" onmouseout="this.style.color='var(--text-primary)'">Trump calls Nato allies ‘cowards’ for not helping in strait of Hormuz; US officials say more troops heading to Middle East – live - The Guardian</h3>
+                    </a>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                        <span class="text-xs text-muted font-mono">Fri, 20 Mar 2026 18:14:22</span>
+                        <span class="badge badge-info">The New York Times</span>
+                    </div>
+                    <a href="https://news.google.com/rss/articles/CBMiqwFBVV95cUxQNTJGUmo4ZlUxNzJ5a3pGX0k5cXJQbHV4UEJpNXFCQldsU2hMaEVVMFNTN1JLX1BNWWZ4VmczSG5WVEwxYVV3ZmRRWDNxVll5bHZ5Zmxkam02cE9QWmFxRThtbmtZR09OWk1McHFFbFk5a2hWSHZuU28tNzdVS3JXOVZNcFl2clJtb05waE9lUFlfNVMtNXgxT1NpQURnbTd5c0JkOVowRXZqa1U?oc=5" target="_blank" style="display: block; text-decoration: none;">
+                        <h3 style="font-size: 1.1rem; line-height: 1.4; color: var(--text-primary); transition: color 0.2s;" onmouseover="this.style.color='var(--accent-info)'" onmouseout="this.style.color='var(--text-primary)'">Video: War in Middle East Looms Over Eid and Nowruz Celebrations - The New York Times</h3>
+                    </a>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                        <span class="text-xs text-muted font-mono">Fri, 20 Mar 2026 18:03:29</span>
+                        <span class="badge badge-info">Fortune</span>
+                    </div>
+                    <a href="https://news.google.com/rss/articles/CBMiiAFBVV95cUxQTmNxU0xSUjRlakRDUkdhV0l2cjh4dXNtRUJoOVEyOF9RUUtFUElkUGhZSlU3QmQ2QmdBMEtOVXhhZEVIZ1U0ZzNNRVRBcmQ4Tk5zXzE5SWoyeTljYmRfMmhtSDFPUnoyZFpZczR1MFd1anpvaUxmaDhEZmxjcVBYM2x0N1lQNDVj?oc=5" target="_blank" style="display: block; text-decoration: none;">
+                        <h3 style="font-size: 1.1rem; line-height: 1.4; color: var(--text-primary); transition: color 0.2s;" onmouseover="this.style.color='var(--accent-info)'" onmouseout="this.style.color='var(--text-primary)'">The Middle East is one of the world’s fastest growing luxury markets—and the war in Iran may cut its sales in half, analysts say - Fortune</h3>
+                    </a>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                        <span class="text-xs text-muted font-mono">Fri, 20 Mar 2026 18:33:47</span>
+                        <span class="badge badge-info">BBC</span>
+                    </div>
+                    <a href="https://news.google.com/rss/articles/CBMiVEFVX3lxTE02b180dHpSREozbXl6aUtXazlWMWVsX3FRUUQ2ajZBUF8zSk8wUnMyLVBQTXNWbGRSUlNObzNFYjQ3MXdfMTVkZGQ5eExKc19VT3B5RQ?oc=5" target="_blank" style="display: block; text-decoration: none;">
+                        <h3 style="font-size: 1.1rem; line-height: 1.4; color: var(--text-primary); transition: color 0.2s;" onmouseover="this.style.color='var(--accent-info)'" onmouseout="this.style.color='var(--text-primary)'">Iran war latest: UK agrees to let US use British bases to strike Iranian sites targeting Strait of Hormuz - BBC</h3>
+                    </a>
+                </div>
+                
+        </div>
+        
+        <div class="glass-card" style="margin-bottom: 2rem;">
+            <h2 style="font-size: 1.5rem; border-left: 4px solid var(--accent-optimal); padding-left: 1rem; margin-bottom: 1.5rem;">Private Credit Concerns</h2>
+            
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                        <span class="text-xs text-muted font-mono">Thu, 19 Mar 2026 09:00:00</span>
+                        <span class="badge badge-info">NPR</span>
+                    </div>
+                    <a href="https://news.google.com/rss/articles/CBMilAFBVV95cUxOSmxqYkQ5YTBYZDlmT0ZQQkhjbW5OX2oxX0h0Vy10VXYtXzZhWGVMZ05pRjRJb1liVzFYS3VBT2lFajFlX1pvak1GUnlldHZfdUltaGlSaEQtNnBDLUFEOFNxQ2ZKc29oWWNxc0REQkNUWFNOclhVWHVwb2JhSUE1TTNURTg1bzZab3otMFh1N0t3azNP?oc=5" target="_blank" style="display: block; text-decoration: none;">
+                        <h3 style="font-size: 1.1rem; line-height: 1.4; color: var(--text-primary); transition: color 0.2s;" onmouseover="this.style.color='var(--accent-info)'" onmouseout="this.style.color='var(--text-primary)'">It's called 'private credit' — and it could lead to big trouble on Wall Street - NPR</h3>
+                    </a>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                        <span class="text-xs text-muted font-mono">Thu, 19 Mar 2026 10:15:00</span>
+                        <span class="badge badge-info">Business Insider</span>
+                    </div>
+                    <a href="https://news.google.com/rss/articles/CBMioAFBVV95cUxQTnRYZEhSbGR3Q3I1enVoUmM4b19Obm80ZFlPSUlhcDlXdFFYT19aRzZ6Uk51UmZXd1l0LTBBZkhmczRta3hmelFUQktDSzRyY2U0UjExbFVKeS1vR0NLQ18tX09YaG84NXNsSnRfR2VuWDJXdzZvc2dwS2JmMXN5UXg1ZzlteEJERXRuM3ZrVlFab2JPU2pRRWZiV3FlaFI0?oc=5" target="_blank" style="display: block; text-decoration: none;">
+                        <h3 style="font-size: 1.1rem; line-height: 1.4; color: var(--text-primary); transition: color 0.2s;" onmouseover="this.style.color='var(--accent-info)'" onmouseout="this.style.color='var(--text-primary)'">Famed economist Mohamed El-Erian sees private credit sparking a 2007-like 'financial accident' - Business Insider</h3>
+                    </a>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                        <span class="text-xs text-muted font-mono">Thu, 19 Mar 2026 03:57:57</span>
+                        <span class="badge badge-info">Seeking Alpha</span>
+                    </div>
+                    <a href="https://news.google.com/rss/articles/CBMiwwFBVV95cUxNdWFvNUNHeW9PWkJDMjVVUkVzaHg2c0h0Uk5xYklVa083a2ZNdjhfd19pQ2doTEwxMktIaG1aYjJjMjRtNXVtR1drLVFoWFBjMllOLUY3MzJFUUdUcE1tZGs4cU1NYUZOakxaQ2tuVHJBdnAtLTZrdkd1T0M0UDlNdU9HV0tnWDlncXI4YUtEN0hrU3VzQVlEakphdnM4ZFFhZjVPd1VZQ1Y0blZuRC1jby1SZllpN0VtUXRURWpia0RUQnc?oc=5" target="_blank" style="display: block; text-decoration: none;">
+                        <h3 style="font-size: 1.1rem; line-height: 1.4; color: var(--text-primary); transition: color 0.2s;" onmouseover="this.style.color='var(--accent-info)'" onmouseout="this.style.color='var(--text-primary)'">Capital Southwest: Demonstrating Resilience Amid Private Credit Sector Concerns (CSWC) - Seeking Alpha</h3>
+                    </a>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                        <span class="text-xs text-muted font-mono">Tue, 17 Mar 2026 13:19:05</span>
+                        <span class="badge badge-info">Reuters</span>
+                    </div>
+                    <a href="https://news.google.com/rss/articles/CBMizAFBVV95cUxQeUFNRkptSXl6WTV3aGoxTlVsUWppekFpUWY1cjJrYnhBNzE0bFh6Uk1pc0k1R2JsbHhnX2Qwc1dDX0lTTk9kR3owZ2k5ZWo4amkzdW4xSmViMzQtSTkwUHBkWlZMdjV4Ry1VUi00X3NqVl93alpYdnRfNzJEbEdUcTFUeWppQjhoUG03dmNqOFNUUXN1blVtMUNwNHVrV3VWbFFkamJqdTg5ODlwV2k1SF9oaXNhVHM0U1dTb3dBNEdIMTNIcXF2Nzl0M0Q?oc=5" target="_blank" style="display: block; text-decoration: none;">
+                        <h3 style="font-size: 1.1rem; line-height: 1.4; color: var(--text-primary); transition: color 0.2s;" onmouseover="this.style.color='var(--accent-info)'" onmouseout="this.style.color='var(--text-primary)'">Intercontinental Exchange launches private credit platform to address transparency concerns - Reuters</h3>
+                    </a>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                        <span class="text-xs text-muted font-mono">Sun, 08 Feb 2026 08:00:00</span>
+                        <span class="badge badge-info">CNBC</span>
+                    </div>
+                    <a href="https://news.google.com/rss/articles/CBMihwFBVV95cUxOMnpYdGtaTlNFSGNpS2dQRGwwNERxTks5SE9YeFo4cTlnTHJvaUo2LVdvdGhqTWZ5MHJ2RUdIcV9vTWQxVzBEUThEZkZZXzk0dlY4V2R4TkIxRThnZUp6ZlA0ZVplUjZXNzJaaXg1aDNULVR6dEFkZ2hEUTFBb0hQWnV1QXBaUDTSAYwBQVVfeXFMTm9oQml3Z3c1QzJ1aXpEWlRHNzZQd2k4WXIwc0IyR1BGazFqRFZOYWFwZHJVcTRRMW9FX3hTTmtYejVhc29WdldkVGdrV2FXdjZoVzdOSWN5NXVOTEZaZTRZZVdkS0FyYThCNFpyWGZQeWpSVzdWeU11cWZncFRtWGJrdGs0ZjZJV1lPd18?oc=5" target="_blank" style="display: block; text-decoration: none;">
+                        <h3 style="font-size: 1.1rem; line-height: 1.4; color: var(--text-primary); transition: color 0.2s;" onmouseover="this.style.color='var(--accent-info)'" onmouseout="this.style.color='var(--text-primary)'">Private credit worries resurface in $3 trillion market as AI pressures software firms - CNBC</h3>
+                    </a>
+                </div>
+                
+        </div>
+        
+        <div class="glass-card" style="margin-bottom: 2rem;">
+            <h2 style="font-size: 1.5rem; border-left: 4px solid var(--accent-optimal); padding-left: 1rem; margin-bottom: 1.5rem;">Stagflation</h2>
+            
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                        <span class="text-xs text-muted font-mono">Thu, 19 Mar 2026 16:49:00</span>
+                        <span class="badge badge-info">Fortune</span>
+                    </div>
+                    <a href="https://news.google.com/rss/articles/CBMiqwFBVV95cUxPZmtQYzlFWkY5bFZqNWh2OVNMd3Rpb2NTWU45QXVGcGgybzVlWXVHbHVEOV9uQ2RIWUVsZXZ2NnlSdkJlTFFzd1loa0ZIQ0l1R2V4eU41NDFhSEVvR2hJXzRJQWVDRDk0SU1WYUxyVnZ0Rm5Sb05WUXpsVDNRbVh5d3JWeGxvZDZ3Uld3VWJxNlViQ0NxRU9fbmt6dnFwX1ozd2RRMjlBU0dMY00?oc=5" target="_blank" style="display: block; text-decoration: none;">
+                        <h3 style="font-size: 1.1rem; line-height: 1.4; color: var(--text-primary); transition: color 0.2s;" onmouseover="this.style.color='var(--accent-info)'" onmouseout="this.style.color='var(--text-primary)'">'A month ago, no one would have believed this': June Fed rate hike odds just surpassed rate cut odds as stagflation fears grow - Fortune</h3>
+                    </a>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                        <span class="text-xs text-muted font-mono">Tue, 17 Mar 2026 13:44:29</span>
+                        <span class="badge badge-info">CNBC</span>
+                    </div>
+                    <a href="https://news.google.com/rss/articles/CBMicEFVX3lxTE4zTGlJM2x3NzE4SUl4ZVUtWDdsVXhVX1JfSm1wUENKTkVlS0JMQi1UQVVnMUNsX0o4cndwcnZMNTBfSE92T21qdkxLZDhyTkw2bkZuSXIyeERPU251a2tRU3RCX3V6Uk1Oa3Nsd2dKVjI?oc=5" target="_blank" style="display: block; text-decoration: none;">
+                        <h3 style="font-size: 1.1rem; line-height: 1.4; color: var(--text-primary); transition: color 0.2s;" onmouseover="this.style.color='var(--accent-info)'" onmouseout="this.style.color='var(--text-primary)'">Some economists are warning about 'stagflation.' What it could mean for your money - CNBC</h3>
+                    </a>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                        <span class="text-xs text-muted font-mono">Wed, 18 Mar 2026 19:36:54</span>
+                        <span class="badge badge-info">Reuters</span>
+                    </div>
+                    <a href="https://news.google.com/rss/articles/CBMiqwFBVV95cUxNUE5XZkptMl9kT2ZCT253SFhhNDUxNkwyUmJfd3U4bzIzcXd6WkwtVzVRS0cwbFlRUUtPUmptSi1xVElNcU1xYjBlcFFvLVNjaW45VUg0ZG5GY05ILUlTa2tDUnp6aUtxYmN5bndtd0VHMFVXQ0Z1MjQ0dlJqRE9yY1JqLUtfQ1Y4eGhqOWY5QkFobFI4S2xhemJhVXBrM01kNndhS0pzYnZnanc?oc=5" target="_blank" style="display: block; text-decoration: none;">
+                        <h3 style="font-size: 1.1rem; line-height: 1.4; color: var(--text-primary); transition: color 0.2s;" onmouseover="this.style.color='var(--accent-info)'" onmouseout="this.style.color='var(--text-primary)'">Powell says 'stagflation' is a 1970s term, not what we face today - Reuters</h3>
+                    </a>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                        <span class="text-xs text-muted font-mono">Fri, 20 Mar 2026 17:03:05</span>
+                        <span class="badge badge-info">Forbes</span>
+                    </div>
+                    <a href="https://news.google.com/rss/articles/CBMisgFBVV95cUxNU0RkUUU0d0wwYm5FelVvTzJ6TkQ4Si1GaTI4OGJOT2I5VzZmNzQ0dGp2Q0swZ0J1WVhMM2hZQlVUQzZpNXlqeTRzWE5nT0lmbWlldHM3QnNzMl9Sdm1HTWdQbU1sRGtyMTVrYnY2OVlVeUZ6UXJvT3dHbF9DM0pmYVVsb2lfVUhZaTBhMldSYVNYYm5NaXkxRmxjX2JYMzFwUXpSa1NwZVNZWHZ0andVQVpn?oc=5" target="_blank" style="display: block; text-decoration: none;">
+                        <h3 style="font-size: 1.1rem; line-height: 1.4; color: var(--text-primary); transition: color 0.2s;" onmouseover="this.style.color='var(--accent-info)'" onmouseout="this.style.color='var(--text-primary)'">Trump Is Making Stagflation Great Again For Japan’s Economy - Forbes</h3>
+                    </a>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                        <span class="text-xs text-muted font-mono">Thu, 19 Mar 2026 17:00:01</span>
+                        <span class="badge badge-info">Bloomberg.com</span>
+                    </div>
+                    <a href="https://news.google.com/rss/articles/CBMitgFBVV95cUxNNm80bXBRY3JDSWYyZ1YzbWxqZGd3clN2U2gtTHVkWl94WGZaREk0Yk4tSExIYVp2WVdwU3N4dVRhMnF6bnJDUmdYblRBWll4UFZGYS1Gb1JhcFZFX3RrNUt3UXNYdnNOTEp1UlczTXRsdkVaZGxFZ010TVg1M3NGWEpkQW5rM1pIQ2NBTFQ4Z3hVejZJYWVjMHBmSEZEem00M19QcGt1YnYwSk9rdHFPM3RIdUlNQQ?oc=5" target="_blank" style="display: block; text-decoration: none;">
+                        <h3 style="font-size: 1.1rem; line-height: 1.4; color: var(--text-primary); transition: color 0.2s;" onmouseover="this.style.color='var(--accent-info)'" onmouseout="this.style.color='var(--text-primary)'">How to Invest if Stagflation Spikes - Bloomberg.com</h3>
+                    </a>
+                </div>
+                
+        </div>
+        
+        <div class="glass-card" style="margin-bottom: 2rem;">
+            <h2 style="font-size: 1.5rem; border-left: 4px solid var(--accent-optimal); padding-left: 1rem; margin-bottom: 1.5rem;">Global Stock Market Trends</h2>
+            
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                        <span class="text-xs text-muted font-mono">Mon, 16 Mar 2026 07:00:00</span>
+                        <span class="badge badge-info">blackrock.com</span>
+                    </div>
+                    <a href="https://news.google.com/rss/articles/CBMingFBVV95cUxQLWJDTjBBalYwVHVpc0VxV1BwRE1xeUt1RWlLQ1VJdnJQRXNnb3p6MnFNbjRBV0s0TnlldW4wSVIycFRQeVNISWJ3VV9wMWdjX1ZndE1Tc24tNzc0anNYWjl0SVBsRDhSa0dVTWlyVVYxX0w5b2JhTFB0Tm9Vb2FwYVZubTU1SVJlcy0zMEpXOEM4ZlhiSU1QazdVQVlldw?oc=5" target="_blank" style="display: block; text-decoration: none;">
+                        <h3 style="font-size: 1.1rem; line-height: 1.4; color: var(--text-primary); transition: color 0.2s;" onmouseover="this.style.color='var(--accent-info)'" onmouseout="this.style.color='var(--text-primary)'">Weekly market commentary - blackrock.com</h3>
+                    </a>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                        <span class="text-xs text-muted font-mono">Fri, 13 Mar 2026 07:00:00</span>
+                        <span class="badge badge-info">Edward Jones</span>
+                    </div>
+                    <a href="https://news.google.com/rss/articles/CBMinwFBVV95cUxPeVcxcmtaeVJRVm9kQ2VyWmVQNG9GNDZzWkJpT01xTUFJbVhYdGF6dG1qZndCb2hFaHhCM0I5NFk2RGxhY1drcWRHVnhyNzc0RWJvTU50S0dnWENrRk1UYVQ4S25xVHBtYzJsU1dabkhWeVBCckxzTHRpS3M2dklsOF84LTJRV1RJLVFRVUdGbHh2SE5CbFVPQVpROGtRa2M?oc=5" target="_blank" style="display: block; text-decoration: none;">
+                        <h3 style="font-size: 1.1rem; line-height: 1.4; color: var(--text-primary); transition: color 0.2s;" onmouseover="this.style.color='var(--accent-info)'" onmouseout="this.style.color='var(--text-primary)'">Weekly market wrap - Edward Jones</h3>
+                    </a>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                        <span class="text-xs text-muted font-mono">Thu, 08 Jan 2026 08:00:00</span>
+                        <span class="badge badge-info">Goldman Sachs</span>
+                    </div>
+                    <a href="https://news.google.com/rss/articles/CBMiswFBVV95cUxOZ1M0YTdudHFEN2ZZblZqa0ljcW1na3RUdmRURm9lRmpLYndSRkFRTm9HR0NYSG5OZ2pOdS1SQS0tUnRHSmV4RTVXRFRYMkE3MnpnTFI3LXBiVE1kUlI1R1hYV09zNFZoMEdkTkE0Yi1uX1dKUk5yZGFtYklueThYZllzSFM1TUJIU0hFeF9OMTJ4Y1hxUWtFOHdCTTBReXJKMV8wTFJRdmZYV0t3ajJ3OFpjdw?oc=5" target="_blank" style="display: block; text-decoration: none;">
+                        <h3 style="font-size: 1.1rem; line-height: 1.4; color: var(--text-primary); transition: color 0.2s;" onmouseover="this.style.color='var(--accent-info)'" onmouseout="this.style.color='var(--text-primary)'">Global Stocks Are Projected to Return 11% in the Next 12 Months - Goldman Sachs</h3>
+                    </a>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                        <span class="text-xs text-muted font-mono">Fri, 20 Mar 2026 08:08:22</span>
+                        <span class="badge badge-info">Meyka</span>
+                    </div>
+                    <a href="https://news.google.com/rss/articles/CBMikwFBVV95cUxPT2pkR1hTakY2ZlpsQ01MUXpHNE1UNjl4TV9JMjdPTkdGd1JKSEZIdGVabzV2U2c4ZHVPR3JnWmdFWFc3ajlHQk9NdHlyYWhKaGZ5N3JWZ1J2WXRUZXVJNWN5YXdXdjl1RlBOUExiaVpQVHcyVVpyWGJOSnpydWNDdWI4dmVqeXI0eGxDbklmbm1TZEk?oc=5" target="_blank" style="display: block; text-decoration: none;">
+                        <h3 style="font-size: 1.1rem; line-height: 1.4; color: var(--text-primary); transition: color 0.2s;" onmouseover="this.style.color='var(--accent-info)'" onmouseout="this.style.color='var(--text-primary)'">Taiwan Stocks Higher at Close of Trade. Taiwan Weighted Gains 1.51% - Meyka</h3>
+                    </a>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                        <span class="text-xs text-muted font-mono">Tue, 09 Dec 2025 08:00:00</span>
+                        <span class="badge badge-info">J.P. Morgan</span>
+                    </div>
+                    <a href="https://news.google.com/rss/articles/CBMifEFVX3lxTE9keHZKTjBMa0NLZXBaV2pjNG0tUm5jZjZ6Ukd3bHRVNDExZmJmcWtOaFlMbmNmSXFiaWVRQU9xTWhrZHJJdzhZcXRybVVnSnhpNldjUU9mVktnVFZLeE1LQ0pBX0kxN2ZaMGNIYmRXVzZNbkJwR09wM3V4Z2g?oc=5" target="_blank" style="display: block; text-decoration: none;">
+                        <h3 style="font-size: 1.1rem; line-height: 1.4; color: var(--text-primary); transition: color 0.2s;" onmouseover="this.style.color='var(--accent-info)'" onmouseout="this.style.color='var(--text-primary)'">2026 market outlook: A multidimensional polarization - J.P. Morgan</h3>
+                    </a>
+                </div>
+                
+        </div>
+        
+            </div>
+
+            <footer style="margin-top:3rem; text-align:center; color:var(--text-secondary); font-size:0.875rem;">
+                <p>Curated by Antigravity Agent. Market data and news are delayed.</p>
+            </footer>
+        </div>
+        
+<script>
+// Sortable Tables
+function initSortableTables() {
+    document.querySelectorAll('.modern-table').forEach(table => {
+        const headers = table.querySelectorAll('th.sortable');
+        headers.forEach((header, colIndex) => {
+            header.addEventListener('click', () => {
+                const tbody = table.querySelector('tbody');
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                const isAsc = header.classList.contains('asc');
+
+                // Clear other headers
+                headers.forEach(h => h.classList.remove('asc', 'desc'));
+                header.classList.add(isAsc ? 'desc' : 'asc');
+
+                rows.sort((a, b) => {
+                    const aCell = a.cells[colIndex];
+                    const bCell = b.cells[colIndex];
+                    let aVal = aCell.textContent.trim();
+                    let bVal = bCell.textContent.trim();
+
+                    // Try numeric sort
+                    const aNum = parseFloat(aVal.replace(/[^0-9.-]/g, ''));
+                    const bNum = parseFloat(bVal.replace(/[^0-9.-]/g, ''));
+
+                    if (!isNaN(aNum) && !isNaN(bNum)) {
+                        return isAsc ? bNum - aNum : aNum - bNum;
+                    }
+                    return isAsc ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
+                });
+
+                rows.forEach(row => tbody.appendChild(row));
+            });
+        });
+    });
+}
+
+// Search/Filter for Stock Cards
+function initSearch() {
+    const searchInput = document.getElementById('stock-search');
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        document.querySelectorAll('.stock-card').forEach(card => {
+            const ticker = card.dataset.ticker?.toLowerCase() || '';
+            const name = card.dataset.name?.toLowerCase() || '';
+            const matches = ticker.includes(query) || name.includes(query);
+            card.classList.toggle('hidden', !matches);
+        });
+
+        // Update visible count
+        const visible = document.querySelectorAll('.stock-card:not(.hidden)').length;
+        const countEl = document.getElementById('visible-count');
+        if (countEl) countEl.textContent = visible;
+    });
+}
+
+// Filter Buttons
+function initFilterButtons() {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const filter = btn.dataset.filter;
+            const isActive = btn.classList.contains('active');
+
+            // Toggle active state
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            if (!isActive) btn.classList.add('active');
+
+            // Apply filter
+            document.querySelectorAll('.stock-card').forEach(card => {
+                if (!filter || isActive) {
+                    card.classList.remove('hidden');
+                } else if (filter === 'top5') {
+                    card.classList.toggle('hidden', parseInt(card.dataset.rank) > 5);
+                } else if (filter === 'trade-ready') {
+                    card.classList.toggle('hidden', card.dataset.tradeReady !== 'true');
+                }
+            });
+
+            // Update count
+            const visible = document.querySelectorAll('.stock-card:not(.hidden)').length;
+            const countEl = document.getElementById('visible-count');
+            if (countEl) countEl.textContent = visible;
+        });
+    });
+}
+
+// Chart Tooltip (for SVG charts)
+function initChartTooltips() {
+    const tooltip = document.createElement('div');
+    tooltip.className = 'chart-tooltip';
+    document.body.appendChild(tooltip);
+
+    document.querySelectorAll('svg.interactive-chart').forEach(chart => {
+        chart.addEventListener('mousemove', (e) => {
+            const rect = chart.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const data = chart.dataset.values ? JSON.parse(chart.dataset.values) : null;
+
+            if (data && data.length > 0) {
+                const idx = Math.floor((x / rect.width) * data.length);
+                const point = data[Math.min(idx, data.length - 1)];
+
+                if (point) {
+                    tooltip.innerHTML = `
+                        <div><strong>${point.date || ''}</strong></div>
+                        <div>Price: $${point.price?.toFixed(2) || 'N/A'}</div>
+                        ${point.ema20 ? `<div style="color:#f59e0b">EMA20: $${point.ema20.toFixed(2)}</div>` : ''}
+                        ${point.ema50 ? `<div style="color:#8b5cf6">EMA50: $${point.ema50.toFixed(2)}</div>` : ''}
+                    `;
+                    tooltip.style.left = (e.clientX + 15) + 'px';
+                    tooltip.style.top = (e.clientY - 10) + 'px';
+                    tooltip.classList.add('visible');
+                }
+            }
+        });
+
+        chart.addEventListener('mouseleave', () => {
+            tooltip.classList.remove('visible');
+        });
+    });
+}
+
+// Initialize on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+    initSortableTables();
+    initSearch();
+    initFilterButtons();
+    initChartTooltips();
+});
+</script>
+
+    </body>
+    </html>
+    
