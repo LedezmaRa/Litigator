@@ -93,8 +93,8 @@ def calculate_up_down_volume_ratio(df: pd.DataFrame, period: int = 5) -> pd.Seri
     up_sum = up_vol.rolling(window=period).sum()
     down_sum = down_vol.rolling(window=period).sum()
     
-    # Avoid division by zero
-    ratio = up_sum / down_sum.replace(0, 1)
+    # NaN where no down volume exists (all-up periods) — downstream handles NaN
+    ratio = up_sum / down_sum.replace(0, np.nan)
     return ratio
 
 def calculate_all_indicators(df: pd.DataFrame) -> pd.DataFrame:

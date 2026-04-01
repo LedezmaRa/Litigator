@@ -32,15 +32,6 @@ SCORE_WEIGHTS = {
 EMA_PROXIMITY_BUCKETS = [0.5, 1.0, 1.5, 2.0, 2.5]
 EMA_PROXIMITY_SCORES = [25, 20, 15, 10, 5, 0]  # Last value is default for > 2.5
 
-# Legacy format (kept for backwards compatibility)
-EMA_PROXIMITY_THRESHOLDS = {
-    0.5: 25,
-    1.0: 20,
-    1.5: 15,
-    2.0: 10,
-    2.5: 5
-}
-
 # =============================================================================
 # FACTOR 2: ADX Stage Scoring (0-25 pts)
 # =============================================================================
@@ -57,15 +48,6 @@ ADX_RANGE_SCORES = {
     'acceptable': 15,
     'caution': 10,
     'late': 5
-}
-
-# Legacy format
-ADX_THRESHOLDS = {
-    'optimal_low': 25,
-    'optimal_high': 30,
-    'good_high': 35,
-    'caution_high': 40,
-    'extreme': 50
 }
 
 # ADX lookback for "rising" determination
@@ -140,6 +122,13 @@ REGIME_PERCENTILES = {
     'low': 30,
     'high': 70
 }
+
+# =============================================================================
+# AI Model Configuration
+# =============================================================================
+AI_MODEL = "claude-sonnet-4-20250514"
+AI_MAX_TOKENS = 8000
+AI_TEMPERATURE = 0.3
 
 # =============================================================================
 # Thematic Market News Context

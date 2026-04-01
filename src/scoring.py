@@ -15,10 +15,22 @@ from typing import Dict, Any, Optional
 
 from .config import (
     SCORE_WEIGHTS,
-    EMA_PROXIMITY_THRESHOLDS,
-    ADX_THRESHOLDS,
+    EMA_PROXIMITY_BUCKETS,
+    EMA_PROXIMITY_SCORES,
+    ADX_SCORE_RANGES,
+    ADX_RANGE_SCORES,
+    ADX_RISING_LOOKBACK,
+    STOP_DIST_ATR_DEFAULT,
+    TARGET_ATR_MULTIPLIER,
+    RR_SCORE_THRESHOLDS,
+    RR_SCORES,
     EMA_FAST_PERIOD,
-    EMA_SLOW_PERIOD
+    EMA_SLOW_PERIOD,
+    STRUCTURE_SLOPE_STRONG,
+    STRUCTURE_SLOPE_POSITIVE,
+    STRUCTURE_BARS_EXCELLENT,
+    STRUCTURE_BARS_GOOD,
+    STRUCTURE_EMA_SPREAD_CLOSE,
 )
 
 from .regime import VolatilityRegime
@@ -43,76 +55,47 @@ class EntryScorer:
     def calculate_ema_proximity_score(self) -> float:
         """
         Factor 1: EMA Proximity Score (0-25 points)
-        Formula: (Price - EMA20) / ATR
+        Measures distance from EMA20 in ATR multiples using config buckets.
         """
         price = self.latest['Close']
         ema20 = self.latest[f'EMA_{EMA_FAST_PERIOD}']
         atr = self.latest['ATR']
-        
+
         if pd.isna(ema20) or pd.isna(atr) or atr == 0:
             return 0.0
-            
-        distance_atr = (price - ema20) / atr
-        
-        # NOTE on Regime: "Extension limit" changes by regime.
-        # But the 0-25 SCORING BUCKETS are hardcoded in the doc?
-        # Check doc PART 4 > OPTIMIZATION #2 > "LOW VOLATILITY REGIME uses Optimal < 1.0x ATR"
-        # The doc has TWO sections:
-        # 1. OPTIMIZATION #1: EXPLICIT ENTRY SCORING with fixed buckets (0-0.5, 0.5-1.0...)
-        # 2. OPTIMIZATION #2: DYNAMIC ATR THRESHOLDS defines "Optimal/Good/Caution" zones per regime.
-        #
-        # Conflict? The Scoring System (Opt #1) seems to be the primary "Entry Score".
-        # Opt #2 seems to be for WARNING/FILTERS or Risk Management.
-        # "Filter based on score... (Score > 75)".
-        #
-        # However, let's adapt the SCORING buckets if the user wants "Complete System".
-        # If High Volatility, 2.0x ATR might be "Optimal" (according to Opt #2).
-        # But Opt #1 says >2.5x is 0 points.
-        #
-        # Let's keep Opt #1 buckets FIXED for consistency with the rubric, 
-        # BUT update Risk/Reward and Stop Distance using Regime params.
-        # AND maybe cap the score if "Violates Extension Limit"?
-        #
-        # Let's stick to Opt #1 for Scoring. Use Opt #2 for Stop Distance logic in Risk/Reward.
-        
-        if distance_atr < 0:
-            distance_abs = abs(distance_atr)
-            if distance_abs < 0.5:
-                return 25.0
-            return 0.0 
-            
-        if distance_atr <= 0.5: return 25.0
-        if distance_atr <= 1.0: return 20.0
-        if distance_atr <= 1.5: return 15.0
-        if distance_atr <= 2.0: return 10.0
-        if distance_atr <= 2.5: return 5.0
-        return 0.0
+
+        distance_atr = abs(price - ema20) / atr
+
+        # Price below EMA20 by more than the tightest bucket = overextended down
+        if price < ema20 and distance_atr >= EMA_PROXIMITY_BUCKETS[0]:
+            return 0.0
+
+        for i, threshold in enumerate(EMA_PROXIMITY_BUCKETS):
+            if distance_atr <= threshold:
+                return float(EMA_PROXIMITY_SCORES[i])
+        return float(EMA_PROXIMITY_SCORES[-1])
 
     def calculate_adx_stage_score(self) -> float:
         """
         Factor 2: ADX Stage Score (0-25 points)
-        Framework 2.0:
-        - 25-30 Rising: 25 pts (Optimal)
-        - 30-35 Rising: 20 pts (Good)
-        - 20-25 Rising: 15 pts (Acceptable - Early)
-        - 35-40 Any:    10 pts (Caution)
-        - 40-50:        5 pts (Late)
-        - >50 or <20:   0 pts
+        Uses ADX_RISING_LOOKBACK to determine trend direction.
         """
         adx = self.latest['ADX']
         if pd.isna(adx): return 0.0
 
-        # Determine if rising (compare to 4 weeks ago as per spec)
-        if len(self.df) < 5: return 0.0
-        adx_4ago = self.df['ADX'].iloc[-5]
-        is_rising = adx > adx_4ago
+        min_len = ADX_RISING_LOOKBACK + 1
+        if len(self.df) < min_len: return 0.0
+        adx_prev = self.df['ADX'].iloc[-(ADX_RISING_LOOKBACK + 1)]
+        is_rising = adx > adx_prev
 
-        if 25 <= adx < 30 and is_rising: return 25.0
-        if 30 <= adx < 35 and is_rising: return 20.0
-        if 20 <= adx < 25 and is_rising: return 15.0
-        if 35 <= adx < 40: return 10.0
-        if 40 <= adx < 50: return 5.0
-        
+        for label, (low, high) in ADX_SCORE_RANGES.items():
+            if low <= adx < high:
+                if label in ('caution', 'late'):
+                    return float(ADX_RANGE_SCORES[label])
+                if is_rising:
+                    return float(ADX_RANGE_SCORES[label])
+                return 0.0
+
         return 0.0
 
     def calculate_volume_score(self) -> float:
@@ -155,94 +138,68 @@ class EntryScorer:
     def calculate_structure_score(self) -> float:
         """
         Factor 4: Structure Integrity Score (0-20 points)
-        Components: EMA stack, EMA50 slope, Bars above EMA20
+        Components: EMA stack, EMA50 slope, Bars above EMA20.
         """
-        # 1. EMA Stack: Price > EMA20 > EMA50
         price = self.latest['Close']
         ema20 = self.latest[f'EMA_{EMA_FAST_PERIOD}']
         ema50 = self.latest[f'EMA_{EMA_SLOW_PERIOD}']
-        
+
         if not (price > ema20 > ema50):
-            # Check if it's just a pullback (Price < EMA20 but EMA20 > EMA50)
-            if ema20 > ema50:
-                 # "No clean stack" usually means EMAs crossed wrong way.
-                 # If price dipped, maybe weak.
-                 pass
             return 0.0
-            
-        # 2. EMA50 Slope
+
         if len(self.df) < 6: return 0.0
         ema50_5ago = self.df[f'EMA_{EMA_SLOW_PERIOD}'].iloc[-6]
-        # % change of EMA50 over 5 days
         ema50_slope_pct = ((ema50 - ema50_5ago) / ema50_5ago) * 100
-        
-        # 3. Bars above EMA20 (vectorized)
-        # Count consecutive closes > EMA20 from the end
+
+        # Consecutive bars above EMA20 (vectorized)
         above = (self.df['Close'] > self.df[f'EMA_{EMA_FAST_PERIOD}']).values
         false_indices = np.where(~above)[0]
-        if len(false_indices) == 0:
-            bars_above = len(above)
-        else:
-            bars_above = len(above) - false_indices[-1] - 1
-        
-        # Scoring:
-        # Stack + EMA50 > 1% + >5 bars: 20
-        # Stack + EMA50 > 0 + >3 bars: 15
-        # Stack + EMA50 flat + >3 bars: 10
-        # New Stack: 10
-        # Stack but EMAs close: 5
-        
-        # "EMAs close" definition? < 0.5% diff?
+        bars_above = len(above) if len(false_indices) == 0 else len(above) - false_indices[-1] - 1
+
         ema_spread = (ema20 - ema50) / ema50
-        
-        if ema50_slope_pct > 1.0 and bars_above > 5: return 20.0
-        if ema50_slope_pct > 0.0 and bars_above > 3: return 15.0
-        if bars_above > 3: return 10.0 # Flat slope implicit
-        
-        # New stack (just formed)
-        # Check if 5 days ago it wasn't stacked
+
+        if ema50_slope_pct > STRUCTURE_SLOPE_STRONG and bars_above > STRUCTURE_BARS_EXCELLENT:
+            return 20.0
+        if ema50_slope_pct > STRUCTURE_SLOPE_POSITIVE and bars_above > STRUCTURE_BARS_GOOD:
+            return 15.0
+        if bars_above > STRUCTURE_BARS_GOOD:
+            return 10.0
+
+        # New stack (just formed in last 5 periods)
         prev_ema20 = self.df[f'EMA_{EMA_FAST_PERIOD}'].iloc[-6]
         prev_ema50 = self.df[f'EMA_{EMA_SLOW_PERIOD}'].iloc[-6]
-        was_stacked = prev_ema20 > prev_ema50
-        
-        if not was_stacked: return 10.0 # Newly formed
-        
-        if ema_spread < 0.01: return 5.0 # Close
-        
-        return 10.0 # Default fallback for valid stack
+        if prev_ema20 <= prev_ema50:
+            return 10.0
+
+        if ema_spread < STRUCTURE_EMA_SPREAD_CLOSE:
+            return 5.0
+
+        return 10.0
 
     def calculate_risk_reward_score(self) -> float:
         """
         Factor 5: Risk/Reward Score (0-10 points)
-        Framework 2.0:
-        - Stop: EMA20 - (1.5 to 2.0 * ATR)
-        - Target: Entry + (4 * ATR) (Moderate)
-        - Score: >4.0=10, 3-4=8, 2-3=6, 1.5-2=3, <1.5=0
+        Uses regime-aware stop distance when available, config defaults otherwise.
         """
         price = self.latest['Close']
         ema20 = self.latest[f'EMA_{EMA_FAST_PERIOD}']
         atr = self.latest['ATR']
-        
+
         if pd.isna(atr) or atr == 0: return 0.0
-        
-        # Use Conservative Stop (2.0 ATR) for calculation safety
-        # Framework says 1.5-2.0. Let's average to 1.75 for scoring estimation
-        stop_dist_atr = 1.75 
-        stop_price = ema20 - (stop_dist_atr * atr)
-        
+
+        stop_dist = self.regime_params.stop_distance_atr if self.regime_params else STOP_DIST_ATR_DEFAULT
+        stop_price = ema20 - (stop_dist * atr)
+
         risk = price - stop_price
-        if risk <= 0: return 0.0 # Price is below stop (already broken structure)
-        
-        # Target (Moderate: 4x ATR)
-        reward = 4.0 * atr
-        
+        if risk <= 0: return 0.0
+
+        reward = TARGET_ATR_MULTIPLIER * atr
         rr_ratio = reward / risk
-        
-        if rr_ratio > 4.0: return 10.0
-        if rr_ratio > 3.0: return 8.0
-        if rr_ratio > 2.0: return 6.0
-        if rr_ratio > 1.5: return 3.0
-        return 0.0
+
+        for i, threshold in enumerate(RR_SCORE_THRESHOLDS):
+            if rr_ratio > threshold:
+                return float(RR_SCORES[i])
+        return float(RR_SCORES[-1])
 
     def score(self) -> ScoreResult:
         """Calculates the total score and breakdown."""

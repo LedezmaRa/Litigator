@@ -1,9 +1,13 @@
 import requests
+import time
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from typing import List, Dict
 from bs4 import BeautifulSoup
 import urllib.parse
+
+MAX_RETRIES = 2
+RETRY_BACKOFF_SECONDS = 1
 
 @dataclass
 class ThematicNewsItem:
@@ -26,29 +30,32 @@ def fetch_thematic_news(themes: List[str], max_items: int = 5) -> Dict[str, List
         query = urllib.parse.quote_plus(theme)
         url = f"https://news.google.com/rss/search?q={query}&hl=en-US&gl=US&ceid=US:en"
         items = []
-        try:
-            response = requests.get(url, headers=headers, timeout=10)
-            response.raise_for_status()
-            
-            root = ET.fromstring(response.content)
-            for item in root.findall('./channel/item')[:max_items]:
-                title_elem = item.find('title')
-                link_elem = item.find('link')
-                pub_date_elem = item.find('pubDate')
-                source_elem = item.find('source')
-                
-                title = title_elem.text if title_elem is not None else "No Title"
-                # Strip away potential HTML tags that RSS feeds sometimes inject
-                title = BeautifulSoup(title, "html.parser").get_text()
-                
-                link = link_elem.text if link_elem is not None else ""
-                pub_date = pub_date_elem.text if pub_date_elem is not None else ""
-                source = source_elem.text if source_elem is not None else "Unknown"
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                response = requests.get(url, headers=headers, timeout=10)
+                response.raise_for_status()
 
-                items.append(ThematicNewsItem(title=title, link=link, pub_date=pub_date, source=source))
-        except Exception as e:
-            # Simple error printing for resilient pipelines
-            print(f"Failed to fetch news for theme '{theme}': {e}")
+                root = ET.fromstring(response.content)
+                for item in root.findall('./channel/item')[:max_items]:
+                    title_elem = item.find('title')
+                    link_elem = item.find('link')
+                    pub_date_elem = item.find('pubDate')
+                    source_elem = item.find('source')
+
+                    title = title_elem.text if title_elem is not None else "No Title"
+                    title = BeautifulSoup(title, "html.parser").get_text()
+
+                    link = link_elem.text if link_elem is not None else ""
+                    pub_date = pub_date_elem.text if pub_date_elem is not None else ""
+                    source = source_elem.text if source_elem is not None else "Unknown"
+
+                    items.append(ThematicNewsItem(title=title, link=link, pub_date=pub_date, source=source))
+                break  # Success — exit retry loop
+            except Exception as e:
+                if attempt < MAX_RETRIES:
+                    time.sleep(RETRY_BACKOFF_SECONDS * attempt)
+                else:
+                    print(f"Failed to fetch news for theme '{theme}' after {MAX_RETRIES} attempts: {e}")
             
         results[theme] = items
         

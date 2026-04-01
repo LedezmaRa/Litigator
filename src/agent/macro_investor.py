@@ -10,7 +10,7 @@ from src.dashboard import CSS_DARK_THEME, INTERACTIVE_JS, generate_top_nav
 # Load environment variables from .env file
 load_dotenv()
 
-from src.config import MARKET_THEMES, DISCLAIMER_TOP, DISCLAIMER_BOTTOM
+from src.config import MARKET_THEMES, DISCLAIMER_TOP, DISCLAIMER_BOTTOM, AI_MODEL, AI_MAX_TOKENS, AI_TEMPERATURE
 from src.news import fetch_thematic_news
 
 SYSTEM_PROMPT = """You are "Joe", Chief Macro Strategist with 25 years of experience — trained as a macroeconomist (former Federal Reserve research economist) and then spent 15 years running a global macro fund at a top-tier hedge fund.
@@ -63,9 +63,9 @@ def generate_macro_investment_memo(drivers_data: dict, output_dir: str = "report
     try:
         client = anthropic.Anthropic(api_key=api_key)
         response = client.messages.create(
-            model="claude-opus-4-5",
-            max_tokens=8000,
-            temperature=0.3,
+            model=AI_MODEL,
+            max_tokens=AI_MAX_TOKENS,
+            temperature=AI_TEMPERATURE,
             system=SYSTEM_PROMPT,
             messages=[
                 {

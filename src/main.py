@@ -4,6 +4,7 @@ Main CLI entry point for the Optimized EMA-ADX-ATR Framework.
 import argparse
 import sys
 import os
+import re
 import webbrowser
 from datetime import datetime
 import pandas as pd
@@ -17,7 +18,7 @@ from src.scoring import EntryScorer
 from src.config import EMA_FAST_PERIOD, EMA_SLOW_PERIOD
 from src.dashboard import generate_dashboard, generate_index
 
-DEFAULT_WATCHLIST = ["HAL", "AVGO", "AMZN", "NVDA", "GOOGL", "NEE", "NTFX", "HLT", "USAR", "UUUU", "MP"]
+DEFAULT_WATCHLIST = ["HAL", "AVGO", "AMZN", "NVDA", "GOOGL", "NEE", "NFLX", "HLT", "USAR", "UUUU", "MP"]
 
 def analyze_ticker(ticker: str, generate_html: bool = True) -> dict:
     """
@@ -148,8 +149,18 @@ def main():
         return
     
     tickers = args.ticker if args.ticker else DEFAULT_WATCHLIST
+
+    # Validate ticker symbols at the boundary
+    ticker_pattern = re.compile(r'^[A-Z0-9]{1,5}([.\-][A-Z]{1,2})?$')
+    invalid = [t for t in tickers if not ticker_pattern.match(t.upper())]
+    if invalid:
+        print(f"Error: Invalid ticker symbol(s): {invalid}")
+        print("Tickers must be 1-5 alphanumeric characters (e.g., AAPL, BRK.B)")
+        sys.exit(1)
+    tickers = [t.upper() for t in tickers]
+
     summary_reports = []
-    
+
     print(f"Analyzing {len(tickers)} tickers...")
     
     for t in tickers:

@@ -9,7 +9,7 @@ from src.dashboard import CSS_DARK_THEME, INTERACTIVE_JS, generate_top_nav
 # Load environment variables from .env file
 load_dotenv()
 
-from src.config import DISCLAIMER_TOP, DISCLAIMER_BOTTOM
+from src.config import DISCLAIMER_TOP, DISCLAIMER_BOTTOM, AI_MODEL, AI_MAX_TOKENS, AI_TEMPERATURE
 
 SYSTEM_PROMPT = """You are "Joe", Chief Market Strategist and Top-Tier Portfolio Manager with 25 years of experience. You previously ran a global macro fund and now focus on selecting the best individual equities across the S&P 500.
 
@@ -56,9 +56,9 @@ def generate_investment_memo(candidates_data: list, output_dir: str = "reports")
     try:
         client = anthropic.Anthropic(api_key=api_key)
         response = client.messages.create(
-            model="claude-opus-4-5",
-            max_tokens=8000,
-            temperature=0.3,
+            model=AI_MODEL,
+            max_tokens=AI_MAX_TOKENS,
+            temperature=AI_TEMPERATURE,
             system=SYSTEM_PROMPT,
             messages=[
                 {

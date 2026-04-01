@@ -4,10 +4,12 @@ Data fetching and validation module.
 Provides functions for fetching market data from yfinance with:
 - Disk caching to reduce API calls
 - Parallel fetching for multiple tickers
+- Retry logic for transient network failures
 - Data validation
 """
 import pandas as pd
 import yfinance as yf
+import time
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Dict, List, Optional, Tuple
@@ -17,6 +19,9 @@ from .cache import read_cache, write_cache
 
 # Lock to protect yfinance downloads (not fully thread-safe)
 _yf_lock = threading.Lock()
+
+MAX_RETRIES = 3
+RETRY_BACKOFF_SECONDS = 2
 
 
 def fetch_data(ticker: str, period: str = "2y", interval: str = "1d", use_cache: bool = True) -> pd.DataFrame:
@@ -39,33 +44,38 @@ def fetch_data(ticker: str, period: str = "2y", interval: str = "1d", use_cache:
             return cached
 
     print(f"Fetching {interval} data for {ticker}...")
-    try:
-        # yfinance download with lock for thread safety
-        with _yf_lock:
-            df = yf.download(ticker, period=period, interval=interval, progress=False, multi_level_index=False)
-            # Make a copy immediately to avoid race conditions
-            df = df.copy()
 
-        if df.empty:
-            raise ValueError(f"No data found for ticker {ticker}")
+    last_error = None
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            with _yf_lock:
+                df = yf.download(ticker, period=period, interval=interval, progress=False, multi_level_index=False)
+                df = df.copy()
 
-        # Ensure standard column names (handle potential duplicates)
-        df.columns = [c.capitalize() for c in df.columns]
+            if df.empty:
+                raise ValueError(f"No data found for ticker {ticker}")
 
-        # Remove duplicate columns if any
-        df = df.loc[:, ~df.columns.duplicated()]
+            df.columns = [c.capitalize() for c in df.columns]
+            df = df.loc[:, ~df.columns.duplicated()]
 
-        # Determine if we need to drop timezone
-        if df.index.tz is not None:
-            df.index = df.index.tz_localize(None)
+            if df.index.tz is not None:
+                df.index = df.index.tz_localize(None)
 
-        # Write to cache
-        if use_cache:
-            write_cache(ticker, period, interval, df)
+            if use_cache:
+                write_cache(ticker, period, interval, df)
 
-        return df
-    except Exception as e:
-        raise ConnectionError(f"Failed to fetch data for {ticker}: {str(e)}")
+            return df
+
+        except ValueError:
+            raise  # Bad ticker — don't retry
+        except Exception as e:
+            last_error = e
+            if attempt < MAX_RETRIES:
+                wait = RETRY_BACKOFF_SECONDS * attempt
+                print(f"  Retry {attempt}/{MAX_RETRIES} for {ticker} in {wait}s...")
+                time.sleep(wait)
+
+    raise ConnectionError(f"Failed to fetch data for {ticker} after {MAX_RETRIES} attempts: {last_error}")
 
 
 def fetch_data_parallel(

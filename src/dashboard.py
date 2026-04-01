@@ -7,6 +7,7 @@ from plotly.subplots import make_subplots
 import pandas as pd
 import os
 import json
+from html import escape as html_escape
 from datetime import datetime
 from .scoring import ScoreResult
 
@@ -503,6 +504,10 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
+    # Sanitize user-controlled strings for HTML output
+    safe_ticker = html_escape(ticker)
+    safe_trend = html_escape(weekly_trend.replace('_', ' ').title())
+
     # --- PLOTLY CHART DARK THEME ---
     fig = make_subplots(rows=3, cols=1, shared_xaxes=True, 
                         vertical_spacing=0.03, 
@@ -573,7 +578,7 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{ticker} Analysis | Command Center</title>
+        <title>{safe_ticker} Analysis | Command Center</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
         <style>{CSS_DARK_THEME}</style>
     </head>
@@ -590,12 +595,12 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
                 <div class="glass-card" style="display:flex; align-items:center; gap: 2rem;">
                     {generate_gauge_svg(result.total_score, 100)}
                     <div>
-                        <h1 style="font-size:3rem; line-height:1; margin-bottom:0.5rem;">{ticker}</h1>
+                        <h1 style="font-size:3rem; line-height:1; margin-bottom:0.5rem;">{safe_ticker}</h1>
                         <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
                             <span class="text-xl font-bold">${result.details['price']:.2f}</span>
                             {get_status_badge(result.total_score, 'score')}
                         </div>
-                        <span class="text-sm text-muted">{weekly_trend.replace('_', ' ').title()}</span>
+                        <span class="text-sm text-muted">{safe_trend}</span>
                     </div>
                 </div>
                 
@@ -657,13 +662,15 @@ def generate_index(reports: list, output_dir: str = "reports"):
     best_pick = reports[0] if reports else None
     hero_html = ""
     if best_pick:
+        bp_ticker = html_escape(best_pick['ticker'])
+        bp_regime = html_escape(best_pick['regime'].replace('_', ' ').title())
         hero_html = f"""
         <div class="glass-card" style="margin-bottom:2rem; background: linear-gradient(135deg, rgba(30,41,59,0.8) 0%, rgba(15,23,42,0.9) 100%); border: 1px solid rgba(74, 222, 128, 0.2);">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div>
                     <span class="badge badge-optimal" style="margin-bottom:0.5rem; display:inline-block;">Top Pick of the Week</span>
-                    <h1 style="font-size:3.5rem; margin-bottom:0rem;">{best_pick['ticker']}</h1>
-                    <p class="text-muted text-lg">Score: <span style="color:var(--accent-optimal); font-weight:bold;">{best_pick['score']:.0f}</span> • {best_pick['regime'].replace('_', ' ').title()}</p>
+                    <h1 style="font-size:3.5rem; margin-bottom:0rem;">{bp_ticker}</h1>
+                    <p class="text-muted text-lg">Score: <span style="color:var(--accent-optimal); font-weight:bold;">{best_pick['score']:.0f}</span> • {bp_regime}</p>
                 </div>
                 {generate_gauge_svg(best_pick['score'], 140)}
             </div>
@@ -678,24 +685,24 @@ def generate_index(reports: list, output_dir: str = "reports"):
     # Table Rows
     rows = ""
     for r in reports:
-        link = os.path.basename(r['path'])
+        link = html_escape(os.path.basename(r['path']))
+        safe_t = html_escape(r['ticker'])
         score = r['score']
-        
-        # Color logic
+
         score_color = "var(--text-primary)"
         if score >= 90: score_color = "var(--accent-optimal)"
         elif score >= 75: score_color = "var(--accent-good)"
         elif score < 45: score_color = "var(--accent-poor)"
-        
+
         rows += f"""
         <tr onclick="window.location='{link}'">
             <td>
                 <div style="display:flex; align-items:center; gap:1rem;">
                     <div style="width:40px; height:40px; background:rgba(255,255,255,0.05); border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold;">
-                        {r['ticker'][0]}
+                        {safe_t[0]}
                     </div>
                     <div>
-                        <div class="font-bold">{r['ticker']}</div>
+                        <div class="font-bold">{safe_t}</div>
                         <div class="text-xs text-muted">${r.get('close',0):.2f}</div>
                     </div>
                 </div>

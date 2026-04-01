@@ -49,9 +49,10 @@ jobs:
           pip install -r requirements.txt
 
       - name: Generate Dashboard Reports
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           python src/main.py --sectors
-          # Replace `--sectors` with any additional flags if needed!
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
