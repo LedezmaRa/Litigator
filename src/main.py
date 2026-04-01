@@ -12,7 +12,7 @@ import pandas as pd
 # Adjust path to allow imports if running from top level
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from src.data import fetch_data, validate_data
+from src.data import fetch_data, fetch_data_parallel, validate_data
 from src.indicators import calculate_all_indicators
 from src.scoring import EntryScorer
 from src.config import EMA_FAST_PERIOD, EMA_SLOW_PERIOD
@@ -20,17 +20,15 @@ from src.dashboard import generate_dashboard, generate_index
 
 DEFAULT_WATCHLIST = ["HAL", "AVGO", "AMZN", "NVDA", "GOOGL", "NEE", "NFLX", "HLT", "USAR", "UUUU", "MP"]
 
-def analyze_ticker(ticker: str, generate_html: bool = True) -> dict:
+def analyze_ticker(ticker: str, generate_html: bool = True, prefetched_df: pd.DataFrame = None) -> dict:
     """
     Analyzes a single ticker and prints the report.
     Returns a dict with summary info if successful.
+    Uses prefetched_df if available (from parallel fetch), otherwise fetches on demand.
     """
     try:
-        # 1. Fetch Data (PRIMARY: WEEKLY)
-        # Framework 2.0 Focus: Weekly Timeframe
-        # Need ~50-100 weeks for proper EMA50 and ADX stability
-        df = fetch_data(ticker, period="2y", interval="1wk")
-        validate_data(df, min_records=52) # Ensure at least 1 year of data
+        df = prefetched_df if prefetched_df is not None else fetch_data(ticker, period="2y", interval="1wk")
+        validate_data(df, min_records=52)
         
         # 2. Calculate Indicators (Weekly)
         df = calculate_all_indicators(df)
@@ -89,32 +87,39 @@ def analyze_ticker(ticker: str, generate_html: bool = True) -> dict:
         print(f"Target (5R):       ${target_5r:.2f}")
 
         if generate_html:
-            path = generate_dashboard(ticker, df, result, "WEEKLY")
+            path = generate_dashboard(ticker, df, result, "WEEKLY", scorer=scorer)
             print(f"Dashboard generated: {path}")
-            
+
             # Helper metrics
             ema_dist = (price - ema20) / atr if atr > 0 else 0
             rel_vol = df['Volume'].iloc[-1] / df['Vol_Avg'].iloc[-1] if df['Vol_Avg'].iloc[-1] > 0 else 0
-            
-            # Recalculate R:R for conservative stop
-            risk = price - stop_conservative
+
+            # Regime-aware stop for R:R display
+            stop_dist = scorer.regime_params.stop_distance_atr
+            regime_stop = ema20 - (stop_dist * atr)
+            risk = price - regime_stop
             reward = target_5r - price
             rr_ratio = reward / risk if risk > 0 else 0
-            
+
+            # Week-over-week deltas
+            prev_close = df['Close'].iloc[-2] if len(df) >= 2 else price
+            price_change_pct = ((price - prev_close) / prev_close) * 100 if prev_close > 0 else 0
+
             return {
                 'ticker': ticker,
                 'score': result.total_score,
                 'trend': "WEEKLY",
                 'regime': result.regime,
                 'path': path,
-                # Rich Dashboard fields
                 'close': price,
                 'ema20': ema20,
                 'ema50': result.details['ema50'],
                 'ema_dist': ema_dist,
                 'adx': result.details['adx'],
                 'rel_vol': rel_vol,
-                'rr': rr_ratio
+                'rr': rr_ratio,
+                'price_change_pct': price_change_pct,
+                'stop_dist_atr': stop_dist,
             }
             
     except Exception as e:
@@ -162,9 +167,12 @@ def main():
     summary_reports = []
 
     print(f"Analyzing {len(tickers)} tickers...")
-    
+
+    # Pre-fetch all data in parallel (I/O bound), then score sequentially (CPU bound)
+    data_map = fetch_data_parallel(tickers, period="2y", interval="1wk")
+
     for t in tickers:
-        res = analyze_ticker(t, generate_html=True)
+        res = analyze_ticker(t, generate_html=True, prefetched_df=data_map.get(t))
         if res:
             summary_reports.append(res)
             

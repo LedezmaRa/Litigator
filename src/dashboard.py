@@ -346,22 +346,23 @@ function initSortableTables() {
     });
 }
 
-// Search/Filter for Stock Cards
+// Search/Filter for Stock Cards and Table Rows
 function initSearch() {
     const searchInput = document.getElementById('stock-search');
     if (!searchInput) return;
 
     searchInput.addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase();
-        document.querySelectorAll('.stock-card').forEach(card => {
-            const ticker = card.dataset.ticker?.toLowerCase() || '';
-            const name = card.dataset.name?.toLowerCase() || '';
-            const matches = ticker.includes(query) || name.includes(query);
-            card.classList.toggle('hidden', !matches);
+
+        // Support both card-based and table-based layouts
+        const items = document.querySelectorAll('.stock-card, .modern-table tbody tr');
+        items.forEach(item => {
+            const ticker = item.dataset.ticker?.toLowerCase() || item.textContent.toLowerCase();
+            const matches = ticker.includes(query);
+            item.classList.toggle('hidden', !matches);
         });
 
-        // Update visible count
-        const visible = document.querySelectorAll('.stock-card:not(.hidden)').length;
+        const visible = document.querySelectorAll('.stock-card:not(.hidden), .modern-table tbody tr:not(.hidden)').length;
         const countEl = document.getElementById('visible-count');
         if (countEl) countEl.textContent = visible;
     });
@@ -499,68 +500,65 @@ def get_status_badge(val: float, type: str):
         return '<span class="badge badge-poor">Poor</span>'
     return ""
 
-def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekly_trend: str, output_dir: str = "reports") -> str:
+def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekly_trend: str, output_dir: str = "reports", scorer=None) -> str:
     """Generates a premium HTML dashboard for individual ticker."""
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    # Sanitize user-controlled strings for HTML output
     safe_ticker = html_escape(ticker)
     safe_trend = html_escape(weekly_trend.replace('_', ' ').title())
 
-    # --- PLOTLY CHART DARK THEME ---
-    fig = make_subplots(rows=3, cols=1, shared_xaxes=True, 
-                        vertical_spacing=0.03, 
+    # Regime-aware stop distance
+    stop_dist = scorer.regime_params.stop_distance_atr if scorer else 2.0
+    stop_label = f"{stop_dist:.1f}x ATR"
+    stop_price = result.details['ema20'] - (stop_dist * result.details['atr'])
+    target_price = result.details['price'] + (5.0 * result.details['atr'])
+
+    # Week-over-week price delta
+    prev_close = df['Close'].iloc[-2] if len(df) >= 2 else result.details['price']
+    wow_pct = ((result.details['price'] - prev_close) / prev_close) * 100 if prev_close > 0 else 0
+    wow_color = "var(--accent-optimal)" if wow_pct >= 0 else "var(--accent-poor)"
+    wow_arrow = "&#9650;" if wow_pct >= 0 else "&#9660;"
+
+    # --- PLOTLY CHART ---
+    fig = make_subplots(rows=3, cols=1, shared_xaxes=True,
+                        vertical_spacing=0.03,
                         row_heights=[0.6, 0.2, 0.2])
 
-    # 1. Price
     fig.add_trace(go.Candlestick(x=df.index, open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'], name='Price'), row=1, col=1)
-    
-    # EMAs
+
     ema_cols = [c for c in df.columns if c.startswith('EMA_')]
-    colors = ['#f59e0b', '#3b82f6', '#8b5cf6'] # Amber, Blue, Violet
+    colors = ['#f59e0b', '#3b82f6', '#8b5cf6']
     for i, col in enumerate(ema_cols):
         fig.add_trace(go.Scatter(x=df.index, y=df[col], line=dict(color=colors[i % len(colors)], width=1.5), name=col), row=1, col=1)
 
-    # 2. ADX
     if 'ADX' in df.columns:
         fig.add_trace(go.Scatter(x=df.index, y=df['ADX'], line=dict(color='#cbd5e1', width=1.5), name='ADX'), row=2, col=1)
         fig.add_hline(y=25, line_dash="dash", line_color="rgba(255,255,255,0.3)", row=2, col=1)
 
-    # 3. Volume
-    colors_vol = ['#22c55e' if row['Open'] - row['Close'] <= 0 else '#ef4444' for index, row in df.iterrows()]
+    colors_vol = ['#22c55e' if row['Open'] - row['Close'] <= 0 else '#ef4444' for _, row in df.iterrows()]
     fig.add_trace(go.Bar(x=df.index, y=df['Volume'], marker_color=colors_vol, name='Volume'), row=3, col=1)
 
-    # Dark Chart Styling
     fig.update_layout(
-        template="plotly_dark",
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        height=800,
-        margin=dict(l=10, r=10, t=10, b=10),
-        showlegend=False,
+        template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+        height=800, margin=dict(l=10, r=10, t=10, b=10), showlegend=False,
         font=dict(family="Inter, sans-serif", color="#94a3b8")
     )
     fig.update_xaxes(rangeslider_visible=False, showgrid=True, gridcolor='rgba(255,255,255,0.05)')
     fig.update_yaxes(showgrid=True, gridcolor='rgba(255,255,255,0.05)')
-    
+
     chart_html = fig.to_html(full_html=False, include_plotlyjs='cdn', config={'displayModeBar': False})
 
     # --- SCORE BREAKDOWN ROWS ---
+    from .config import SCORE_WEIGHTS
     score_rows = ""
     for k, v in result.breakdown.items():
-        # Get max points for this factor (hardcoded logic based on known weights)
-        max_pts = 25.0
-        if 'volume' in k or 'structure' in k: max_pts = 20.0
-        if 'risk' in k: max_pts = 10.0
-        
-        pct = (v / max_pts) * 100
-        
-        # Color bar
+        max_pts = float(SCORE_WEIGHTS.get(k, 25))
+        pct = (v / max_pts) * 100 if max_pts > 0 else 0
         bar_color = "var(--accent-optimal)"
         if pct < 60: bar_color = "var(--accent-marginal)"
         if pct < 40: bar_color = "var(--accent-poor)"
-        
+
         score_rows += f"""
         <div class="metric-item">
             <span class="text-sm font-medium">{k.replace('_', ' ').title()}</span>
@@ -571,7 +569,6 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
         </div>
         """
 
-    # --- HTML ASSEMBLY ---
     html = f"""
     <!DOCTYPE html>
     <html lang="en">
@@ -589,7 +586,7 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
                 <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 Back to Dashboard
             </a>
-            
+
             <div class="grid-cols-3" style="margin-bottom: 2rem;">
                 <!-- Main Status Card -->
                 <div class="glass-card" style="display:flex; align-items:center; gap: 2rem;">
@@ -598,19 +595,20 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
                         <h1 style="font-size:3rem; line-height:1; margin-bottom:0.5rem;">{safe_ticker}</h1>
                         <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
                             <span class="text-xl font-bold">${result.details['price']:.2f}</span>
+                            <span class="font-mono text-sm" style="color:{wow_color}">{wow_arrow} {wow_pct:+.1f}%</span>
                             {get_status_badge(result.total_score, 'score')}
                         </div>
-                        <span class="text-sm text-muted">{safe_trend}</span>
+                        <span class="text-sm text-muted">{safe_trend} &middot; {html_escape(result.regime.replace('_', ' ').title())}</span>
                     </div>
                 </div>
-                
+
                 <!-- Score Breakdown -->
                 <div class="glass-card">
                     <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1rem;">Score Breakdown</h3>
                     {score_rows}
                 </div>
-                
-                <!-- Risk & Targets -->
+
+                <!-- Risk & Targets (regime-aware) -->
                 <div class="glass-card">
                     <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1rem;">Risk Management</h3>
                     <div class="grid-cols-2" style="gap:1rem;">
@@ -619,70 +617,124 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
                             <span class="font-mono text-sm">${result.details['atr']:.2f}</span>
                         </div>
                         <div>
-                            <span class="text-xs text-muted block">EMA (20) Support</span>
+                            <span class="text-xs text-muted block">EMA20 Support</span>
                             <span class="font-mono text-sm" style="color:var(--accent-info)">${result.details['ema20']:.2f}</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-muted block">EMA50 Trend</span>
+                            <span class="font-mono text-sm" style="color:#8b5cf6">${result.details['ema50']:.2f}</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-muted block">ADX</span>
+                            <span class="font-mono text-sm">{result.details['adx']:.1f}</span>
                         </div>
                     </div>
                     <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.1);">
                         <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
-                            <span class="text-sm text-muted">Stop (2.0x ATR)</span>
-                            <span class="font-mono text-sm text-primary">${result.details['ema20'] - 2*result.details['atr']:.2f}</span>
+                            <span class="text-sm text-muted">Stop ({stop_label})</span>
+                            <span class="font-mono text-sm" style="color:var(--accent-poor)">${stop_price:.2f}</span>
                         </div>
                         <div style="display:flex; justify-content:space-between;">
                             <span class="text-sm text-muted">Target (5.0x ATR)</span>
-                            <span class="font-mono text-sm" style="color:var(--accent-optimal)">${result.details['price'] + 5*result.details['atr']:.2f}</span>
+                            <span class="font-mono text-sm" style="color:var(--accent-optimal)">${target_price:.2f}</span>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Chart Area -->
             <div class="glass-card" style="padding:1rem;">
                 {chart_html}
             </div>
         </div>
+        {INTERACTIVE_JS}
     </body>
     </html>
     """
-    
+
     file_path = os.path.join(output_dir, f"{ticker}_analysis.html")
     with open(file_path, "w") as f:
         f.write(html)
-        
+
     return file_path
 
 def generate_index(reports: list, output_dir: str = "reports"):
-    """Generates the Main Dashboard Index."""
+    """Generates the Main Dashboard Index with market breadth, search, sorting, and deltas."""
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-        
+
     reports.sort(key=lambda x: x['score'], reverse=True)
-    
-    # Hero/Best Pick
+    total = len(reports)
+
+    # --- MARKET BREADTH STATS ---
+    scores = [r['score'] for r in reports]
+    avg_score = sum(scores) / total if total else 0
+    n_optimal = sum(1 for s in scores if s >= 90)
+    n_good = sum(1 for s in scores if 75 <= s < 90)
+    n_acceptable = sum(1 for s in scores if 60 <= s < 75)
+    n_poor = sum(1 for s in scores if s < 45)
+    breadth_pct = ((n_optimal + n_good) / total * 100) if total else 0
+
+    # Breadth color
+    if breadth_pct >= 50: breadth_color = "var(--accent-optimal)"
+    elif breadth_pct >= 25: breadth_color = "var(--accent-marginal)"
+    else: breadth_color = "var(--accent-poor)"
+
+    breadth_html = f"""
+    <div class="grid-cols-3" style="margin-bottom:2rem; gap:1.5rem;">
+        <div class="glass-card" style="text-align:center;">
+            <span class="text-xs text-muted" style="text-transform:uppercase; letter-spacing:0.05em;">Watchlist Health</span>
+            <div style="font-size:2.5rem; font-weight:700; color:{breadth_color}; margin:0.5rem 0;">{breadth_pct:.0f}%</div>
+            <span class="text-xs text-muted">{n_optimal + n_good} of {total} tickers scoring Good+</span>
+        </div>
+        <div class="glass-card" style="text-align:center;">
+            <span class="text-xs text-muted" style="text-transform:uppercase; letter-spacing:0.05em;">Average Score</span>
+            <div style="font-size:2.5rem; font-weight:700; margin:0.5rem 0;">{avg_score:.0f}</div>
+            <span class="text-xs text-muted">across {total} tickers</span>
+        </div>
+        <div class="glass-card">
+            <span class="text-xs text-muted" style="text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:0.75rem;">Distribution</span>
+            <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+                <span class="badge badge-optimal">{n_optimal} Optimal</span>
+                <span class="badge badge-good">{n_good} Good</span>
+                <span class="badge badge-marginal">{n_acceptable} Acceptable</span>
+                <span class="badge badge-poor">{n_poor} Poor</span>
+            </div>
+        </div>
+    </div>
+    """
+
+    # --- HERO / BEST PICK ---
     best_pick = reports[0] if reports else None
     hero_html = ""
     if best_pick:
         bp_ticker = html_escape(best_pick['ticker'])
         bp_regime = html_escape(best_pick['regime'].replace('_', ' ').title())
+        bp_chg = best_pick.get('price_change_pct', 0)
+        bp_arrow = "&#9650;" if bp_chg >= 0 else "&#9660;"
+        bp_chg_color = "var(--accent-optimal)" if bp_chg >= 0 else "var(--accent-poor)"
+
         hero_html = f"""
         <div class="glass-card" style="margin-bottom:2rem; background: linear-gradient(135deg, rgba(30,41,59,0.8) 0%, rgba(15,23,42,0.9) 100%); border: 1px solid rgba(74, 222, 128, 0.2);">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div>
                     <span class="badge badge-optimal" style="margin-bottom:0.5rem; display:inline-block;">Top Pick of the Week</span>
                     <h1 style="font-size:3.5rem; margin-bottom:0rem;">{bp_ticker}</h1>
-                    <p class="text-muted text-lg">Score: <span style="color:var(--accent-optimal); font-weight:bold;">{best_pick['score']:.0f}</span> • {bp_regime}</p>
+                    <p class="text-muted text-lg">Score: <span style="color:var(--accent-optimal); font-weight:bold;">{best_pick['score']:.0f}</span> &middot; {bp_regime}</p>
                 </div>
                 {generate_gauge_svg(best_pick['score'], 140)}
             </div>
-            <div style="margin-top:1.5rem; display:flex; gap:2rem;">
+            <div style="margin-top:1.5rem; display:flex; gap:2rem; flex-wrap:wrap;">
                 <div><span class="text-xs text-muted block">Price</span><span class="text-xl font-mono">${best_pick.get('close',0):.2f}</span></div>
+                <div><span class="text-xs text-muted block">WoW</span><span class="text-xl font-mono" style="color:{bp_chg_color}">{bp_arrow} {bp_chg:+.1f}%</span></div>
                 <div><span class="text-xs text-muted block">EMA20</span><span class="text-xl font-mono">${best_pick.get('ema20',0):.2f}</span></div>
+                <div><span class="text-xs text-muted block">EMA50</span><span class="text-xl font-mono">${best_pick.get('ema50',0):.2f}</span></div>
                 <div><span class="text-xs text-muted block">R:R</span><span class="text-xl font-mono">{best_pick.get('rr',0):.1f}</span></div>
             </div>
         </div>
         """
-        
-    # Table Rows
+
+    # --- TABLE ROWS ---
     rows = ""
     for r in reports:
         link = html_escape(os.path.basename(r['path']))
@@ -694,8 +746,17 @@ def generate_index(reports: list, output_dir: str = "reports"):
         elif score >= 75: score_color = "var(--accent-good)"
         elif score < 45: score_color = "var(--accent-poor)"
 
+        # WoW delta
+        chg = r.get('price_change_pct', 0)
+        chg_arrow = "&#9650;" if chg >= 0 else "&#9660;"
+        chg_color = "var(--accent-optimal)" if chg >= 0 else "var(--accent-poor)"
+
+        # EMA distance
+        ema_d = r.get('ema_dist', 0)
+        ema_d_color = "var(--accent-optimal)" if abs(ema_d) <= 1.0 else "var(--accent-marginal)" if abs(ema_d) <= 2.0 else "var(--accent-poor)"
+
         rows += f"""
-        <tr onclick="window.location='{link}'">
+        <tr onclick="window.location='{link}'" data-ticker="{safe_t}">
             <td>
                 <div style="display:flex; align-items:center; gap:1rem;">
                     <div style="width:40px; height:40px; background:rgba(255,255,255,0.05); border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold;">
@@ -707,10 +768,10 @@ def generate_index(reports: list, output_dir: str = "reports"):
                     </div>
                 </div>
             </td>
-            <td>
-                <span style="font-size:1.25rem; font-weight:700; color:{score_color}">{score:.0f}</span>
-            </td>
+            <td><span style="font-size:1.25rem; font-weight:700; color:{score_color}">{score:.0f}</span></td>
             <td>{get_status_badge(score, 'score')}</td>
+            <td class="font-mono text-sm" style="color:{chg_color}">{chg_arrow} {chg:+.1f}%</td>
+            <td class="font-mono text-sm" style="color:{ema_d_color}">{ema_d:+.1f}x</td>
             <td class="font-mono text-sm">{r.get('adx',0):.1f}</td>
             <td class="font-mono text-sm">{r.get('rel_vol',0):.1f}x</td>
             <td class="font-mono text-sm">{r.get('rr',0):.1f}</td>
@@ -738,22 +799,31 @@ def generate_index(reports: list, output_dir: str = "reports"):
                     <p class="text-muted">EMA-ADX-ATR Optimized Framework 2.0</p>
                 </div>
                 <div>
-                  <span class="badge badge-avg">{datetime.now().strftime("%Y-%m-%d")}</span>
+                    <span class="badge badge-info">{datetime.now().strftime("%Y-%m-%d")}</span>
                 </div>
             </header>
-            
+
+            {breadth_html}
             {hero_html}
-            
+
+            <!-- Search & Filter Bar -->
+            <div class="filter-bar">
+                <input type="text" id="stock-search" class="search-input" placeholder="Search tickers...">
+                <span class="text-sm text-muted">Showing <span id="visible-count">{total}</span> of {total}</span>
+            </div>
+
             <div class="glass-card" style="padding:0; overflow:hidden;">
                 <table class="modern-table">
                     <thead>
                         <tr>
                             <th>Ticker</th>
-                            <th>Score</th>
+                            <th class="sortable">Score</th>
                             <th>Rating</th>
-                            <th>ADX</th>
-                            <th>Vol</th>
-                            <th>R:R</th>
+                            <th class="sortable">WoW</th>
+                            <th class="sortable">EMA Dist</th>
+                            <th class="sortable">ADX</th>
+                            <th class="sortable">Vol</th>
+                            <th class="sortable">R:R</th>
                             <th>Regime</th>
                             <th></th>
                         </tr>
@@ -763,14 +833,15 @@ def generate_index(reports: list, output_dir: str = "reports"):
                     </tbody>
                 </table>
             </div>
-            
+
             <footer style="margin-top:3rem; text-align:center; color:var(--text-secondary); font-size:0.875rem;">
                 <p>Generated by Antigravity Agent. Market data is delayed.</p>
             </footer>
         </div>
+        {INTERACTIVE_JS}
     </body>
     </html>
     """
-    
+
     with open(os.path.join(output_dir, "index.html"), "w") as f:
         f.write(html)
