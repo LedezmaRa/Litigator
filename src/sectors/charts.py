@@ -579,36 +579,39 @@ def generate_projection_chart_svg(
 def generate_benchmark_chart_svg(
     prices: pd.Series,
     width: int = 280,
-    height: int = 120
+    height: int = 110,
+    show_52w_levels: bool = True,
 ) -> str:
     """
     Generate a compact chart for benchmark cards.
-    Similar to price chart but smaller and without EMAs.
+    Shows 52W price range with high/low reference lines, time markers, and current value dot.
     """
     prices = prices.dropna().tail(252)
 
     if len(prices) < 10:
         return f'<svg width="{width}" height="{height}"></svg>'
 
-    padding = 10
-    chart_width = width - padding * 2
-    chart_height = height - padding * 2
+    pad_h = 10   # horizontal padding
+    pad_v = 12   # vertical padding
+    chart_width = width - pad_h * 2
+    chart_height = height - pad_v * 2
 
-    y_min = prices.min()
-    y_max = prices.max()
-    y_range = y_max - y_min
+    actual_min = prices.min()
+    actual_max = prices.max()
+    y_range = actual_max - actual_min
     if y_range == 0:
-        y_range = y_max * 0.1 or 1
-    y_min -= y_range * 0.05
-    y_max += y_range * 0.05
+        y_range = actual_max * 0.1 or 1
+
+    # Expand range slightly so the H/L lines don't touch the edges
+    y_min = actual_min - y_range * 0.08
+    y_max = actual_max + y_range * 0.08
 
     def price_to_y(p):
-        return padding + chart_height - ((p - y_min) / (y_max - y_min) * chart_height)
+        return pad_v + chart_height - ((p - y_min) / (y_max - y_min) * chart_height)
 
     def idx_to_x(i, total):
-        return padding + (i / (total - 1)) * chart_width
+        return pad_h + (i / (total - 1)) * chart_width
 
-    # Determine color based on trend
     trend_color = COLORS["green"] if prices.iloc[-1] >= prices.iloc[0] else COLORS["red"]
 
     svg_parts = [f'<svg width="{width}" height="{height}" viewBox="0 0 {width} {height}">']
@@ -617,13 +620,13 @@ def generate_benchmark_chart_svg(
     svg_parts.append(f'<rect width="{width}" height="{height}" fill="{COLORS["bg"]}" rx="6"/>')
 
     # Area fill under line
-    path_parts = [f"M{padding},{price_to_y(prices.iloc[0]):.1f}"]
+    path_parts = [f"M{pad_h},{price_to_y(prices.iloc[0]):.1f}"]
     for i, val in enumerate(prices):
         x = idx_to_x(i, len(prices))
         y = price_to_y(val)
         path_parts.append(f"L{x:.1f},{y:.1f}")
-    path_parts.append(f"L{idx_to_x(len(prices) - 1, len(prices)):.1f},{height - padding}")
-    path_parts.append(f"L{padding},{height - padding}")
+    path_parts.append(f"L{idx_to_x(len(prices) - 1, len(prices)):.1f},{height - pad_v}")
+    path_parts.append(f"L{pad_h},{height - pad_v}")
     path_parts.append("Z")
     svg_parts.append(f'<path d="{" ".join(path_parts)}" fill="{trend_color}" opacity="0.1"/>')
 
@@ -634,14 +637,46 @@ def generate_benchmark_chart_svg(
         y = price_to_y(val)
         cmd = "M" if i == 0 else "L"
         path_parts.append(f"{cmd}{x:.1f},{y:.1f}")
-    svg_parts.append(f'<path d="{" ".join(path_parts)}" fill="none" stroke="{trend_color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>')
+    svg_parts.append(f'<path d="{" ".join(path_parts)}" fill="none" stroke="{trend_color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>')
 
-    # Time markers
-    markers = [(len(prices) - 63, "3M"), (len(prices) - 126, "6M")]
-    for idx, label in markers:
+    # 52W High / Low reference lines with labels
+    if show_52w_levels:
+        y_52w_high = price_to_y(actual_max)
+        y_52w_low = price_to_y(actual_min)
+        # High line (green dashed)
+        svg_parts.append(
+            f'<line x1="{pad_h}" y1="{y_52w_high:.1f}" x2="{width - pad_h}" y2="{y_52w_high:.1f}" '
+            f'stroke="{COLORS["green"]}" stroke-width="1" stroke-dasharray="3,2" opacity="0.5"/>'
+        )
+        svg_parts.append(
+            f'<text x="{pad_h + 2}" y="{y_52w_high - 2:.1f}" font-size="7" fill="{COLORS["green"]}" opacity="0.7">52W H</text>'
+        )
+        # Low line (red dashed)
+        svg_parts.append(
+            f'<line x1="{pad_h}" y1="{y_52w_low:.1f}" x2="{width - pad_h}" y2="{y_52w_low:.1f}" '
+            f'stroke="{COLORS["red"]}" stroke-width="1" stroke-dasharray="3,2" opacity="0.5"/>'
+        )
+        svg_parts.append(
+            f'<text x="{pad_h + 2}" y="{y_52w_low + 9:.1f}" font-size="7" fill="{COLORS["red"]}" opacity="0.7">52W L</text>'
+        )
+
+    # Time markers with labels (3M and 6M ago)
+    time_markers = [(len(prices) - 63, "3M"), (len(prices) - 126, "6M")]
+    for idx, label in time_markers:
         if 0 <= idx < len(prices):
             x = idx_to_x(idx, len(prices))
-            svg_parts.append(f'<line x1="{x:.1f}" y1="{padding}" x2="{x:.1f}" y2="{height - padding}" stroke="{COLORS["marker"]}" stroke-width="1" stroke-dasharray="2,2"/>')
+            svg_parts.append(
+                f'<line x1="{x:.1f}" y1="{pad_v}" x2="{x:.1f}" y2="{height - pad_v}" '
+                f'stroke="{COLORS["marker"]}" stroke-width="1" stroke-dasharray="2,2"/>'
+            )
+            svg_parts.append(
+                f'<text x="{x:.1f}" y="{height - 2}" text-anchor="middle" font-size="7" fill="{COLORS["text"]}">{label}</text>'
+            )
+
+    # Current value dot at the rightmost point
+    x_last = idx_to_x(len(prices) - 1, len(prices))
+    y_last = price_to_y(prices.iloc[-1])
+    svg_parts.append(f'<circle cx="{x_last:.1f}" cy="{y_last:.1f}" r="2.5" fill="{trend_color}"/>')
 
     svg_parts.append('</svg>')
     return "\n".join(svg_parts)

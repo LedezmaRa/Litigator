@@ -102,8 +102,10 @@ def get_all_tickers(config: Dict) -> List[str]:
         for wl in config['watchlists'].values():
             tickers.update(wl.get('stocks', {}).keys())
             
-    # Add VIX if possible (Yahoo: ^VIX)
+    # Add benchmark indices
     tickers.add("^VIX")
+    tickers.add("^TNX")   # 10Y Treasury yield (for yield curve)
+    tickers.add("^IRX")   # 13-week T-Bill yield (for yield curve spread)
     return sorted(list(tickers))
 
 
@@ -247,32 +249,199 @@ def generate_sector_leaderboard_html(sector_metrics: List[SectorMetrics]) -> str
 
 # --- HTML GENERATORS ---
 
+# Educational descriptions for each benchmark card
+BENCHMARK_INFO = {
+    "SPY": (
+        "S&P 500",
+        "Tracks the 500 largest U.S. companies by market cap. The primary gauge of U.S. large-cap equity market health. When SPY trends up, the broad market is healthy."
+    ),
+    "QQQ": (
+        "Nasdaq-100",
+        "Top 100 non-financial Nasdaq stocks, heavily weighted toward tech and growth. Very sensitive to interest rates — rising rates compress growth valuations."
+    ),
+    "IWM": (
+        "Russell 2000",
+        "2,000 U.S. small-cap stocks. A risk-on barometer: small-caps lead in early bull markets and crack first during credit stress or recession fears. IWM/SPY ratio signals market breadth."
+    ),
+    "^VIX": (
+        "VIX — Fear Gauge",
+        "Expected 30-day S&P 500 volatility derived from options pricing. Below 15 = calm complacency, 15–25 = normal uncertainty, above 30 = elevated stress, above 40 = panic."
+    ),
+}
+
+# Lookback periods for multi-period return display
+PERIOD_LOOKBACKS = [("1W", 5), ("1M", 21), ("3M", 63), ("6M", 126), ("1Y", 252)]
+
+
+def _range_bar_html(curr: float, low: float, high: float, is_vix: bool = False) -> str:
+    """Horizontal range bar showing where current value sits within the 52-week range."""
+    if high <= low:
+        return ""
+    pct = max(0.0, min(100.0, (curr - low) / (high - low) * 100))
+    # For VIX: low percentile = good (calm). For price: high percentile = good (uptrend).
+    if is_vix:
+        bar_color = "var(--accent-optimal)" if pct < 30 else "var(--accent-marginal)" if pct < 60 else "var(--accent-poor)"
+    else:
+        bar_color = "var(--accent-optimal)" if pct >= 70 else "var(--accent-marginal)" if pct >= 40 else "var(--accent-poor)"
+    return f"""<div style="margin:0.4rem 0 0.5rem;">
+        <div style="display:flex; justify-content:space-between; font-size:0.68rem; color:var(--text-secondary); margin-bottom:3px;">
+            <span>52W: {low:.2f} – {high:.2f}</span>
+            <span style="color:{bar_color}; font-weight:600;">{pct:.0f}th %ile of 52W range</span>
+        </div>
+        <div style="height:4px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden;">
+            <div style="height:100%; width:{pct:.1f}%; background:{bar_color}; border-radius:2px;"></div>
+        </div>
+    </div>"""
+
+
+def _returns_cells_html(prices: pd.Series) -> str:
+    """5-period return grid: 1W / 1M / 3M / 6M / 1Y."""
+    curr = prices.iloc[-1]
+    cells = ""
+    for label, bars in PERIOD_LOOKBACKS:
+        if len(prices) > bars:
+            val = curr / prices.iloc[-(bars + 1)] - 1
+            cls = _color_class(val)
+            formatted = fmt_pct(val)
+        else:
+            cls = ""
+            formatted = "–"
+        cells += (
+            f'<div style="text-align:center; background:rgba(255,255,255,0.03); border-radius:4px; padding:3px 0;">'
+            f'<div style="font-size:0.62rem; color:var(--text-secondary);">{label}</div>'
+            f'<div class="{cls}" style="font-size:0.78rem; font-weight:600;">{formatted}</div>'
+            f'</div>'
+        )
+    return f'<div style="display:grid; grid-template-columns:repeat(5,1fr); gap:3px; margin-bottom:0.4rem;">{cells}</div>'
+
+
+def _spread_returns_cells_html(spread: pd.Series) -> str:
+    """5-period absolute-change grid for a yield spread (in basis points)."""
+    curr = spread.iloc[-1]
+    cells = ""
+    for label, bars in PERIOD_LOOKBACKS:
+        if len(spread) > bars:
+            delta = curr - spread.iloc[-(bars + 1)]  # change in pct points
+            bps = delta * 100                         # convert to basis points
+            cls = _color_class(delta)
+            formatted = f"{bps:+.0f}bps"
+        else:
+            cls = ""
+            formatted = "–"
+        cells += (
+            f'<div style="text-align:center; background:rgba(255,255,255,0.03); border-radius:4px; padding:3px 0;">'
+            f'<div style="font-size:0.62rem; color:var(--text-secondary);">{label}</div>'
+            f'<div class="{cls}" style="font-size:0.78rem; font-weight:600;">{formatted}</div>'
+            f'</div>'
+        )
+    return f'<div style="display:grid; grid-template-columns:repeat(5,1fr); gap:3px; margin-bottom:0.4rem;">{cells}</div>'
+
+
 def generate_benchmarks_html(closes: pd.DataFrame, data_dict: Dict) -> str:
-    # Hardcoded benchmarks for display
-    bms = ["SPY", "QQQ", "IWM", "^VIX"]
+    """Generate Market Benchmarks section with educational context and historical comparison."""
     cards = ""
-    
-    for b in bms:
-        if b not in closes.columns: continue
-        
-        prices = closes[b]
+
+    for b, (name, desc) in BENCHMARK_INFO.items():
+        if b not in closes.columns:
+            continue
+        prices = closes[b].dropna()
+        if len(prices) < 5:
+            continue
+
         curr = prices.iloc[-1]
-        chg_1m = (curr / prices.iloc[-21] - 1) if len(prices) > 21 else 0
-        
+        is_vix = b == "^VIX"
+        val_display = f"{curr:.2f}" if is_vix else f"${curr:.2f}"
+
+        # 1W change for header badge
+        chg_1w = (curr / prices.iloc[-6] - 1) if len(prices) > 5 else None
+        chg_color = _color_class(chg_1w) if chg_1w is not None else ""
+        chg_display = fmt_pct(chg_1w) if chg_1w is not None else "–"
+
+        # 52W range context
+        prices_52w = prices.tail(252)
+        low_52w = prices_52w.min()
+        high_52w = prices_52w.max()
+        range_bar = _range_bar_html(curr, low_52w, high_52w, is_vix=is_vix)
+        returns_html = _returns_cells_html(prices)
         chart = generate_benchmark_chart_svg(prices)
-        
+
         cards += f"""
-        <div class="glass-card">
-            <h3 style="margin-bottom:0px;">{b}</h3>
-            <div style="font-size:1.5rem; font-weight:bold;">${curr:.2f}</div>
-            <div class="{_color_class(chg_1m)}">1M: {fmt_pct(chg_1m)}</div>
-            <div style="margin-top:1rem;">{chart}</div>
+        <div class="glass-card" style="min-width:0;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.2rem;">
+                <div>
+                    <div style="font-size:0.75rem; font-weight:700; letter-spacing:0.06em; color:var(--text-secondary); text-transform:uppercase;">{b}</div>
+                    <div style="font-size:0.95rem; font-weight:600; color:var(--text-primary);">{name}</div>
+                </div>
+                <div style="text-align:right; flex-shrink:0; margin-left:0.5rem;">
+                    <div style="font-size:1.3rem; font-weight:bold;">{val_display}</div>
+                    <div class="{chg_color}" style="font-size:0.75rem;">1W: {chg_display}</div>
+                </div>
+            </div>
+            <div style="font-size:0.7rem; color:var(--text-secondary); line-height:1.45; margin-bottom:0.5rem; border-left:2px solid rgba(255,255,255,0.1); padding-left:0.5rem;">{desc}</div>
+            {range_bar}
+            {returns_html}
+            <div>{chart}</div>
         </div>
         """
-        
+
+    # --- Yield Curve Card (10Y − 3M Treasury spread) ---
+    if "^TNX" in closes.columns and "^IRX" in closes.columns:
+        tnx = closes["^TNX"].dropna()
+        irx = closes["^IRX"].dropna()
+        spread_df = pd.DataFrame({"tnx": tnx, "irx": irx}).dropna()
+
+        if len(spread_df) >= 10:
+            spread = spread_df["tnx"] - spread_df["irx"]
+            curr_spread = spread.iloc[-1]
+            curr_10y = spread_df["tnx"].iloc[-1]
+            curr_3m = spread_df["irx"].iloc[-1]
+
+            is_inverted = curr_spread < 0
+            spread_color = "var(--accent-poor)" if is_inverted else "var(--accent-optimal)"
+            status_label = "INVERTED ⚠" if is_inverted else "NORMAL"
+
+            spread_52w = spread.tail(252)
+            low_52w = spread_52w.min()
+            high_52w = spread_52w.max()
+            spread_range_bar = _range_bar_html(curr_spread, low_52w, high_52w, is_vix=False)
+            spread_returns = _spread_returns_cells_html(spread)
+            spread_chart = generate_benchmark_chart_svg(spread)
+
+            # 1W delta in basis points
+            chg_1w_bps = (curr_spread - spread.iloc[-6]) * 100 if len(spread) > 5 else None
+            chg_1w_display = f"{chg_1w_bps:+.0f}bps" if chg_1w_bps is not None else "–"
+            chg_1w_color = _color_class(chg_1w_bps) if chg_1w_bps is not None else ""
+
+            desc_yc = (
+                f"10Y minus 3M Treasury yield spread. When negative (inverted), it has historically "
+                f"preceded U.S. recessions within 6–18 months — short-term rates exceed long-term, "
+                f"signaling market expects rate cuts ahead. "
+                f"10Y: {curr_10y:.2f}% | 3M: {curr_3m:.2f}%"
+            )
+
+            cards += f"""
+            <div class="glass-card" style="min-width:0;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.2rem;">
+                    <div>
+                        <div style="font-size:0.75rem; font-weight:700; letter-spacing:0.06em; color:var(--text-secondary); text-transform:uppercase;">^TNX − ^IRX</div>
+                        <div style="font-size:0.95rem; font-weight:600; color:var(--text-primary);">Yield Curve (10Y−3M)</div>
+                    </div>
+                    <div style="text-align:right; flex-shrink:0; margin-left:0.5rem;">
+                        <div style="font-size:1.3rem; font-weight:bold; color:{spread_color};">{curr_spread:+.2f}%</div>
+                        <div style="font-size:0.75rem; color:{spread_color}; font-weight:600;">1W: {chg_1w_display} · {status_label}</div>
+                    </div>
+                </div>
+                <div style="font-size:0.7rem; color:var(--text-secondary); line-height:1.45; margin-bottom:0.5rem; border-left:2px solid rgba(255,255,255,0.1); padding-left:0.5rem;">{desc_yc}</div>
+                {spread_range_bar}
+                {spread_returns}
+                <div>{spread_chart}</div>
+            </div>
+            """
+
     return f"""
     <h2 style="margin-top:2rem;">Market Benchmarks</h2>
-    <div class="grid-cols-4" style="margin-bottom:2rem;">
+    <p class="text-muted" style="margin-bottom:1rem;">Key market indicators with historical context — where are we today vs. the past 52 weeks?</p>
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:1.5rem; margin-bottom:2rem;">
         {cards}
     </div>
     """
