@@ -135,20 +135,24 @@ def calculate_projection(
     regime: str,
     volume_confirms: bool,
     composite_score: float = 0.0,
-    sector: str = ""
+    sector: str = "",
+    stop_price: Optional[float] = None,
 ) -> ProjectionResult:
     """
     Calculate ATR-based price targets with confidence scoring.
 
     First Principles:
-    - Stop distance = ATR * 1.5 (defines 1 unit of risk "R")
+    - Stop distance = 1 unit of risk "R" (regime-aware ATR multiple if stop_price provided)
     - Target 1R = Entry + R (1:1 risk/reward)
     - Target 2R = Entry + 2R (2:1 risk/reward)
     - Target 3R = Entry + 3R (3:1 risk/reward)
     """
-    # Calculate stop distance (1R = risk unit)
-    stop_distance = atr * STOP_ATR_MULTIPLIER
-    stop_price = current_price - stop_distance
+    # Use explicit regime-aware stop if provided; fall back to default 1.5x ATR
+    if stop_price is not None and stop_price < current_price:
+        stop_distance = current_price - stop_price
+    else:
+        stop_distance = atr * STOP_ATR_MULTIPLIER
+        stop_price = current_price - stop_distance
 
     # Calculate targets
     target_1r = current_price + stop_distance

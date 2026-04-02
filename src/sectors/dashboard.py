@@ -83,7 +83,9 @@ class TradeCandidateAnalysis:
     adx_ok: bool = False
     stop_price: float = 0.0
     stop_dist_pct: float = 0.0
+    stop_dist_atr: float = 1.5   # regime-aware ATR multiplier used for stop
     is_trade_ready: bool = False
+    score_breakdown: Optional[Dict] = None  # {ema_proximity, adx_stage, volume_conviction, structure, risk_reward}
 
 
 def load_config():
@@ -193,29 +195,43 @@ def calculate_sector_metrics(
     return metrics_list
 
 
-def generate_sector_leaderboard_html(sector_metrics: List[SectorMetrics]) -> str:
-    """Generate HTML for sector comparison leaderboard with links to detail pages."""
+def generate_sector_leaderboard_html(sector_metrics: List[SectorMetrics], closes: pd.DataFrame = None) -> str:
+    """Generate HTML for sector comparison leaderboard with sparklines and links to detail pages."""
     rows = ""
 
     for i, m in enumerate(sector_metrics):
-        # Rank badge color
         rank_color = "var(--accent-optimal)" if i < 3 else "var(--accent-good)" if i < 6 else "var(--text-secondary)"
-
-        # Trade ready badge
         ready_badge = f'<span class="badge badge-optimal">{m.trade_ready_count}</span>' if m.trade_ready_count > 0 else '<span class="badge badge-poor">0</span>'
+
+        # ETF sparkline
+        sparkline = ""
+        if closes is not None and m.etf in closes.columns:
+            sparkline = generate_sparkline_svg(closes[m.etf], width=80, height=28)
+
+        # % Up context: color-code against rough market average (50% = neutral)
+        pct_up_color = "var(--accent-optimal)" if m.pct_trending_up >= 60 else \
+                       "var(--accent-marginal)" if m.pct_trending_up >= 40 else "var(--accent-poor)"
 
         rows += f"""
         <tr>
             <td style="color:{rank_color}; font-weight:bold;">#{i+1}</td>
             <td>
-                <a href="sector_{m.etf}.html" style="color:var(--text-primary); text-decoration:none;">
-                    <b>{m.name}</b> →
-                </a>
-                <br><span class="text-xs text-muted">{m.etf}</span>
+                <div style="display:flex; align-items:center; gap:0.75rem;">
+                    {sparkline}
+                    <div>
+                        <a href="sector_{m.etf}.html" style="color:var(--text-primary); text-decoration:none; font-weight:600;">
+                            {m.name} →
+                        </a>
+                        <br><span class="text-xs text-muted">{m.etf}</span>
+                    </div>
+                </div>
             </td>
-            <td style="text-align:center;"><b>{m.top5_avg_score:.0f}</b></td>
+            <td style="text-align:center;">
+                <b>{m.top5_avg_score:.0f}</b>
+                <br><span class="text-xs text-muted">top 5</span>
+            </td>
             <td style="text-align:center;">{m.avg_composite_score:.0f}</td>
-            <td style="text-align:center;">{m.pct_trending_up:.0f}%</td>
+            <td style="text-align:center; color:{pct_up_color}; font-weight:600;">{m.pct_trending_up:.0f}%</td>
             <td style="text-align:center;">{ready_badge}</td>
             <td class="{_color_class(m.etf_ret_1w)}">{fmt_pct(m.etf_ret_1w)}</td>
             <td class="{_color_class(m.etf_ret_1m)}">{fmt_pct(m.etf_ret_1m)}</td>
@@ -225,14 +241,18 @@ def generate_sector_leaderboard_html(sector_metrics: List[SectorMetrics]) -> str
 
     return f"""
     <h2 style="margin-top:2rem;">Sector Leaderboard</h2>
-    <p class="text-muted" style="margin-bottom:1rem;">Sectors ranked by Top 5 Average Composite Score • Click column headers to sort • Click sector name for charts</p>
+    <p class="text-muted" style="margin-bottom:1rem;">
+        Ranked by Top 5 Average Composite Score (RS 50% + Trend 30% + Volume 20%, percentile within sector, 0–100) •
+        % Up = share of stocks with positive 3M relative return vs sector ETF •
+        Click sector name for full charts
+    </p>
     <div class="glass-card">
         <table class="modern-table">
             <thead>
                 <tr>
-                    <th class="sortable">Rank</th>
-                    <th>Sector</th>
-                    <th class="sortable" style="text-align:center;">Top 5 Avg</th>
+                    <th class="sortable">#</th>
+                    <th>Sector ETF</th>
+                    <th class="sortable" style="text-align:center;">Top 5 Score</th>
                     <th class="sortable" style="text-align:center;">All Avg</th>
                     <th class="sortable" style="text-align:center;">% Up</th>
                     <th class="sortable" style="text-align:center;">Trade Ready</th>
@@ -487,18 +507,35 @@ def generate_sector_html(config: Dict, ranked_sectors: Dict, closes: pd.DataFram
             """
 
         rows = ""
-        for i, stock in enumerate(ranked[:25]):  # Show all 25 stocks
+        for i, stock in enumerate(ranked[:25]):
             trend_badge = _pill_class(stock.trend)
-            # Highlight top 5 that advance to Stage 2
             is_stage2 = i < 5
-            row_style = 'background: rgba(74, 222, 128, 0.1); border-left: 3px solid var(--accent-optimal);' if is_stage2 else ''
-            stage2_marker = '<span style="color:var(--accent-optimal);">→</span>' if is_stage2 else ''
+            row_style = 'background: rgba(74, 222, 128, 0.08); border-left: 3px solid var(--accent-optimal);' if is_stage2 else ''
+            stage2_marker = ' <span style="color:var(--accent-optimal); font-size:0.75rem;">→S2</span>' if is_stage2 else ''
+
+            # Composite score mini-bar (fill width proportional to 0-100)
+            bar_pct = min(100, max(0, stock.composite_score))
+            if bar_pct >= 70:
+                bar_color = "var(--accent-optimal)"
+            elif bar_pct >= 45:
+                bar_color = "var(--accent-marginal)"
+            else:
+                bar_color = "var(--accent-poor)"
+            score_bar = (
+                f'<div style="height:3px; background:rgba(255,255,255,0.08); border-radius:2px; margin-top:2px;">'
+                f'<div style="height:100%; width:{bar_pct:.0f}%; background:{bar_color}; border-radius:2px;"></div>'
+                f'</div>'
+            )
+            price_display = f"${stock.price:.2f}" if stock.price else "—"
 
             rows += f"""
             <tr style="{row_style}">
-                <td>#{i+1}</td>
-                <td><b>{stock.ticker}</b> {stage2_marker}</td>
-                <td>{stock.composite_score:.0f}</td>
+                <td style="color:var(--text-secondary);">#{i+1}</td>
+                <td><b>{stock.ticker}</b>{stage2_marker}<br><span class="text-xs text-muted">{price_display}</span></td>
+                <td style="min-width:60px;">
+                    <span style="font-weight:600;">{stock.composite_score:.0f}</span>
+                    {score_bar}
+                </td>
                 <td class="{_color_class(stock.rel_3m)}">{fmt_pct(stock.rel_3m)}</td>
                 <td><span class="{trend_badge}">{stock.trend}</span></td>
             </tr>
@@ -508,15 +545,23 @@ def generate_sector_html(config: Dict, ranked_sectors: Dict, closes: pd.DataFram
         <div class="glass-card" style="max-height: 600px; overflow: hidden; display: flex; flex-direction: column;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-shrink: 0;">
                 <div>
-                    <h3>{name} ({etf})</h3>
-                    <span class="text-xs text-muted">Top 5 → Stage 2</span>
+                    <h3 style="margin:0;">{name} ({etf})</h3>
+                    <span class="text-xs text-muted">Top 5 advance → Stage 2</span>
                 </div>
                 {sparkline}
             </div>
             {drivers_html}
             <div style="overflow-y: auto; flex: 1;">
                 <table class="modern-table" style="font-size:0.8rem;">
-                    <thead style="position: sticky; top: 0; background: var(--card-bg);"><tr><th>#</th><th>TKR</th><th>Scr</th><th>Rel3M</th><th>Trend</th></tr></thead>
+                    <thead style="position: sticky; top: 0; background: var(--card-bg);">
+                        <tr>
+                            <th>#</th>
+                            <th>Ticker / Price</th>
+                            <th>Score</th>
+                            <th>Rel 3M</th>
+                            <th>Trend</th>
+                        </tr>
+                    </thead>
                     <tbody>{rows}</tbody>
                 </table>
             </div>
@@ -532,61 +577,134 @@ def generate_sector_html(config: Dict, ranked_sectors: Dict, closes: pd.DataFram
     """
 
 
+def _score_breakdown_html(breakdown: Optional[Dict]) -> str:
+    """Compact 5-component breakdown bar for the entry score cell."""
+    if not breakdown:
+        return ""
+    components = [
+        ("EMA", breakdown.get('ema_proximity', 0), 25),
+        ("ADX", breakdown.get('adx_stage', 0),     25),
+        ("Vol", breakdown.get('volume_conviction', 0), 20),
+        ("Str", breakdown.get('structure', 0),     20),
+        ("R:R", breakdown.get('risk_reward', 0),   10),
+    ]
+    cells = ""
+    for label, score, max_score in components:
+        pct = (score / max_score * 100) if max_score > 0 else 0
+        if pct >= 70:
+            color = "rgba(74,222,128,0.35)"
+        elif pct >= 40:
+            color = "rgba(251,191,36,0.35)"
+        else:
+            color = "rgba(248,113,113,0.25)"
+        cells += (
+            f'<div style="text-align:center; background:{color}; border-radius:2px; padding:1px 2px;">'
+            f'<div style="font-size:0.58rem; color:var(--text-secondary);">{label}</div>'
+            f'<div style="font-size:0.68rem; font-weight:600;">{score:.0f}</div>'
+            f'</div>'
+        )
+    return f'<div style="display:grid; grid-template-columns:repeat(5,1fr); gap:2px; margin-top:3px;">{cells}</div>'
+
+
 def generate_candidates_html(candidates: List[TradeCandidateAnalysis], data_dict: Dict) -> str:
     rows = ""
     ready_count = 0
-    
+
     for c in candidates:
-        if c.is_trade_ready: ready_count += 1
-        
-        regime_badge = _pill_class(c.regime)
-        signal_badge = _pill_class(c.signal_strength)
-        
-        # Mini Chart
+        if c.is_trade_ready:
+            ready_count += 1
+
+        # Mini Chart — slightly larger so EMA structure is readable
         chart = ""
         if c.ticker in data_dict:
-             df = data_dict[c.ticker]
-             chart = generate_price_chart_svg(df['close'], df['ema_20'], df['ema_50'], width=200, height=60, show_markers=False, show_grid=False)
+            df = data_dict[c.ticker]
+            chart = generate_price_chart_svg(
+                df['close'], df['ema_20'], df['ema_50'],
+                width=220, height=70, show_markers=False, show_grid=False
+            )
 
-        # Color the entry score based on thresholds
-        entry_color = "var(--accent-poor)"
-        if c.entry_score >= 75: entry_color = "var(--accent-optimal)"
-        elif c.entry_score >= 60: entry_color = "var(--accent-good)"
-        elif c.entry_score >= 45: entry_color = "var(--accent-marginal)"
+        # Entry score coloring
+        if c.entry_score >= 75:
+            entry_color = "var(--accent-optimal)"
+        elif c.entry_score >= 60:
+            entry_color = "var(--accent-good)"
+        elif c.entry_score >= 45:
+            entry_color = "var(--accent-marginal)"
+        else:
+            entry_color = "var(--accent-poor)"
+
+        # Stop distance as % of price
+        stop_pct = ((c.price - c.stop_price) / c.price * 100) if c.price and c.price > 0 else 0
+
+        # Why not trade ready? (show the missing condition)
+        not_ready_hint = ""
+        if not c.is_trade_ready:
+            reasons = []
+            if c.entry_score < 60:
+                reasons.append(f"score {c.entry_score:.0f}<60")
+            if c.regime != "TRENDING":
+                reasons.append(f"regime={c.regime}")
+            not_ready_hint = f'<div style="font-size:0.62rem; color:var(--accent-poor); margin-top:2px;">✗ {" · ".join(reasons)}</div>'
+
+        breakdown_html = _score_breakdown_html(c.score_breakdown)
+        ready_star = '<span style="color:var(--accent-optimal); font-size:1.1rem;">★</span>' if c.is_trade_ready else '<span style="color:var(--text-secondary); font-size:0.8rem;">–</span>'
 
         rows += f"""
         <tr>
-            <td style="text-align:center;">
-                {'''<span style="color:var(--accent-optimal); font-size:1.2rem;">★</span>''' if c.is_trade_ready else ''}
+            <td style="text-align:center;">{ready_star}{not_ready_hint}</td>
+            <td>
+                <b>{c.ticker}</b>
+                <br><span class="text-xs text-muted">{c.name}</span>
             </td>
-            <td><b>{c.ticker}</b><br><span class="text-xs text-muted">{c.name}</span></td>
-            <td>{c.sector_etf}</td>
-            <td style="text-align:center;"><b>{c.composite_score:.0f}</b><br><span class="text-xs text-muted">Stage 1</span></td>
-            <td style="text-align:center; color:{entry_color};"><b>{c.entry_score:.0f}</b><br><span class="text-xs text-muted">Entry</span></td>
-            <td><span class="{_pill_class(c.trend)}">{c.trend}</span></td>
-            <td><span class="{regime_badge}">{c.regime}</span></td>
+            <td style="text-align:center;">
+                <span class="text-xs text-muted">{c.sector_etf}</span>
+            </td>
+            <td style="text-align:center;">
+                ${c.price:.2f if c.price else 'N/A'}
+                <br><span class="text-xs text-muted">ADX {c.adx:.0f}</span>
+            </td>
+            <td style="text-align:center;">
+                <b>{c.composite_score:.0f}</b>
+                <br><span class="text-xs text-muted">Stage 1</span>
+            </td>
+            <td style="text-align:center;">
+                <b style="color:{entry_color};">{c.entry_score:.0f}</b>
+                {breakdown_html}
+            </td>
+            <td>
+                <span class="{_pill_class(c.trend)}">{c.trend}</span>
+                <br><span class="{_pill_class(c.regime)}" style="margin-top:3px; display:inline-block;">{c.regime}</span>
+            </td>
+            <td style="color:var(--accent-poor); font-size:0.8rem;">
+                ${c.stop_price:.2f}
+                <br><span class="text-xs">−{stop_pct:.1f}% · {c.stop_dist_atr:.1f}×ATR</span>
+            </td>
             <td>{chart}</td>
         </tr>
         """
 
     return f"""
     <h2 style="margin-top:2rem;">Trade Candidates (Stage 2)</h2>
-    <p class="text-muted" style="margin-bottom:1rem;">Top 5 from each sector evaluated with EMA-ADX-ATR Entry Score (Proximity 25 + ADX 25 + Volume 20 + Structure 20 + R:R 10)</p>
+    <p class="text-muted" style="margin-bottom:1rem;">
+        Top 5 per sector scored by EMA-ADX-ATR Entry System (EMA Proximity 25 + ADX Stage 25 + Volume 20 + Structure 20 + R:R 10 = 100).
+        ★ = Entry ≥60 <em>and</em> TRENDING regime.
+    </p>
     <div class="glass-card">
-        <div style="margin-bottom:1rem; display:flex; gap:1rem; align-items:center;">
+        <div style="margin-bottom:1rem; display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
             <span class="badge badge-optimal">{ready_count} Trade Ready</span>
-            <span class="text-xs text-muted">★ = Entry Score ≥60 + Trending Regime</span>
+            <span class="text-xs text-muted">Score breakdown: green ≥70% · amber 40–69% · red &lt;40% of component max</span>
         </div>
         <table class="modern-table">
             <thead>
                 <tr>
-                    <th style="width:50px;">Ready</th>
+                    <th style="width:60px;">Ready</th>
                     <th class="sortable">Ticker</th>
-                    <th class="sortable">Sector</th>
+                    <th class="sortable" style="text-align:center;">Sector</th>
+                    <th class="sortable" style="text-align:center;">Price / ADX</th>
                     <th class="sortable" style="text-align:center;">Composite</th>
-                    <th class="sortable" style="text-align:center;">Entry</th>
-                    <th class="sortable">Trend</th>
-                    <th class="sortable">Regime</th>
+                    <th class="sortable" style="text-align:center;">Entry Score</th>
+                    <th class="sortable">Trend / Regime</th>
+                    <th class="sortable">Stop / Risk</th>
                     <th>Chart</th>
                 </tr>
             </thead>
@@ -598,37 +716,65 @@ def generate_candidates_html(candidates: List[TradeCandidateAnalysis], data_dict
 
 def generate_projections_html(ranked_projections: List[ProjectionResult]) -> str:
     rows = ""
-    for i, p in enumerate(ranked_projections[:20]): # Top 20
+    for i, p in enumerate(ranked_projections[:20]):
         conf_bar = generate_confidence_bar_svg(p.confidence_score)
-        
+
+        # Risk metrics
+        risk_pct = (p.stop_distance / p.current_price * 100) if p.current_price > 0 else 0
+        gain_3r_pct = (p.target_3r / p.current_price - 1) * 100 if p.current_price > 0 else 0
+
+        # Confidence color
+        if p.confidence_score >= 80:
+            conf_color = "var(--accent-optimal)"
+        elif p.confidence_score >= 50:
+            conf_color = "var(--accent-good)"
+        else:
+            conf_color = "var(--accent-marginal)"
+
         rows += f"""
         <tr>
-            <td>#{i+1}</td>
-            <td><b>{p.ticker}</b></td>
+            <td style="color:var(--text-secondary);">#{i+1}</td>
+            <td>
+                <b>{p.ticker}</b>
+                <br><span class="text-xs text-muted">{p.sector}</span>
+            </td>
             <td>${p.current_price:.2f}</td>
-            <td style="color:var(--accent-poor);">${p.stop_price:.2f}</td>
+            <td style="text-align:center; color:var(--text-secondary);">
+                {p.atr:.2f}
+                <br><span class="text-xs" style="color:var(--text-secondary);">{p.atr_percent:.1f}%</span>
+            </td>
+            <td style="color:var(--accent-poor);">
+                ${p.stop_price:.2f}
+                <br><span class="text-xs">−{risk_pct:.1f}%</span>
+            </td>
             <td style="color:var(--accent-optimal);">${p.target_2r:.2f}</td>
-            <td style="color:var(--accent-optimal); font-weight:bold;">${p.target_3r:.2f}</td>
+            <td style="color:var(--accent-optimal); font-weight:bold;">
+                ${p.target_3r:.2f}
+                <br><span class="text-xs">+{gain_3r_pct:.1f}%</span>
+            </td>
             <td>
                 <div style="display:flex; align-items:center; gap:0.5rem;">
-                    {conf_bar} <span>{p.confidence_score:.0f}%</span>
+                    {conf_bar}
+                    <span style="color:{conf_color}; font-weight:600;">{p.confidence_score:.0f}%</span>
                 </div>
             </td>
         </tr>
         """
-        
+
     return f"""
-    <h2 style="margin-top:2rem;">Projections & Targets (Stage 3)</h2>
+    <h2 style="margin-top:2rem;">Projections &amp; Targets (Stage 3)</h2>
+    <p class="text-muted" style="margin-bottom:1rem;">ATR-based targets for trade-ready setups. Stop = regime-aware ATR multiple below EMA20. Targets = 2R and 3R multiples of that risk unit.</p>
     <div class="glass-card">
         <table class="modern-table">
             <thead>
                 <tr>
-                    <th class="sortable">Rank</th>
-                    <th class="sortable">Ticker</th>
+                    <th class="sortable">#</th>
+                    <th class="sortable">Ticker / Sector</th>
                     <th class="sortable">Price</th>
-                    <th class="sortable">Stop (1.5xATR)</th>
-                    <th class="sortable">Target 2R</th>
-                    <th class="sortable">Target 3R</th>
+                    <th class="sortable" style="text-align:center;">ATR / ATR%</th>
+                    <th class="sortable">Stop / Risk%</th>
+                    <th class="sortable">2R Target</th>
+                    <th class="sortable">3R Target / Gain%</th>
                     <th class="sortable">Confidence</th>
                 </tr>
             </thead>
@@ -976,20 +1122,31 @@ def run_sector_analysis(output_dir="reports", focus_sector: Optional[str] = None
             signal_str = "WEAK"
             if res.total_score >= 80: signal_str = "STRONG"
             elif res.total_score >= 60: signal_str = "MODERATE"
-            
+
             is_ready = res.total_score >= 60 and res.regime == "TRENDING"
-            
+
+            # Regime-aware stop: use the same multiplier the scorer used
+            stop_dist_atr = scorer.regime_params.stop_distance_atr
+            stop_price = res.details['ema20'] - stop_dist_atr * res.details['atr']
+
+            # Real volume confirmation from scored data
+            vol_ratio = res.details.get('rel_vol', 1.0)
+            volume_confirms = vol_ratio >= 1.0
+
             # Create Candidate Analysis
             cand = TradeCandidateAnalysis(
                 ticker=c.ticker, name=c.name, sector=c.sector, sector_etf=c.sector_etf,
                 composite_score=c.composite_score, rank_in_sector=c.rank_in_sector,
                 price=res.details['price'], rel_3m=c.rel_3m, trend=c.trend,
                 regime=res.regime, signal_strength=signal_str,
-                entry_score=res.total_score,  # EMA-ADX-ATR Entry Score
+                entry_score=res.total_score,
                 adx=res.details.get('adx', 0),
                 atr=res.details['atr'],
+                volume_ratio=vol_ratio,
                 is_trade_ready=is_ready,
-                stop_price=res.details['ema20'] - 2*res.details['atr'] # 2x ATR stop from EMA20
+                stop_price=stop_price,
+                stop_dist_atr=stop_dist_atr,
+                score_breakdown=res.breakdown if hasattr(res, 'breakdown') else None,
             )
             candidates.append(cand)
             
@@ -1006,8 +1163,10 @@ def run_sector_analysis(output_dir="reports", focus_sector: Optional[str] = None
         
         proj = calculate_projection(
             cand.ticker, cand.name, cand.price, cand.atr,
-            cand.signal_strength, cand.regime, volume_confirms=True, # Simplified
-            composite_score=cand.composite_score, sector=cand.sector
+            cand.signal_strength, cand.regime,
+            volume_confirms=(cand.volume_ratio >= 1.0),
+            composite_score=cand.composite_score, sector=cand.sector,
+            stop_price=cand.stop_price,
         )
         projections.append(proj)
         
@@ -1021,7 +1180,7 @@ def run_sector_analysis(output_dir="reports", focus_sector: Optional[str] = None
     print("Generating Dashboard...")
 
     benchmarks_html_str = generate_benchmarks_html(closes, data_map)
-    leaderboard_html_str = generate_sector_leaderboard_html(sector_metrics)
+    leaderboard_html_str = generate_sector_leaderboard_html(sector_metrics, closes=closes)
     sectors_html_str = generate_sector_html(config, ranked_sectors, closes, sector_drivers_map)
     candidates_html_str = generate_candidates_html(candidates, data_map)
     projections_html_str = generate_projections_html(ranked_projections)
