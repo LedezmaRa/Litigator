@@ -387,21 +387,26 @@ def generate_benchmarks_html(closes: pd.DataFrame, data_dict: Dict) -> str:
         chart = generate_benchmark_chart_svg(prices)
 
         cards += f"""
-        <div class="glass-card" style="min-width:0;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.2rem;">
+        <div class="glass-card" style="min-width:0; display:flex; flex-direction:column; gap:0.6rem;">
+            <!-- Header: ticker + price -->
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                 <div>
-                    <div style="font-size:0.75rem; font-weight:700; letter-spacing:0.06em; color:var(--text-secondary); text-transform:uppercase;">{b}</div>
-                    <div style="font-size:0.95rem; font-weight:600; color:var(--text-primary);">{name}</div>
+                    <div style="font-size:0.7rem; font-weight:700; letter-spacing:0.07em; color:var(--text-secondary); text-transform:uppercase;">{b}</div>
+                    <div style="font-size:1rem; font-weight:700; color:var(--text-primary); margin-top:1px;">{name}</div>
                 </div>
-                <div style="text-align:right; flex-shrink:0; margin-left:0.5rem;">
-                    <div style="font-size:1.3rem; font-weight:bold;">{val_display}</div>
-                    <div class="{chg_color}" style="font-size:0.75rem;">1W: {chg_display}</div>
+                <div style="text-align:right; flex-shrink:0; margin-left:0.75rem;">
+                    <div style="font-size:1.6rem; font-weight:bold; line-height:1;">{val_display}</div>
+                    <div class="{chg_color}" style="font-size:0.78rem; margin-top:3px;">1W: {chg_display}</div>
                 </div>
             </div>
-            <div style="font-size:0.7rem; color:var(--text-secondary); line-height:1.45; margin-bottom:0.5rem; border-left:2px solid rgba(255,255,255,0.1); padding-left:0.5rem;">{desc}</div>
+            <!-- Chart — full width, prominent -->
+            <div style="margin:0 -0.1rem;">{chart}</div>
+            <!-- Description -->
+            <div style="font-size:0.72rem; color:var(--text-secondary); line-height:1.5; border-left:2px solid rgba(255,255,255,0.12); padding-left:0.5rem;">{desc}</div>
+            <!-- 52W range bar -->
             {range_bar}
+            <!-- Multi-period returns -->
             {returns_html}
-            <div>{chart}</div>
         </div>
         """
 
@@ -441,28 +446,33 @@ def generate_benchmarks_html(closes: pd.DataFrame, data_dict: Dict) -> str:
             )
 
             cards += f"""
-            <div class="glass-card" style="min-width:0;">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.2rem;">
+            <div class="glass-card" style="min-width:0; display:flex; flex-direction:column; gap:0.6rem;">
+                <!-- Header -->
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                     <div>
-                        <div style="font-size:0.75rem; font-weight:700; letter-spacing:0.06em; color:var(--text-secondary); text-transform:uppercase;">^TNX − ^IRX</div>
-                        <div style="font-size:0.95rem; font-weight:600; color:var(--text-primary);">Yield Curve (10Y−3M)</div>
+                        <div style="font-size:0.7rem; font-weight:700; letter-spacing:0.07em; color:var(--text-secondary); text-transform:uppercase;">^TNX − ^IRX</div>
+                        <div style="font-size:1rem; font-weight:700; color:var(--text-primary); margin-top:1px;">Yield Curve (10Y−3M)</div>
                     </div>
-                    <div style="text-align:right; flex-shrink:0; margin-left:0.5rem;">
-                        <div style="font-size:1.3rem; font-weight:bold; color:{spread_color};">{curr_spread:+.2f}%</div>
-                        <div style="font-size:0.75rem; color:{spread_color}; font-weight:600;">1W: {chg_1w_display} · {status_label}</div>
+                    <div style="text-align:right; flex-shrink:0; margin-left:0.75rem;">
+                        <div style="font-size:1.6rem; font-weight:bold; line-height:1; color:{spread_color};">{curr_spread:+.2f}%</div>
+                        <div style="font-size:0.78rem; color:{spread_color}; font-weight:600; margin-top:3px;">{status_label} · 1W: {chg_1w_display}</div>
                     </div>
                 </div>
-                <div style="font-size:0.7rem; color:var(--text-secondary); line-height:1.45; margin-bottom:0.5rem; border-left:2px solid rgba(255,255,255,0.1); padding-left:0.5rem;">{desc_yc}</div>
+                <!-- Chart -->
+                <div style="margin:0 -0.1rem;">{spread_chart}</div>
+                <!-- Description -->
+                <div style="font-size:0.72rem; color:var(--text-secondary); line-height:1.5; border-left:2px solid rgba(255,255,255,0.12); padding-left:0.5rem;">{desc_yc}</div>
+                <!-- Range bar -->
                 {spread_range_bar}
+                <!-- Returns -->
                 {spread_returns}
-                <div>{spread_chart}</div>
             </div>
             """
 
     return f"""
     <h2 style="margin-top:2rem;">Market Benchmarks</h2>
     <p class="text-muted" style="margin-bottom:1rem;">Key market indicators with historical context — where are we today vs. the past 52 weeks?</p>
-    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:1.5rem; margin-bottom:2rem;">
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:1.5rem; margin-bottom:2rem;">
         {cards}
     </div>
     """
