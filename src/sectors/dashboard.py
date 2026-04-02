@@ -9,6 +9,7 @@ Four-Stage Stock Screening System:
 
 Output: Single HTML dashboard (sector_analysis.html)
 """
+import math
 import os
 import yaml
 import pandas as pd
@@ -648,6 +649,7 @@ def generate_candidates_html(candidates: List[TradeCandidateAnalysis], data_dict
 
         breakdown_html = _score_breakdown_html(c.score_breakdown)
         ready_star = '<span style="color:var(--accent-optimal); font-size:1.1rem;">★</span>' if c.is_trade_ready else '<span style="color:var(--text-secondary); font-size:0.8rem;">–</span>'
+        price_display = f"${c.price:.2f}" if c.price else "N/A"
 
         rows += f"""
         <tr>
@@ -660,7 +662,7 @@ def generate_candidates_html(candidates: List[TradeCandidateAnalysis], data_dict
                 <span class="text-xs text-muted">{c.sector_etf}</span>
             </td>
             <td style="text-align:center;">
-                ${c.price:.2f if c.price else 'N/A'}
+                {price_display}
                 <br><span class="text-xs text-muted">ADX {c.adx:.0f}</span>
             </td>
             <td style="text-align:center;">
@@ -1129,8 +1131,13 @@ def run_sector_analysis(output_dir="reports", focus_sector: Optional[str] = None
             stop_dist_atr = scorer.regime_params.stop_distance_atr
             stop_price = res.details['ema20'] - stop_dist_atr * res.details['atr']
 
-            # Real volume confirmation from scored data
-            vol_ratio = res.details.get('rel_vol', 1.0)
+            # Real volume confirmation — compute from DataFrame (not in res.details)
+            vol_avg = df_core['Vol_Avg'].iloc[-1]
+            vol_curr = df_core['Volume'].iloc[-1]
+            if vol_avg and not math.isnan(float(vol_avg)) and float(vol_avg) > 0:
+                vol_ratio = float(vol_curr) / float(vol_avg)
+            else:
+                vol_ratio = 1.0
             volume_confirms = vol_ratio >= 1.0
 
             # Create Candidate Analysis
