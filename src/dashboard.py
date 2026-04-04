@@ -434,12 +434,118 @@ function initChartTooltips() {
     });
 }
 
+function initWatchlist() {
+    // Merge server-side pre-populated tickers with localStorage
+    const serverList = window.__SERVER_WATCHLIST__ || [];
+    let watchlist = JSON.parse(localStorage.getItem('ema_watchlist') || '[]');
+    serverList.forEach(t => { if (!watchlist.includes(t)) watchlist.push(t); });
+    localStorage.setItem('ema_watchlist', JSON.stringify(watchlist));
+
+    // Apply saved state to all star buttons on this page
+    document.querySelectorAll('.watchlist-btn').forEach(btn => {
+        const ticker = btn.dataset.ticker;
+        if (watchlist.includes(ticker)) {
+            btn.textContent = '★';
+            btn.style.color = '#fbbf24';
+        }
+    });
+
+    // Update candidates table star buttons too (if present)
+    document.querySelectorAll('.cand-watchlist-btn').forEach(btn => {
+        if (watchlist.includes(btn.dataset.ticker)) {
+            btn.textContent = '★';
+            btn.style.color = '#fbbf24';
+        }
+    });
+}
+
+function toggleWatchlist(btn) {
+    const ticker = btn.dataset.ticker;
+    let watchlist = JSON.parse(localStorage.getItem('ema_watchlist') || '[]');
+    const idx = watchlist.indexOf(ticker);
+    if (idx === -1) {
+        watchlist.push(ticker);
+        btn.textContent = '★';
+        btn.style.color = '#fbbf24';
+    } else {
+        watchlist.splice(idx, 1);
+        btn.textContent = '☆';
+        btn.style.color = 'rgba(255,255,255,0.2)';
+    }
+    localStorage.setItem('ema_watchlist', JSON.stringify(watchlist));
+    // Sync all buttons for same ticker on this page
+    document.querySelectorAll(`.watchlist-btn[data-ticker="${ticker}"], .cand-watchlist-btn[data-ticker="${ticker}"]`).forEach(b => {
+        b.textContent = btn.textContent;
+        b.style.color = btn.style.color;
+    });
+}
+
+function exportWatchlist() {
+    const watchlist = JSON.parse(localStorage.getItem('ema_watchlist') || '[]');
+    const blob = new Blob([JSON.stringify(watchlist, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'watchlist.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+function initAdvancedFilters() {
+    // Populate sector dropdown from data-sector values in candidates table
+    const sectorSel = document.getElementById('cand-sector-filter');
+    if (sectorSel) {
+        const sectors = new Set();
+        document.querySelectorAll('#candidates-table tbody tr').forEach(r => {
+            if (r.dataset.sector) sectors.add(r.dataset.sector);
+        });
+        Array.from(sectors).sort().forEach(s => {
+            const o = document.createElement('option');
+            o.value = s; o.textContent = s; sectorSel.appendChild(o);
+        });
+    }
+
+    function applyCandFilter() {
+        const minScore = parseInt(document.getElementById('cand-score-filter')?.value || '0');
+        const regime = document.getElementById('cand-regime-filter')?.value || '';
+        const sector = document.getElementById('cand-sector-filter')?.value || '';
+        let visible = 0;
+        document.querySelectorAll('#candidates-table tbody tr').forEach(row => {
+            const show = parseFloat(row.dataset.entryScore || '0') >= minScore
+                && (regime === '' || (row.dataset.regime || '').toUpperCase().includes(regime))
+                && (sector === '' || row.dataset.sector === sector);
+            row.classList.toggle('hidden', !show);
+            if (show) visible++;
+        });
+        const el = document.getElementById('cand-visible-count');
+        if (el) el.textContent = visible;
+    }
+
+    ['cand-score-filter', 'cand-regime-filter', 'cand-sector-filter'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', applyCandFilter);
+    });
+
+    // Projections confidence filter
+    document.getElementById('proj-conf-filter')?.addEventListener('change', function() {
+        const val = this.value;
+        let vis = 0;
+        document.querySelectorAll('#projections-table tbody tr').forEach(row => {
+            const show = val === '' || row.dataset.confidence === val;
+            row.classList.toggle('hidden', !show);
+            if (show) vis++;
+        });
+        const el = document.getElementById('proj-visible-count');
+        if (el) el.textContent = vis;
+    });
+}
+
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
     initSortableTables();
     initSearch();
     initFilterButtons();
     initChartTooltips();
+    initAdvancedFilters();
+    initWatchlist();
 });
 </script>
 """

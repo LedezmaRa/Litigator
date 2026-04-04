@@ -133,18 +133,16 @@ def classify_trend(rel_1w: Optional[float], rel_1m: Optional[float], rel_3m: Opt
 
 def calculate_volume_score(volume_ratio: float) -> float:
     """
-    Score volume characteristics.
+    Score volume characteristics using continuous piecewise-linear interpolation.
 
-    - > 1.5x average: 100 (strong volume confirmation)
-    - 1.0-1.5x: 70 (normal volume)
-    - < 1.0x: 40 (below average - less conviction)
+    Breakpoints: 0.5→20, 1.0→40, 1.5→70, 2.5→100 (capped at both ends).
+    This gives proportional credit throughout the range instead of 3 hard buckets.
     """
-    if volume_ratio >= 1.5:
-        return 100.0
-    elif volume_ratio >= 1.0:
-        return 70.0
-    else:
-        return 40.0
+    if volume_ratio is None or np.isnan(float(volume_ratio)):
+        return 20.0
+    xp = [0.5, 1.0, 1.5, 2.5]
+    fp = [20.0, 40.0, 70.0, 100.0]
+    return float(np.clip(np.interp(float(volume_ratio), xp, fp), 20.0, 100.0))
 
 
 def calculate_relative_strength_percentile(

@@ -9,6 +9,7 @@ Four-Stage Stock Screening System:
 
 Output: Single HTML dashboard (sector_analysis.html)
 """
+import json
 import math
 import os
 import yaml
@@ -60,6 +61,7 @@ class SectorMetrics:
     etf_ret_1w: Optional[float] = None
     etf_ret_1m: Optional[float] = None
     etf_ret_3m: Optional[float] = None
+    rotation_status: str = "UNKNOWN"
 
 
 @dataclass
@@ -128,13 +130,43 @@ def _color_class(val) -> str:
 
 def _pill_class(val: str) -> str:
     v = str(val).lower()
-    if "strong" in v or "accelerating" in v or "trending" in v: return "badge badge-optimal"
-    if "moderate" in v or "steady" in v: return "badge badge-good"
+    if "strong" in v or "accelerating" in v or "trending" in v or "low_vol" in v: return "badge badge-optimal"
+    if "moderate" in v or "steady" in v or "normal_vol" in v: return "badge badge-good"
     if "weak" in v or "decelerating" in v: return "badge badge-marginal"
+    if "high_vol" in v: return "badge badge-marginal"
     return "badge badge-poor"
+
+_REGIME_LABEL = {
+    "LOW_VOLATILITY": "Low Vol",
+    "NORMAL_VOLATILITY": "Normal Vol",
+    "HIGH_VOLATILITY": "High Vol",
+}
+
+def _regime_display(regime: str) -> str:
+    """Return a short human-readable label for the volatility regime."""
+    return _REGIME_LABEL.get(regime, regime)
 
 
 # --- SECTOR METRICS ---
+
+def classify_rotation_status(ret_1w, ret_1m) -> str:
+    """
+    Classify sector rotation phase based on short vs medium-term momentum.
+    ENTERING:  both positive and 1W > 1M (accelerating)
+    HOLDING:   1M positive but 1W <= 1M (still up, slowing)
+    EXITING:   1W negative but 1M positive (short-term crack)
+    AVOIDING:  both negative (broad weakness)
+    """
+    if ret_1w is None or ret_1m is None:
+        return "UNKNOWN"
+    if ret_1w > 0 and ret_1m > 0 and ret_1w > ret_1m:
+        return "ENTERING"
+    if ret_1m > 0 and ret_1w <= ret_1m:
+        return "HOLDING"
+    if ret_1w <= 0 and ret_1m > 0:
+        return "EXITING"
+    return "AVOIDING"
+
 
 def calculate_sector_metrics(
     config: Dict,
@@ -178,6 +210,7 @@ def calculate_sector_metrics(
             if len(prices) > 63:
                 etf_ret_3m = (prices.iloc[-1] / prices.iloc[-64]) - 1
 
+        rotation = classify_rotation_status(etf_ret_1w, etf_ret_1m)
         metrics_list.append(SectorMetrics(
             etf=etf,
             name=name,
@@ -188,12 +221,29 @@ def calculate_sector_metrics(
             trade_ready_count=trade_ready,
             etf_ret_1w=etf_ret_1w,
             etf_ret_1m=etf_ret_1m,
-            etf_ret_3m=etf_ret_3m
+            etf_ret_3m=etf_ret_3m,
+            rotation_status=rotation,
         ))
 
     # Sort by top5 average score descending
     metrics_list.sort(key=lambda x: x.top5_avg_score, reverse=True)
     return metrics_list
+
+
+_ROTATION_BADGE_CLASS = {
+    "ENTERING": "badge-optimal",
+    "HOLDING": "badge-good",
+    "EXITING": "badge-marginal",
+    "AVOIDING": "badge-poor",
+    "UNKNOWN": "",
+}
+_ROTATION_TOOLTIP = {
+    "ENTERING": "1W > 1M > 0: momentum accelerating. Consider adding exposure.",
+    "HOLDING":  "1M > 0 but 1W slowing: still healthy, watch for continuation.",
+    "EXITING":  "1W < 0 but 1M > 0: short-term crack in an uptrend. Caution.",
+    "AVOIDING": "Both 1W and 1M negative: broad weakness. Avoid new longs.",
+    "UNKNOWN":  "Insufficient data.",
+}
 
 
 def generate_sector_leaderboard_html(sector_metrics: List[SectorMetrics], closes: pd.DataFrame = None) -> str:
@@ -212,6 +262,10 @@ def generate_sector_leaderboard_html(sector_metrics: List[SectorMetrics], closes
         # % Up context: color-code against rough market average (50% = neutral)
         pct_up_color = "var(--accent-optimal)" if m.pct_trending_up >= 60 else \
                        "var(--accent-marginal)" if m.pct_trending_up >= 40 else "var(--accent-poor)"
+
+        rot_badge_cls = _ROTATION_BADGE_CLASS.get(m.rotation_status, "")
+        rot_tooltip = _ROTATION_TOOLTIP.get(m.rotation_status, "")
+        rotation_cell = f'<span class="badge {rot_badge_cls}" title="{rot_tooltip}" style="cursor:help;">{m.rotation_status}</span>'
 
         rows += f"""
         <tr>
@@ -234,6 +288,7 @@ def generate_sector_leaderboard_html(sector_metrics: List[SectorMetrics], closes
             <td style="text-align:center;">{m.avg_composite_score:.0f}</td>
             <td style="text-align:center; color:{pct_up_color}; font-weight:600;">{m.pct_trending_up:.0f}%</td>
             <td style="text-align:center;">{ready_badge}</td>
+            <td style="text-align:center;">{rotation_cell}</td>
             <td class="{_color_class(m.etf_ret_1w)}">{fmt_pct(m.etf_ret_1w)}</td>
             <td class="{_color_class(m.etf_ret_1m)}">{fmt_pct(m.etf_ret_1m)}</td>
             <td class="{_color_class(m.etf_ret_3m)}">{fmt_pct(m.etf_ret_3m)}</td>
@@ -245,6 +300,7 @@ def generate_sector_leaderboard_html(sector_metrics: List[SectorMetrics], closes
     <p class="text-muted" style="margin-bottom:1rem;">
         Ranked by Top 5 Average Composite Score (RS 50% + Trend 30% + Volume 20%, percentile within sector, 0–100) •
         % Up = share of stocks with positive 3M relative return vs sector ETF •
+        Rotation = ENTERING/HOLDING/EXITING/AVOIDING based on 1W vs 1M momentum •
         Click sector name for full charts
     </p>
     <div class="glass-card">
@@ -257,6 +313,7 @@ def generate_sector_leaderboard_html(sector_metrics: List[SectorMetrics], closes
                     <th class="sortable" style="text-align:center;">All Avg</th>
                     <th class="sortable" style="text-align:center;">% Up</th>
                     <th class="sortable" style="text-align:center;">Trade Ready</th>
+                    <th style="text-align:center;">Rotation</th>
                     <th class="sortable">1W</th>
                     <th class="sortable">1M</th>
                     <th class="sortable">3M</th>
@@ -588,8 +645,17 @@ def generate_sector_html(config: Dict, ranked_sectors: Dict, closes: pd.DataFram
     """
 
 
+_FACTOR_TOOLTIPS = {
+    "EMA": "EMA Proximity (0-25): Ideal = price within 0.5 ATR of EMA20, just above it. Penalised if >2.5 ATR away (overextended).",
+    "ADX": "ADX Stage (0-25): Ideal = ADX 20-40, rising. Confirms trend strength with room to run. Full 25 pts when ADX 25-30 and rising.",
+    "Vol": "Volume Conviction (0-20): Ideal = >2x average volume, rising weekly trend, more up-volume than down. All 3 sub-factors required for max.",
+    "Str": "Structure Integrity (0-20): Ideal = price > EMA20 > EMA50, EMA50 slope rising. Clean EMA stack is the prerequisite for any trend trade.",
+    "R:R": "Risk/Reward (0-10): Ideal = stop <5% away with reward >3R. Uses regime-aware stop (1.5-2x ATR below EMA20). R:R >4.0 = max points.",
+}
+
+
 def _score_breakdown_html(breakdown: Optional[Dict]) -> str:
-    """Compact 5-component breakdown bar for the entry score cell."""
+    """Compact 5-component breakdown bar showing score/max with educational tooltips."""
     if not breakdown:
         return ""
     components = [
@@ -608,13 +674,166 @@ def _score_breakdown_html(breakdown: Optional[Dict]) -> str:
             color = "rgba(251,191,36,0.35)"
         else:
             color = "rgba(248,113,113,0.25)"
+        tooltip = _FACTOR_TOOLTIPS.get(label, "")
         cells += (
-            f'<div style="text-align:center; background:{color}; border-radius:2px; padding:1px 2px;">'
-            f'<div style="font-size:0.58rem; color:var(--text-secondary);">{label}</div>'
-            f'<div style="font-size:0.68rem; font-weight:600;">{score:.0f}</div>'
+            f'<div title="{tooltip}" style="text-align:center; background:{color}; border-radius:2px; padding:1px 2px; cursor:help;">'
+            f'<div style="font-size:0.55rem; color:var(--text-secondary);">{label}</div>'
+            f'<div style="font-size:0.60rem; font-weight:600;">{score:.0f}<span style="opacity:0.5">/{max_score}</span></div>'
             f'</div>'
         )
     return f'<div style="display:grid; grid-template-columns:repeat(5,1fr); gap:2px; margin-top:3px;">{cells}</div>'
+
+
+def _hit_rate_bar_svg(pct: float, width: int = 120, height: int = 10) -> str:
+    """Horizontal bar for hit-rate visualization."""
+    fill = max(0.0, min(100.0, pct))
+    color = "var(--accent-optimal)" if fill >= 60 else "var(--accent-marginal)" if fill >= 40 else "var(--accent-poor)"
+    fill_w = fill / 100 * width
+    return (
+        f'<svg width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg">'
+        f'<rect width="{width}" height="{height}" rx="3" fill="rgba(255,255,255,0.08)"/>'
+        f'<rect width="{fill_w:.1f}" height="{height}" rx="3" fill="{color}"/>'
+        f'</svg>'
+    )
+
+
+def generate_signal_performance_html(backtest: Dict) -> str:
+    """
+    Renders the Signal Performance section from backtesting results.
+    Shows 'Building history...' placeholder until 5+ projections are evaluated.
+    """
+    if not backtest or backtest.get("status") == "building":
+        evaluated = backtest.get("total_evaluated", 0) if backtest else 0
+        return f"""
+    <h2 style="margin-top:2rem;">Signal Performance</h2>
+    <div class="glass-card" style="padding:1.5rem; text-align:center; color:var(--text-secondary);">
+        <p style="font-size:1.1rem; margin-bottom:0.5rem;">📊 Building signal history…</p>
+        <p>{evaluated} projection{'' if evaluated == 1 else 's'} recorded so far.</p>
+        <p style="font-size:0.8rem; margin-top:0.5rem;">
+            Requires 5+ projection snapshots from different days to calculate hit rates.
+            Run the dashboard daily — each run saves a snapshot automatically.
+        </p>
+    </div>
+    """
+
+    total = backtest["total_evaluated"]
+    hit_1r_pct = backtest["hit_1r_pct"]
+    hit_2r_pct = backtest["hit_2r_pct"]
+    hit_3r_pct = backtest["hit_3r_pct"]
+
+    def _stat_card(label: str, hits: int, pct: float, desc: str) -> str:
+        bar = _hit_rate_bar_svg(pct, width=140, height=8)
+        color = "var(--accent-optimal)" if pct >= 60 else "var(--accent-marginal)" if pct >= 40 else "var(--accent-poor)"
+        return f"""
+        <div class="glass-card" style="padding:1.25rem; text-align:center;">
+            <div class="text-xs text-muted" style="margin-bottom:0.5rem;">{label}</div>
+            <div style="font-size:2rem; font-weight:bold; color:{color};">{pct:.0f}%</div>
+            <div class="text-xs text-muted">{hits} of {total} signals</div>
+            <div style="margin:0.5rem auto; display:inline-block;">{bar}</div>
+            <div style="font-size:0.72rem; color:var(--text-secondary); margin-top:0.25rem;">{desc}</div>
+        </div>
+        """
+
+    cards = (
+        _stat_card("1R Target Hit", backtest["hit_1r"], hit_1r_pct, "Price reached 1× risk reward") +
+        _stat_card("2R Target Hit", backtest["hit_2r"], hit_2r_pct, "Price reached 2× risk reward") +
+        _stat_card("3R Target Hit", backtest["hit_3r"], hit_3r_pct, "Price reached 3× risk reward")
+    )
+
+    return f"""
+    <h2 style="margin-top:2rem;">Signal Performance</h2>
+    <p class="text-muted" style="margin-bottom:1rem;">
+        Historical hit rates based on {total} past projection{'' if total == 1 else 's'} (last 60 days, evaluated after 5-day lag).
+        Hit = price reached target within 20 trading bars (≈4 weeks) of signal date.
+    </p>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; max-width:700px;">
+        {cards}
+    </div>
+    """
+
+
+def generate_global_leaderboard_html(candidates: List[TradeCandidateAnalysis]) -> str:
+    """
+    Cross-sector leaderboard: top 30 stocks across all sectors ranked by
+    combined score = 50% composite (Stage 1 breadth) + 50% entry score (Stage 2 quality).
+    """
+    if not candidates:
+        return ""
+
+    scored = sorted(
+        candidates,
+        key=lambda c: c.composite_score * 0.5 + c.entry_score * 0.5,
+        reverse=True,
+    )[:30]
+
+    rows = ""
+    for i, c in enumerate(scored):
+        combined = round(c.composite_score * 0.5 + c.entry_score * 0.5, 1)
+        if combined >= 75:
+            combined_color = "var(--accent-optimal)"
+        elif combined >= 60:
+            combined_color = "var(--accent-good)"
+        elif combined >= 45:
+            combined_color = "var(--accent-marginal)"
+        else:
+            combined_color = "var(--accent-poor)"
+
+        ready_star = '<span style="color:var(--accent-optimal);">★</span>' if c.is_trade_ready else '<span style="color:var(--text-secondary);">–</span>'
+        rank_style = "color:var(--accent-optimal); font-weight:bold;" if i < 3 else "color:var(--text-secondary);"
+        breakdown_html = _score_breakdown_html(c.score_breakdown)
+        entry_color = "var(--accent-optimal)" if c.entry_score >= 75 else \
+                      "var(--accent-good)" if c.entry_score >= 60 else \
+                      "var(--accent-marginal)" if c.entry_score >= 45 else "var(--accent-poor)"
+
+        rows += f"""
+        <tr data-entry-score="{c.entry_score:.0f}" data-regime="{c.regime}" data-sector="{c.sector_etf}">
+            <td style="{rank_style}">#{i+1}</td>
+            <td>
+                <b>{c.ticker}</b>
+                <br><span class="text-xs text-muted">{c.name}</span>
+            </td>
+            <td style="text-align:center;">
+                <span class="badge badge-info" style="font-size:0.65rem;">{c.sector_etf}</span>
+            </td>
+            <td style="text-align:center; font-size:1.1rem; font-weight:bold; color:{combined_color};">{combined}</td>
+            <td style="text-align:center;">{c.composite_score:.0f}</td>
+            <td style="text-align:center;">
+                <b style="color:{entry_color};">{c.entry_score:.0f}</b>
+                {breakdown_html}
+            </td>
+            <td>
+                <span class="{_pill_class(c.trend)}">{c.trend}</span>
+                <br><span class="{_pill_class(c.regime)}" style="margin-top:2px; display:inline-block;">{_regime_display(c.regime)}</span>
+            </td>
+            <td style="text-align:center;">{ready_star}</td>
+        </tr>
+        """
+
+    return f"""
+    <h2 style="margin-top:2rem;">Global Stock Leaderboard</h2>
+    <p class="text-muted" style="margin-bottom:1rem;">
+        Top 30 stocks across all sectors ranked by <b>Combined Score</b> = 50% Composite (breadth) + 50% Entry Score (quality).
+        Use this view to find the best setups regardless of sector.
+        Hover breakdown cells for factor explanations.
+    </p>
+    <div class="glass-card">
+        <table class="modern-table" id="global-leaderboard-table">
+            <thead>
+                <tr>
+                    <th class="sortable">#</th>
+                    <th class="sortable">Ticker / Name</th>
+                    <th class="sortable" style="text-align:center;">Sector</th>
+                    <th class="sortable" style="text-align:center;">Combined</th>
+                    <th class="sortable" style="text-align:center;">Composite</th>
+                    <th class="sortable" style="text-align:center;">Entry Score</th>
+                    <th class="sortable">Trend / Regime</th>
+                    <th style="text-align:center;">Ready</th>
+                </tr>
+            </thead>
+            <tbody>{rows}</tbody>
+        </table>
+    </div>
+    """
 
 
 def generate_candidates_html(candidates: List[TradeCandidateAnalysis], data_dict: Dict) -> str:
@@ -662,7 +881,7 @@ def generate_candidates_html(candidates: List[TradeCandidateAnalysis], data_dict
         price_display = f"${c.price:.2f}" if c.price else "N/A"
 
         rows += f"""
-        <tr>
+        <tr data-entry-score="{c.entry_score:.0f}" data-regime="{c.regime}" data-sector="{c.sector_etf}">
             <td style="text-align:center;">{ready_star}{not_ready_hint}</td>
             <td>
                 <b>{c.ticker}</b>
@@ -685,7 +904,7 @@ def generate_candidates_html(candidates: List[TradeCandidateAnalysis], data_dict
             </td>
             <td>
                 <span class="{_pill_class(c.trend)}">{c.trend}</span>
-                <br><span class="{_pill_class(c.regime)}" style="margin-top:3px; display:inline-block;">{c.regime}</span>
+                <br><span class="{_pill_class(c.regime)}" style="margin-top:3px; display:inline-block;">{_regime_display(c.regime)}</span>
             </td>
             <td style="color:var(--accent-poor); font-size:0.8rem;">
                 ${c.stop_price:.2f}
@@ -702,11 +921,29 @@ def generate_candidates_html(candidates: List[TradeCandidateAnalysis], data_dict
         ★ = Entry ≥60 <em>and</em> TRENDING regime.
     </p>
     <div class="glass-card">
-        <div style="margin-bottom:1rem; display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+        <div style="margin-bottom:1rem; display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
+            <select id="cand-score-filter" class="search-input" style="width:auto; padding:0.35rem 0.65rem; font-size:0.8rem;">
+                <option value="0">All Scores</option>
+                <option value="75">75+ (Good+)</option>
+                <option value="60">60+ (Acceptable+)</option>
+                <option value="45">45+ (Marginal+)</option>
+            </select>
+            <select id="cand-regime-filter" class="search-input" style="width:auto; padding:0.35rem 0.65rem; font-size:0.8rem;">
+                <option value="">All Regimes</option>
+                <option value="LOW_VOLATILITY">Low Volatility</option>
+                <option value="NORMAL_VOLATILITY">Normal Volatility</option>
+                <option value="HIGH_VOLATILITY">High Volatility</option>
+            </select>
+            <select id="cand-sector-filter" class="search-input" style="width:auto; padding:0.35rem 0.65rem; font-size:0.8rem;">
+                <option value="">All Sectors</option>
+            </select>
             <span class="badge badge-optimal">{ready_count} Trade Ready</span>
-            <span class="text-xs text-muted">Score breakdown: green ≥70% · amber 40–69% · red &lt;40% of component max</span>
+            <span class="text-xs text-muted">
+                Showing <span id="cand-visible-count">{len(candidates)}</span> of {len(candidates)} ·
+                breakdown: green ≥70% · amber 40–69% · red &lt;40%
+            </span>
         </div>
-        <table class="modern-table">
+        <table class="modern-table" id="candidates-table">
             <thead>
                 <tr>
                     <th style="width:60px;">Ready</th>
@@ -744,7 +981,7 @@ def generate_projections_html(ranked_projections: List[ProjectionResult]) -> str
             conf_color = "var(--accent-marginal)"
 
         rows += f"""
-        <tr>
+        <tr data-confidence="{p.confidence_level}">
             <td style="color:var(--text-secondary);">#{i+1}</td>
             <td>
                 <b>{p.ticker}</b>
@@ -777,7 +1014,16 @@ def generate_projections_html(ranked_projections: List[ProjectionResult]) -> str
     <h2 style="margin-top:2rem;">Projections &amp; Targets (Stage 3)</h2>
     <p class="text-muted" style="margin-bottom:1rem;">ATR-based targets for trade-ready setups. Stop = regime-aware ATR multiple below EMA20. Targets = 2R and 3R multiples of that risk unit.</p>
     <div class="glass-card">
-        <table class="modern-table">
+        <div style="margin-bottom:1rem; display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
+            <select id="proj-conf-filter" class="search-input" style="width:auto; padding:0.35rem 0.65rem; font-size:0.8rem;">
+                <option value="">All Confidence</option>
+                <option value="HIGH">HIGH</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="LOW">LOW</option>
+            </select>
+            <span class="text-xs text-muted">Showing <span id="proj-visible-count">{len(ranked_projections[:20])}</span> projections</span>
+        </div>
+        <table class="modern-table" id="projections-table">
             <thead>
                 <tr>
                     <th class="sortable">#</th>
@@ -803,7 +1049,9 @@ def generate_sector_detail_page(
     data_map: Dict,
     closes: pd.DataFrame,
     candidates: List[TradeCandidateAnalysis],
-    output_dir: str = "reports"
+    output_dir: str = "reports",
+    score_history: Optional[Dict] = None,
+    watchlist_tickers: Optional[List[str]] = None,
 ) -> str:
     """
     Generate a detailed sector page with full charts for each stock.
@@ -858,15 +1106,49 @@ def generate_sector_detail_page(
         if cand:
             if cand.is_trade_ready:
                 trade_badge = '<span class="badge badge-optimal">Trade Ready</span>'
+            breakdown_html = _score_breakdown_html(cand.score_breakdown)
             entry_info = f"""
                 <div style="margin-top:0.5rem; padding-top:0.5rem; border-top:1px solid var(--border);">
-                    <span class="text-xs text-muted">Entry Score:</span>
-                    <b style="color:{'var(--accent-optimal)' if cand.entry_score >= 60 else 'var(--text-primary)'};">{cand.entry_score:.0f}</b>
-                    <span class="text-xs text-muted" style="margin-left:1rem;">ADX:</span> <b>{cand.adx:.0f}</b>
-                    <span class="text-xs text-muted" style="margin-left:1rem;">Regime:</span>
-                    <span class="{_pill_class(cand.regime)}">{cand.regime}</span>
+                    <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+                        <span class="text-xs text-muted">Entry Score:</span>
+                        <b style="color:{'var(--accent-optimal)' if cand.entry_score >= 60 else 'var(--text-primary)'};">{cand.entry_score:.0f}/100</b>
+                        <span class="text-xs text-muted">ADX:</span> <b>{cand.adx:.0f}</b>
+                        <span class="text-xs text-muted">Regime:</span>
+                        <span class="{_pill_class(cand.regime)}">{_regime_display(cand.regime)}</span>
+                    </div>
+                    {breakdown_html}
                 </div>
             """
+
+        # Score history sparkline
+        score_history_html = ""
+        if score_history and stock.ticker in score_history:
+            hist_scores = [d['entry_score'] for d in score_history[stock.ticker]]
+            if len(hist_scores) >= 2:
+                from src.sectors.history import build_score_sparkline_svg, get_score_trend
+                sparkline_svg = build_score_sparkline_svg(hist_scores)
+                trend = get_score_trend(hist_scores)
+                trend_color = {
+                    "IMPROVING": "var(--accent-optimal)",
+                    "WORSENING": "var(--accent-poor)",
+                }.get(trend, "var(--text-secondary)")
+                score_history_html = (
+                    f'<div style="display:flex; align-items:center; gap:4px; margin-top:4px;">'
+                    f'{sparkline_svg}'
+                    f'<span style="font-size:0.62rem; color:{trend_color};">{trend}</span>'
+                    f'</div>'
+                )
+
+        # Watchlist star
+        _wl = watchlist_tickers or []
+        is_watchlisted = stock.ticker in _wl
+        star_color = "#fbbf24" if is_watchlisted else "rgba(255,255,255,0.2)"
+        star_char = "★" if is_watchlisted else "☆"
+        watchlist_btn = (
+            f'<button class="watchlist-btn" data-ticker="{stock.ticker}" onclick="toggleWatchlist(this)" '
+            f'style="background:none; border:none; cursor:pointer; font-size:1.3rem; color:{star_color}; '
+            f'padding:0; line-height:1;" aria-label="Toggle watchlist">{star_char}</button>'
+        )
 
         # Highlight top 5
         card_border = "border-left: 4px solid var(--accent-optimal);" if i < 5 else ""
@@ -876,10 +1158,13 @@ def generate_sector_detail_page(
 
         stock_cards += f"""
         <div class="glass-card stock-card" style="{card_border}; position:relative;" data-ticker="{stock.ticker}" data-name="{stock.name}" data-rank="{i+1}" data-trade-ready="{is_trade_ready}">
-            <a href="stock_{stock.ticker}.html" style="position:absolute; top:0.75rem; right:0.75rem; text-decoration:none;">
-                <span class="badge badge-info" style="font-size:0.65rem;">Company Info</span>
-            </a>
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; padding-right:6rem;">
+            <div style="position:absolute; top:0.75rem; right:0.75rem; display:flex; align-items:center; gap:0.5rem;">
+                {watchlist_btn}
+                <a href="stock_{stock.ticker}.html" style="text-decoration:none;">
+                    <span class="badge badge-info" style="font-size:0.65rem;">Company Info</span>
+                </a>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; padding-right:8rem;">
                 <div>
                     <h3 style="margin:0;">{stock.ticker}</h3>
                     <span class="text-xs text-muted">{stock.name}</span>
@@ -887,6 +1172,7 @@ def generate_sector_detail_page(
                         <span class="text-xs text-muted">Rank:</span> {rank_badge}
                         {trade_badge}
                     </div>
+                    {score_history_html}
                 </div>
                 <div style="text-align:right;">
                     <div style="font-size:1.5rem; font-weight:bold;">{price_display}</div>
@@ -935,6 +1221,7 @@ def generate_sector_detail_page(
             .text-poor {{ color: var(--accent-poor); }}
             .stock-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(550px, 1fr)); gap: 1.5rem; }}
         </style>
+        <script>window.__SERVER_WATCHLIST__ = {json.dumps(watchlist_tickers or [])};</script>
     </head>
     <body>
         {generate_top_nav("")}
@@ -1135,7 +1422,15 @@ def run_sector_analysis(output_dir="reports", focus_sector: Optional[str] = None
             if res.total_score >= 80: signal_str = "STRONG"
             elif res.total_score >= 60: signal_str = "MODERATE"
 
-            is_ready = res.total_score >= 60 and res.regime == "TRENDING"
+            # Derive trend-readiness from score + volatility regime.
+            # EntryScorer returns volatility regime (HIGH/NORMAL/LOW_VOLATILITY), not
+            # a trend regime — checking == "TRENDING" was always False.
+            # Trade-ready = acceptable entry score AND not in extreme volatility.
+            is_ready = res.total_score >= 60 and res.regime != "HIGH_VOLATILITY"
+
+            # Derive a trend-regime string for the projection confidence scorer,
+            # which expects "TRENDING" / "CHOPPING" / "SIDEWAYS".
+            trend_regime = "TRENDING" if signal_str in ("STRONG", "MODERATE") else "CHOPPING"
 
             # Regime-aware stop: use the same multiplier the scorer used
             stop_dist_atr = scorer.regime_params.stop_distance_atr
@@ -1151,6 +1446,7 @@ def run_sector_analysis(output_dir="reports", focus_sector: Optional[str] = None
             volume_confirms = vol_ratio >= 1.0
 
             # Create Candidate Analysis
+            # Store volatility regime for display; trend_regime used for projections.
             cand = TradeCandidateAnalysis(
                 ticker=c.ticker, name=c.name, sector=c.sector, sector_etf=c.sector_etf,
                 composite_score=c.composite_score, rank_in_sector=c.rank_in_sector,
@@ -1172,15 +1468,24 @@ def run_sector_analysis(output_dir="reports", focus_sector: Optional[str] = None
 
     candidates.sort(key=lambda x: x.composite_score, reverse=True)
 
+    # 3b. Save history snapshot and load prior history
+    from src.sectors.history import (
+        save_daily_snapshot, load_history, evaluate_past_projections,
+        build_score_sparkline_svg, get_score_trend,
+    )
+
     # 4. Stage 3: Projections
     print("Stage 3: Projections...")
     projections = []
     for cand in candidates:
         if not cand.is_trade_ready: continue
-        
+
+        # Convert volatility regime → trend regime expected by projection confidence scorer
+        proj_regime = "TRENDING" if cand.signal_strength in ("STRONG", "MODERATE") else "CHOPPING"
+
         proj = calculate_projection(
             cand.ticker, cand.name, cand.price, cand.atr,
-            cand.signal_strength, cand.regime,
+            cand.signal_strength, proj_regime,
             volume_confirms=(cand.volume_ratio >= 1.0),
             composite_score=cand.composite_score, sector=cand.sector,
             stop_price=cand.stop_price,
@@ -1188,6 +1493,21 @@ def run_sector_analysis(output_dir="reports", focus_sector: Optional[str] = None
         projections.append(proj)
         
     ranked_projections = rank_projections(projections)
+
+    # 4b. Persist snapshot (after projections are known) and load history
+    save_daily_snapshot(candidates, ranked_projections, output_dir)
+    score_history_map = load_history(output_dir, days=30)
+    backtest_results = evaluate_past_projections(output_dir, closes)
+
+    # Load watchlist for star pre-population
+    watchlist_tickers: List[str] = []
+    _watchlist_path = os.path.join(output_dir, "watchlist.json")
+    if os.path.exists(_watchlist_path):
+        try:
+            with open(_watchlist_path) as _wf:
+                watchlist_tickers = json.load(_wf)
+        except Exception:
+            pass
 
     # 5. Calculate Sector Metrics for Leaderboard
     print("Calculating Sector Metrics...")
@@ -1198,9 +1518,11 @@ def run_sector_analysis(output_dir="reports", focus_sector: Optional[str] = None
 
     benchmarks_html_str = generate_benchmarks_html(closes, data_map)
     leaderboard_html_str = generate_sector_leaderboard_html(sector_metrics, closes=closes)
+    global_leaderboard_html_str = generate_global_leaderboard_html(candidates)
     sectors_html_str = generate_sector_html(config, ranked_sectors, closes, sector_drivers_map)
     candidates_html_str = generate_candidates_html(candidates, data_map)
     projections_html_str = generate_projections_html(ranked_projections)
+    signal_perf_html_str = generate_signal_performance_html(backtest_results)
 
     full_html = f"""
     <!DOCTYPE html>
@@ -1216,6 +1538,7 @@ def run_sector_analysis(output_dir="reports", focus_sector: Optional[str] = None
             .text-poor {{ color: var(--accent-poor); }}
             .grid-cols-4 {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }}
         </style>
+        <script>window.__SERVER_WATCHLIST__ = {__import__('json').dumps(watchlist_tickers)};</script>
     </head>
     <body>
         {generate_top_nav("sector_analysis")}
@@ -1224,15 +1547,21 @@ def run_sector_analysis(output_dir="reports", focus_sector: Optional[str] = None
             <header style="margin-bottom:2rem;">
                 <h1>Sector Analysis Dashboard</h1>
                 <p class="text-muted">Top 25 Stocks per Sector • 4-Stage Screening</p>
-                <div style="margin-top: 1rem;">
+                <div style="margin-top: 1rem; display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
+                    <button onclick="exportWatchlist()" class="filter-btn" style="font-size:0.8rem;">
+                        ★ Export Watchlist
+                    </button>
+                    <span class="text-xs text-muted">Click ★/☆ on any stock card or use sector detail pages to manage your watchlist</span>
                 </div>
             </header>
 
             {benchmarks_html_str}
             {leaderboard_html_str}
+            {global_leaderboard_html_str}
             {sectors_html_str}
             {candidates_html_str}
             {projections_html_str}
+            {signal_perf_html_str}
             
             <footer style="margin-top:4rem; text-align:center; color:var(--text-secondary);">
                 <p>Macro Watch 2.1 • Unified Intelligence Layer</p>
@@ -1271,7 +1600,9 @@ def run_sector_analysis(output_dir="reports", focus_sector: Optional[str] = None
             data_map=data_map,
             closes=closes,
             candidates=candidates,
-            output_dir=output_dir
+            output_dir=output_dir,
+            score_history=score_history_map,
+            watchlist_tickers=watchlist_tickers,
         )
         print(f"  - {etf}: {detail_path}")
 

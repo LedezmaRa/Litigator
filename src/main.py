@@ -134,8 +134,18 @@ def main():
     parser.add_argument('--ai-memo', action='store_true', help='Generate AI Investment Strategy Memo of top candidates.')
     parser.add_argument('--ai-macro-memo', action='store_true', help='Generate Macro AI Strategy Memo of sector drivers.')
     parser.add_argument('--news', action='store_true', help='Generate Market Themes News Dashboard.')
+    parser.add_argument('--update-universe', action='store_true',
+                        help='Fetch current ETF top holdings and rewrite sectors.yaml stock lists.')
 
     args = parser.parse_args()
+
+    if args.update_universe:
+        from src.sectors.universe_updater import update_universe
+        _config_path = os.path.join(os.path.dirname(__file__), 'sectors', 'config', 'sectors.yaml')
+        print("Updating stock universe from ETF holdings…")
+        update_universe(_config_path)
+        print("Re-run with --sectors to generate an updated dashboard.")
+        return
 
     if args.news:
         from src.news import fetch_thematic_news
