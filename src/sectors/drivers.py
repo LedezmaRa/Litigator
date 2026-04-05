@@ -10,6 +10,7 @@ class DriverAnalysis:
     ticker: str
     name: str
     current_price: float
+    change_1w: float
     change_1m: float
     change_3m: float
     change_ytd: float
@@ -100,8 +101,10 @@ def analyze_drivers(
 
         # Price & Change
         curr_price = close.iloc[-1]
+        start_price_1w = close.iloc[-5] if len(close) > 5 else close.iloc[0]
         start_price_1m = close.iloc[-21] if len(close) > 21 else close.iloc[0]
         start_price_3m = close.iloc[-63] if len(close) > 63 else close.iloc[0]
+        chg_1w = (curr_price / start_price_1w) - 1
         chg_1m = (curr_price / start_price_1m) - 1
         chg_3m = (curr_price / start_price_3m) - 1
 
@@ -151,6 +154,7 @@ def analyze_drivers(
             ticker=ticker,
             name=name,
             current_price=curr_price,
+            change_1w=chg_1w,
             change_1m=chg_1m,
             change_3m=chg_3m,
             change_ytd=chg_ytd,
