@@ -553,12 +553,13 @@ document.addEventListener('DOMContentLoaded', () => {
 def generate_top_nav(active_page: str = "command_center") -> str:
     """Generates the shared top navigation menu HTML."""
     pages = [
-        {"id": "command_center", "name": "Command Center", "url": "index.html"},
+        {"id": "command_center",  "name": "Command Center",  "url": "index.html"},
         {"id": "sector_analysis", "name": "Sector Analysis", "url": "sector_analysis.html"},
-        {"id": "macro_drivers", "name": "Macro Drivers", "url": "macro_drivers.html"},
-        {"id": "market_news", "name": "Market News", "url": "market_news.html"},
-        {"id": "ai_memo", "name": "AI Strategy", "url": "ai_memo.html"},
-        {"id": "ai_macro_memo", "name": "Macro AI", "url": "ai_macro_memo.html"}
+        {"id": "macro_drivers",   "name": "Macro Drivers",   "url": "macro_drivers.html"},
+        {"id": "sentiment",       "name": "Sentiment",       "url": "sentiment.html"},
+        {"id": "market_news",     "name": "Market News",     "url": "market_news.html"},
+        {"id": "ai_memo",         "name": "AI Strategy",     "url": "ai_memo.html"},
+        {"id": "ai_macro_memo",   "name": "Macro AI",        "url": "ai_macro_memo.html"},
     ]
     
     links_html = ""
@@ -606,7 +607,7 @@ def get_status_badge(val: float, type: str):
         return '<span class="badge badge-poor">Poor</span>'
     return ""
 
-def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekly_trend: str, output_dir: str = "reports", scorer=None, short_interest: dict = None) -> str:
+def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekly_trend: str, output_dir: str = "reports", scorer=None, short_interest: dict = None, rs_rating: dict = None, earnings: dict = None, options: dict = None, factors: dict = None, darkpool: dict = None, volume_profile: dict = None, insiders: dict = None) -> str:
     """Generates a premium HTML dashboard for individual ticker."""
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -738,6 +739,262 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
         </div>
     """
 
+    # ── RS RATING PANEL ──────────────────────────────────────────────────────
+    rs = rs_rating or {}
+    rs_score = rs.get('score')
+    rs_label = rs.get('label', 'N/A')
+    rs_signal = rs.get('signal', 'N/A')
+    rs_pct    = rs_score if rs_score is not None else 0
+    rs_color  = ('var(--accent-optimal)' if rs_pct >= 85
+                 else 'var(--accent-good)' if rs_pct >= 70
+                 else 'var(--accent-marginal)' if rs_pct >= 50
+                 else 'var(--accent-poor)')
+    rs_badge  = ('badge-optimal' if rs_pct >= 85
+                 else 'badge-good' if rs_pct >= 70
+                 else 'badge-marginal' if rs_pct >= 50
+                 else 'badge-poor')
+    rs_expl   = rs.get('explanation', '')
+    rs_interp = rs.get('interpretation', '')
+    rs_panel_html = f"""
+        <div class="glass-card" style="margin-bottom:1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Relative Strength Rating</h3>
+                    <p class="text-xs text-muted" style="margin:0;">{rs_expl}</p>
+                </div>
+                <span class="badge {rs_badge}">{rs_label}</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:2rem; flex-wrap:wrap; margin-bottom:.75rem;">
+                <div style="text-align:center;">
+                    <span class="text-xs text-muted block">RS Rating</span>
+                    <span class="font-mono" style="font-size:2rem; font-weight:700; color:{rs_color};">{rs_score if rs_score is not None else 'N/A'}</span>
+                    <span class="text-xs text-muted block">out of 99</span>
+                </div>
+                <div style="flex:1; min-width:180px;">
+                    <div class="progress-bar-bg" style="width:100%; margin-bottom:.5rem;"><div class="progress-bar-fg" style="width:{rs_pct}%; background:{rs_color};"></div></div>
+                    <p class="text-xs text-muted" style="margin:0;">{rs_interp}</p>
+                </div>
+            </div>
+        </div>"""
+
+    # ── EARNINGS PANEL ────────────────────────────────────────────────────────
+    ea = earnings or {}
+    ea_days   = ea.get('days_to_earnings')
+    ea_risk   = ea.get('risk_level', 'CLEAR')
+    ea_color  = ea.get('risk_color', 'var(--accent-optimal)')
+    ea_label  = ea.get('risk_label', 'Clear')
+    ea_impl   = ea.get('implied_move_pct')
+    ea_surp   = ea.get('eps_surprise_avg')
+    ea_date   = ea.get('next_earnings_date')
+    ea_badge  = ('badge-poor' if ea_risk == 'HIGH'
+                 else 'badge-marginal' if ea_risk == 'MEDIUM'
+                 else 'badge-good')
+    ea_expl   = ea.get('explanation', '')
+    ea_interp = ea.get('interpretation', '')
+    ea_date_str = str(ea_date)[:10] if ea_date else 'Unknown'
+    ea_impl_str = f"{ea_impl:.1f}%" if ea_impl else "N/A"
+    ea_surp_str = f"{ea_surp:+.1f}%" if ea_surp else "N/A"
+    ea_days_str = f"{ea_days}" if ea_days is not None else "N/A"
+    earnings_panel_html = f"""
+        <div class="glass-card" style="margin-bottom:1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Earnings Calendar &amp; Binary Risk</h3>
+                    <p class="text-xs text-muted" style="margin:0;">{ea_expl}</p>
+                </div>
+                <span class="badge {ea_badge}">{ea_label}</span>
+            </div>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:.75rem;">
+                <div><span class="text-xs text-muted block">Next Earnings</span><span class="font-mono text-sm">{ea_date_str}</span></div>
+                <div><span class="text-xs text-muted block">Days Away</span><span class="font-mono text-sm" style="color:{ea_color}; font-weight:600;">{ea_days_str}</span></div>
+                <div><span class="text-xs text-muted block">Implied Move (options)</span><span class="font-mono text-sm">{ea_impl_str}</span></div>
+                <div><span class="text-xs text-muted block">Avg EPS Surprise (4Q)</span><span class="font-mono text-sm">{ea_surp_str}</span></div>
+            </div>
+            <p class="text-xs text-muted" style="margin:0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">{ea_interp}</p>
+        </div>"""
+
+    # ── OPTIONS & VOLATILITY PANEL ────────────────────────────────────────────
+    op = options or {}
+    iv_rank  = op.get('iv_rank')
+    iv_label = op.get('iv_label', 'N/A')
+    iv_sig   = op.get('iv_signal', 'N/A')
+    pc_ratio = op.get('put_call_ratio')
+    pc_label = op.get('sentiment_label', 'N/A')
+    impl_mv  = op.get('implied_move_pct')
+    iv_hv    = op.get('iv_hv_ratio')
+    iv_pct   = iv_rank if iv_rank is not None else 0
+    iv_bar_color = ('var(--accent-poor)' if iv_pct >= 70
+                    else 'var(--accent-marginal)' if iv_pct >= 30
+                    else 'var(--accent-optimal)')
+    op_expl  = op.get('explanation', '')
+    op_interp= op.get('interpretation', '')
+    iv_rank_str = f"{iv_rank:.0f}" if iv_rank is not None else "N/A"
+    pc_str   = f"{pc_ratio:.2f}" if pc_ratio else "N/A"
+    impl_str = f"{impl_mv:.1f}%" if impl_mv else "N/A"
+    iv_hv_str= f"{iv_hv:.2f}x" if iv_hv else "N/A"
+    options_panel_html = f"""
+        <div class="glass-card" style="margin-bottom:1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0;">Options &amp; Volatility Context</h3>
+                <span class="badge badge-info">{iv_label} IV</span>
+            </div>
+            <p class="text-xs text-muted" style="margin:0 0 1rem 0;">{op_expl}</p>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:.75rem;">
+                <div>
+                    <span class="text-xs text-muted block">IV Rank (52W)</span>
+                    <div style="display:flex; align-items:center; gap:.75rem; margin-top:4px;">
+                        <div class="progress-bar-bg" style="width:80px;"><div class="progress-bar-fg" style="width:{iv_pct}%; background:{iv_bar_color};"></div></div>
+                        <span class="font-mono text-sm">{iv_rank_str}/100</span>
+                    </div>
+                    <span class="text-xs text-muted">{iv_sig}</span>
+                </div>
+                <div><span class="text-xs text-muted block">IV / HV Ratio</span><span class="font-mono text-sm">{iv_hv_str}</span></div>
+                <div><span class="text-xs text-muted block">Put/Call Ratio</span><span class="font-mono text-sm">{pc_str} — {pc_label}</span></div>
+                <div><span class="text-xs text-muted block">Options Implied Move</span><span class="font-mono text-sm">±{impl_str}</span></div>
+            </div>
+            <p class="text-xs text-muted" style="margin:0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">{op_interp}</p>
+        </div>"""
+
+    # ── FACTOR PROFILE PANEL ──────────────────────────────────────────────────
+    fc = factors or {}
+    mom_s  = fc.get('momentum_score', 0) or 0
+    qua_s  = fc.get('quality_score',  0) or 0
+    val_s  = fc.get('value_score',    0) or 0
+    mom_l  = fc.get('momentum_label', 'N/A')
+    qua_l  = fc.get('quality_label',  'N/A')
+    val_l  = fc.get('value_label',    'N/A')
+    fc_profile = fc.get('composite_profile', 'N/A')
+    fc_align   = fc.get('alignment', 'N/A')
+    fc_expl    = fc.get('explanation', '')
+    fc_interp  = fc.get('interpretation', '')
+    def _bar(score):
+        col = ('var(--accent-optimal)' if score >= 70
+               else 'var(--accent-marginal)' if score >= 40
+               else 'var(--accent-poor)')
+        return f'<div class="progress-bar-bg" style="width:100%;"><div class="progress-bar-fg" style="width:{score}%; background:{col};"></div></div>'
+    factors_panel_html = f"""
+        <div class="glass-card" style="margin-bottom:1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0;">Factor Profile</h3>
+                <span class="badge badge-info">{fc_profile}</span>
+            </div>
+            <p class="text-xs text-muted" style="margin:0 0 1rem 0;">{fc_expl}</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-bottom:.75rem;">
+                <div><span class="text-xs text-muted block">Momentum</span>{_bar(mom_s)}<span class="text-xs text-muted">{mom_l}</span></div>
+                <div><span class="text-xs text-muted block">Quality</span>{_bar(qua_s)}<span class="text-xs text-muted">{qua_l}</span></div>
+                <div><span class="text-xs text-muted block">Value</span>{_bar(val_s)}<span class="text-xs text-muted">{val_l}</span></div>
+            </div>
+            <p class="text-xs text-muted" style="margin:0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">{fc_interp}</p>
+        </div>"""
+
+    # ── INSIDER ACTIVITY PANEL ────────────────────────────────────────────────
+    ins = insiders or {}
+    ins_buy   = ins.get('buy_count', 0) or 0
+    ins_sell  = ins.get('sell_count', 0) or 0
+    ins_buyers= ins.get('unique_buyers', 0) or 0
+    ins_clust = ins.get('cluster_signal', False)
+    ins_sent  = ins.get('net_sentiment', 'NEUTRAL')
+    ins_str   = ins.get('signal_strength', 'NONE')
+    ins_badge = ('badge-optimal' if ins_sent == 'BULLISH'
+                 else 'badge-poor' if ins_sent == 'BEARISH'
+                 else 'badge-marginal')
+    ins_expl  = ins.get('explanation', '')
+    ins_interp= ins.get('interpretation', '')
+    ins_txns  = ins.get('recent_transactions', [])
+    txn_rows  = ''.join(
+        f'<div class="metric-item"><span class="text-xs">{t.get("date","")[:10]} — {t.get("filer_name","Unknown")}</span>'
+        f'<span class="badge {"badge-optimal" if t.get("type")=="P" else "badge-poor"} text-xs">{"BUY" if t.get("type")=="P" else "SELL"}</span></div>'
+        for t in ins_txns[:4]
+    ) if ins_txns else '<p class="text-xs text-muted">No recent transactions on record.</p>'
+    insiders_panel_html = f"""
+        <div class="glass-card" style="margin-bottom:1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Insider Transactions (Form 4)</h3>
+                    <p class="text-xs text-muted" style="margin:0;">{ins_expl}</p>
+                </div>
+                <span class="badge {ins_badge}">{ins_sent}</span>
+            </div>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:.75rem;">
+                <div><span class="text-xs text-muted block">Open-Market Buys (90d)</span><span class="font-mono" style="font-size:1.3rem; font-weight:700; color:var(--accent-optimal);">{ins_buy}</span></div>
+                <div><span class="text-xs text-muted block">Open-Market Sells (90d)</span><span class="font-mono" style="font-size:1.3rem; font-weight:700; color:var(--accent-poor);">{ins_sell}</span></div>
+                <div><span class="text-xs text-muted block">Unique Buyers</span><span class="font-mono text-sm">{ins_buyers}</span></div>
+                <div><span class="text-xs text-muted block">Cluster Signal</span><span class="font-mono text-sm" style="color:{'var(--accent-optimal)' if ins_clust else 'var(--text-secondary)'};">{'🟢 Yes' if ins_clust else '—'}</span></div>
+            </div>
+            {txn_rows}
+            <p class="text-xs text-muted" style="margin:.75rem 0 0 0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">{ins_interp}</p>
+        </div>"""
+
+    # ── DARK POOL / INSTITUTIONAL FLOW PANEL ─────────────────────────────────
+    dp = darkpool or {}
+    dp_sig   = dp.get('signal', 'NEUTRAL')
+    dp_str   = dp.get('signal_strength', 'WEAK')
+    dp_color = dp.get('signal_color', 'var(--accent-marginal)')
+    dp_quiet = dp.get('quiet_accumulation_days')
+    dp_corr  = dp.get('institutional_correlation')
+    dp_blk   = dp.get('block_volume_pct')
+    dp_expl  = dp.get('explanation', '')
+    dp_interp= dp.get('interpretation', '')
+    dp_badge = ('badge-optimal' if dp_sig == 'ACCUMULATION'
+                else 'badge-poor' if dp_sig == 'DISTRIBUTION'
+                else 'badge-marginal')
+    dp_top   = dp.get('top_volume_days', [])
+    dp_top_rows = ''.join(
+        f'<div class="metric-item"><span class="text-xs">{d.get("date","")} — ${d.get("close",0):.2f}</span>'
+        f'<span class="badge badge-info text-xs">{d.get("type","")}</span></div>'
+        for d in dp_top[:3]
+    ) if dp_top else ''
+    darkpool_panel_html = f"""
+        <div class="glass-card" style="margin-bottom:1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Institutional Flow / Dark Pool Proxy</h3>
+                    <p class="text-xs text-muted" style="margin:0;">{dp_expl}</p>
+                </div>
+                <span class="badge {dp_badge}">{dp_sig} ({dp_str})</span>
+            </div>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:.75rem;">
+                <div><span class="text-xs text-muted block">Quiet Absorption Days</span><span class="font-mono" style="font-size:1.3rem; font-weight:700; color:{dp_color};">{dp_quiet if dp_quiet is not None else 'N/A'}</span></div>
+                <div><span class="text-xs text-muted block">Vol–Price Correlation</span><span class="font-mono text-sm">{f"{dp_corr:+.2f}" if dp_corr is not None else "N/A"}</span></div>
+                <div><span class="text-xs text-muted block">Block Volume %</span><span class="font-mono text-sm">{f"{dp_blk:.1f}%" if dp_blk is not None else "N/A"}</span></div>
+            </div>
+            {dp_top_rows}
+            <p class="text-xs text-muted" style="margin:.75rem 0 0 0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">{dp_interp}</p>
+        </div>"""
+
+    # ── VOLUME PROFILE PANEL ──────────────────────────────────────────────────
+    vp = volume_profile or {}
+    vp_poc   = vp.get('poc_price')
+    vp_vah   = vp.get('value_area_high')
+    vp_val   = vp.get('value_area_low')
+    vp_pos   = vp.get('position', 'N/A')
+    vp_vwap  = vp.get('vwap_period')
+    vp_dist  = vp.get('poc_distance_pct')
+    vp_expl  = vp.get('explanation', '')
+    vp_interp= vp.get('interpretation', '')
+    vp_pos_color = ('var(--accent-marginal)' if 'ABOVE' in str(vp_pos)
+                    else 'var(--accent-optimal)' if 'VALUE' in str(vp_pos)
+                    else 'var(--accent-poor)')
+    vp_pos_label = vp_pos.replace('_', ' ').title() if vp_pos else 'N/A'
+    vp_panel_html = f"""
+        <div class="glass-card" style="margin-bottom:1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Volume Profile &amp; Price Levels</h3>
+                    <p class="text-xs text-muted" style="margin:0;">{vp_expl}</p>
+                </div>
+                <span class="badge badge-info" style="color:{vp_pos_color};">{vp_pos_label}</span>
+            </div>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:.75rem;">
+                <div><span class="text-xs text-muted block">Point of Control (POC)</span><span class="font-mono text-sm" style="color:var(--accent-info);">{f"${vp_poc:.2f}" if vp_poc else "N/A"}</span></div>
+                <div><span class="text-xs text-muted block">Distance to POC</span><span class="font-mono text-sm">{f"{vp_dist:+.1f}%" if vp_dist is not None else "N/A"}</span></div>
+                <div><span class="text-xs text-muted block">Value Area High</span><span class="font-mono text-sm" style="color:var(--accent-optimal);">{f"${vp_vah:.2f}" if vp_vah else "N/A"}</span></div>
+                <div><span class="text-xs text-muted block">Value Area Low</span><span class="font-mono text-sm" style="color:var(--accent-poor);">{f"${vp_val:.2f}" if vp_val else "N/A"}</span></div>
+                <div><span class="text-xs text-muted block">Period VWAP</span><span class="font-mono text-sm">{f"${vp_vwap:.2f}" if vp_vwap else "N/A"}</span></div>
+            </div>
+            <p class="text-xs text-muted" style="margin:0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">{vp_interp}</p>
+        </div>"""
+
     html = f"""
     <!DOCTYPE html>
     <html lang="en">
@@ -812,6 +1069,19 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
             </div>
 
             {si_panel_html}
+            {rs_panel_html}
+            {earnings_panel_html}
+
+            <!-- Two-column intelligence grid -->
+            <div class="grid-cols-2" style="margin-bottom:1.5rem;">
+                <div>{options_panel_html}</div>
+                <div>{factors_panel_html}</div>
+            </div>
+            <div class="grid-cols-2" style="margin-bottom:1.5rem;">
+                <div>{insiders_panel_html}</div>
+                <div>{darkpool_panel_html}</div>
+            </div>
+            {vp_panel_html}
 
             <!-- Chart Area -->
             <div class="glass-card" style="padding:1rem;">
@@ -926,6 +1196,22 @@ def generate_index(reports: list, output_dir: str = "reports", basket_context: d
         ema_d = r.get('ema_dist', 0)
         ema_d_color = "var(--accent-optimal)" if abs(ema_d) <= 1.0 else "var(--accent-marginal)" if abs(ema_d) <= 2.0 else "var(--accent-poor)"
 
+        # RS rating
+        rs_s = r.get('rs_score')
+        rs_col = ("var(--accent-optimal)" if rs_s and rs_s >= 85
+                  else "var(--accent-good)" if rs_s and rs_s >= 70
+                  else "var(--accent-marginal)" if rs_s and rs_s >= 50
+                  else "var(--accent-poor)")
+        rs_str = f"{rs_s:.0f}" if rs_s is not None else "—"
+
+        # Earnings risk
+        er = r.get('earnings_risk', 'CLEAR')
+        dte = r.get('days_to_earnings')
+        er_color = ("var(--accent-poor)" if er == 'HIGH'
+                    else "var(--accent-marginal)" if er == 'MEDIUM'
+                    else "var(--accent-optimal)")
+        er_str = f"{dte}d" if dte is not None else "Clear"
+
         rows += f"""
         <tr onclick="window.location='{link}'" data-ticker="{safe_t}">
             <td>
@@ -946,6 +1232,8 @@ def generate_index(reports: list, output_dir: str = "reports", basket_context: d
             <td class="font-mono text-sm">{r.get('adx',0):.1f}</td>
             <td class="font-mono text-sm">{r.get('rel_vol',0):.1f}x</td>
             <td class="font-mono text-sm">{r.get('rr',0):.1f}</td>
+            <td class="font-mono text-sm" style="color:{rs_col}; font-weight:600;">{rs_str}</td>
+            <td class="font-mono text-sm" style="color:{er_color};">{er_str}</td>
             <td><span class="badge" style="background:rgba(255,255,255,0.1); color:#cbd5e1;">{r['regime'].split('_')[0]}</span></td>
             <td><span class="text-muted">&rarr;</span></td>
         </tr>
@@ -1071,6 +1359,8 @@ def generate_index(reports: list, output_dir: str = "reports", basket_context: d
                             <th class="sortable">ADX</th>
                             <th class="sortable">Vol</th>
                             <th class="sortable">R:R</th>
+                            <th class="sortable" title="IBD-style Relative Strength Rating (0-99). Higher = stronger market leader.">RS</th>
+                            <th title="Days until next earnings report. RED = within 14 days.">Earnings</th>
                             <th>Regime</th>
                             <th></th>
                         </tr>

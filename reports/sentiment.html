@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment & Breadth | Framework</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+:root {
+    --bg-color: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --card-border: 1px solid rgba(255, 255, 255, 0.1);
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --accent-optimal: #4ade80; /* Green-400 */
+    --accent-good: #34d399;    /* Emerald-400 */
+    --accent-marginal: #fbbf24; /* Amber-400 */
+    --accent-poor: #f87171;    /* Red-400 */
+    --accent-info: #38bdf8;    /* Sky-400 */
+    --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+    --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    background-image: 
+        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Glassmorphism Card */
+.glass-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: var(--card-border);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--glass-shadow);
+}
+
+/* Typography */
+h1, h2, h3, h4 { margin-top: 0; color: #fff; font-weight: 600; }
+.text-muted { color: var(--text-secondary); }
+.text-sm { font-size: 0.875rem; }
+.text-xs { font-size: 0.75rem; }
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+
+/* Status Badges */
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.badge-optimal { background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
+.badge-good { background: rgba(52, 211, 153, 0.2); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+.badge-marginal { background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
+.badge-poor { background: rgba(248, 113, 113, 0.2); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
+.badge-info { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+
+/* Score Gauge Ring */
+.score-ring-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.score-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #fff;
+    z-index: 10;
+}
+.score-circle-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 8; }
+.score-circle-fg { 
+    fill: none; 
+    stroke-width: 8; 
+    stroke-linecap: round; 
+    transform: rotate(-90deg); 
+    transform-origin: 50% 50%;
+    transition: stroke-dashoffset 1s ease-out;
+}
+
+/* Grid Layouts */
+.grid-cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.grid-cols-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+@media (max-width: 1024px) {
+    .grid-cols-3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+    .grid-cols-3, .grid-cols-2 { grid-template-columns: 1fr; }
+}
+
+/* HUD Metrics */
+.metric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.metric-item:last-child { border-bottom: none; }
+.progress-bar-bg {
+    width: 100px;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+.progress-bar-fg {
+    height: 100%;
+    border-radius: 3px;
+}
+
+/* Table */
+.modern-table { width: 100%; border-collapse: separate; border-spacing: 0 0.5rem; }
+.modern-table th { padding: 1rem; color: var(--text-secondary); font-weight: 500; font-size: 0.875rem; text-align: left; }
+.modern-table td { padding: 1rem; background: rgba(30, 41, 59, 0.5); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
+.modern-table td:first-child { border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; border-left: 1px solid rgba(255,255,255,0.05); }
+.modern-table td:last-child { border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; border-right: 1px solid rgba(255,255,255,0.05); }
+.modern-table tr:hover td { background: rgba(30, 41, 59, 0.8); cursor: pointer; transform: scale(1.005); transition: all 0.2s; }
+
+/* Links */
+a { color: inherit; text-decoration: none; }
+.back-link { 
+    display: inline-flex; align-items: center; gap: 0.5rem; 
+    color: var(--text-secondary); margin-bottom: 1.5rem; 
+    transition: color 0.2s;
+}
+.back-link:hover { color: #fff; }
+
+/* Sortable Table Headers */
+.modern-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-right: 1.5rem;
+}
+.modern-table th.sortable:hover {
+    color: var(--text-primary);
+}
+.modern-table th.sortable::after {
+    content: '⇅';
+    position: absolute;
+    right: 0.5rem;
+    opacity: 0.4;
+    font-size: 0.7rem;
+}
+.modern-table th.sortable.asc::after {
+    content: '↑';
+    opacity: 1;
+    color: var(--accent-optimal);
+}
+.modern-table th.sortable.desc::after {
+    content: '↓';
+    opacity: 1;
+    color: var(--accent-optimal);
+}
+
+/* Search Input */
+.search-input {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+    width: 100%;
+    max-width: 400px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-input:focus {
+    border-color: var(--accent-info);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+}
+.search-input::placeholder {
+    color: var(--text-secondary);
+}
+
+/* Filter Controls */
+.filter-bar {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+.filter-btn {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.filter-btn:hover {
+    background: rgba(30, 41, 59, 0.9);
+    color: var(--text-primary);
+}
+.filter-btn.active {
+    background: rgba(74, 222, 128, 0.2);
+    border-color: rgba(74, 222, 128, 0.3);
+    color: var(--accent-optimal);
+}
+
+/* Chart Tooltip */
+.chart-tooltip {
+    position: fixed;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    display: none;
+}
+.chart-tooltip.visible {
+    display: block;
+}
+
+/* Stock Card Hover Enhancement */
+.glass-card.stock-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.glass-card.stock-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Hidden class for filtering */
+.hidden {
+    display: none !important;
+}
+/* Top Navigation Menu */
+.top-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    margin-bottom: 2rem;
+}
+.top-nav-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.nav-item {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+.nav-item:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+.nav-item.active {
+    color: var(--accent-optimal);
+    background: rgba(74, 222, 128, 0.1);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+}
+</style>
+</head>
+<body>
+    
+    <nav class="top-nav">
+        <ul class="top-nav-list">
+            <li><a href="index.html" class="nav-item">Command Center</a></li><li><a href="sector_analysis.html" class="nav-item">Sector Analysis</a></li><li><a href="macro_drivers.html" class="nav-item">Macro Drivers</a></li><li><a href="sentiment.html" class="nav-item active">Sentiment</a></li><li><a href="market_news.html" class="nav-item">Market News</a></li><li><a href="ai_memo.html" class="nav-item">AI Strategy</a></li><li><a href="ai_macro_memo.html" class="nav-item">Macro AI</a></li>
+        </ul>
+    </nav>
+    
+    <div class="container">
+        <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2.5rem;">
+            <div>
+                <h1 style="margin:0 0 .4rem 0; background:linear-gradient(to right,#60a5fa,#a78bfa);
+                    -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
+                    Sentiment &amp; Market Health
+                </h1>
+                <p class="text-muted">Fear, greed, breadth, and macro regime — the ocean your trades swim in.</p>
+            </div>
+            <span class="badge badge-info">2026-04-07 09:18</span>
+        </header>
+
+        <!-- Educational intro -->
+        <div class="glass-card" style="margin-bottom:2rem; padding:1.25rem 1.5rem; background:rgba(56,189,248,.05); border:1px solid rgba(56,189,248,.2);">
+            <h3 style="margin:0 0 .5rem 0; color:#38bdf8; font-size:1rem;">📖 How to Read This Page</h3>
+            <p style="margin:0; font-size:.85em; color:var(--text-secondary); line-height:1.6;">
+                <strong style="color:#e2e8f0;">Sentiment</strong> tells you the emotional state of market participants — when fear is extreme, nearly everyone who wants to sell has already sold (contrarian buy signal). When greed is extreme, there are no buyers left to push prices higher (caution signal).
+                <br><br>
+                <strong style="color:#e2e8f0;">Breadth</strong> tells you whether the market move is broad (sustainable) or narrow (risky). A market where only 30% of stocks are above their 50-week MA while the index hits highs is a house built on a crumbling foundation.
+                <br><br>
+                <strong style="color:#e2e8f0;">Macro Regime</strong> is the context above everything else. Technical setups that form in a RISK_OFF macro environment fail at a much higher rate — you are fighting the tide. Never force entries when the macro is against you.
+            </p>
+        </div>
+
+        
+    <section class="glass-card" style="margin-bottom:2rem; border:1px solid rgba(248,113,113,.3);">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1.5rem; margin-bottom:1.5rem;">
+            <div>
+                <h2 style="margin:0 0 .4rem 0;">Market Sentiment</h2>
+                <p class="text-muted" style="margin:0; font-size:.85em; max-width:520px;">Sentiment indicators measure the collective emotional state of market participants. When fear is extreme (VIX >30, high put/call ratio), it often marks bottoms because everyone who wants to sell has already sold. When greed is extreme (VIX <12, low put/call, everything extended), it often marks tops because there are no buyers left. The contrarian insight: be greedy when others are fearful, fearful when others are greedy.</p>
+            </div>
+            <div style="text-align:center;">
+                
+    <svg width="120" height="120" style="display:block; margin:0 auto;">
+        <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="8"/>
+        <circle cx="60" cy="60" r="54" fill="none"
+            stroke="var(--color-bearish, #e74c3c)" stroke-width="8" stroke-linecap="round"
+            stroke-dasharray="339.3" stroke-dashoffset="254.1"
+            transform="rotate(-90 60 60)"/>
+        <text x="60" y="66" text-anchor="middle"
+            font-size="18" font-weight="700" fill="#e2e8f0">25</text>
+    </svg>
+                <div style="font-size:.85rem; font-weight:600; color:var(--color-bearish, #e74c3c); margin-top:4px;">Fear</div>
+                <div style="font-size:.7rem; color:var(--text-secondary);">Fear &amp; Greed Score</div>
+            </div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(175px,1fr)); gap:1rem; margin-bottom:1rem;">
+            
+    <div style="padding:1.25rem; background:rgba(255,255,255,.04); border-radius:10px;
+        border:1px solid rgba(255,255,255,.08);">
+        <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase;
+            letter-spacing:.07em; margin-bottom:6px;">VIX (30-day)</div>
+        <div style="font-size:1.4rem; font-weight:700; color:#f87171;">25.8</div>
+        <div style="font-size:.75rem; color:#f87171; margin-top:2px;">ELEVATED</div>
+        <p style="font-size:.7rem; color:var(--text-secondary); margin:.5rem 0 0 0; line-height:1.4;">Below 15 = calm markets. Above 30 = fear. Above 40 = panic (historic buy signals).</p>
+    </div>
+            
+    <div style="padding:1.25rem; background:rgba(255,255,255,.04); border-radius:10px;
+        border:1px solid rgba(255,255,255,.08);">
+        <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase;
+            letter-spacing:.07em; margin-bottom:6px;">VIX3M (90-day)</div>
+        <div style="font-size:1.4rem; font-weight:700; color:#f87171;">25.6</div>
+        <div style="font-size:.75rem; color:#f87171; margin-top:2px;">FLAT</div>
+        <p style="font-size:.7rem; color:var(--text-secondary); margin:.5rem 0 0 0; line-height:1.4;">Contango (VIX3M > VIX) = normal structure. Backwardation = acute near-term fear.</p>
+    </div>
+            
+    <div style="padding:1.25rem; background:rgba(255,255,255,.04); border-radius:10px;
+        border:1px solid rgba(255,255,255,.08);">
+        <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase;
+            letter-spacing:.07em; margin-bottom:6px;">VIX Contango Ratio</div>
+        <div style="font-size:1.4rem; font-weight:700; color:#f87171;">0.99</div>
+        <div style="font-size:.75rem; color:#f87171; margin-top:2px;">VIX3M ÷ VIX</div>
+        <p style="font-size:.7rem; color:var(--text-secondary); margin:.5rem 0 0 0; line-height:1.4;">>1.0 = normal/calm. <1.0 = inverted = market stress.</p>
+    </div>
+            
+    <div style="padding:1.25rem; background:rgba(255,255,255,.04); border-radius:10px;
+        border:1px solid rgba(255,255,255,.08);">
+        <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase;
+            letter-spacing:.07em; margin-bottom:6px;">Equity Put/Call Ratio</div>
+        <div style="font-size:1.4rem; font-weight:700; color:#e2e8f0;">1.44</div>
+        <div style="font-size:.75rem; color:#e2e8f0; margin-top:2px;">FEARFUL</div>
+        <p style="font-size:.7rem; color:var(--text-secondary); margin:.5rem 0 0 0; line-height:1.4;">>0.8 = fearful (traders buying puts for protection). <0.5 = complacent (too many calls).</p>
+    </div>
+        </div>
+        <div style="padding:1rem; background:rgba(255,255,255,.03); border-radius:8px; border:1px solid rgba(255,255,255,.07);">
+            <p style="margin:0; font-size:.85em; color:var(--text-secondary);">FEAR reading — composite score 31/100. VIX at 25.8 (elevated), equity put/call at 1.44. Elevated fear but not at capitulation levels. Risk assets remain under pressure; high-quality setups offer better-than-average expected value as participants are positioned defensively.</p>
+        </div>
+    </section>
+        
+    <section class="glass-card" style="margin-bottom:2rem; border:1px solid rgba(248,113,113,.3);">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1.5rem; margin-bottom:1.5rem;">
+            <div>
+                <h2 style="margin:0 0 .4rem 0;">Market Breadth <span class="text-muted" style="font-size:.75rem;">(30 S&amp;P 500 stocks)</span></h2>
+                <p class="text-muted" style="margin:0; font-size:.85em; max-width:520px;">Market breadth measures whether a stock market rally is being driven by all stocks rising together (healthy, sustainable) or just a handful of large-caps dragging the index higher while most stocks decline (unhealthy, dangerous). A market where only 30% of stocks are above their 50-day moving average while the index makes new highs is a warning sign — the foundation is eroding. The biggest crashes in history were preceded by deteriorating breadth.</p>
+            </div>
+            <div style="text-align:center;">
+                
+    <svg width="120" height="120" style="display:block; margin:0 auto;">
+        <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="8"/>
+        <circle cx="60" cy="60" r="54" fill="none"
+            stroke="var(--color-bear)" stroke-width="8" stroke-linecap="round"
+            stroke-dasharray="339.3" stroke-dashoffset="271.4"
+            transform="rotate(-90 60 60)"/>
+        <text x="60" y="66" text-anchor="middle"
+            font-size="18" font-weight="700" fill="#e2e8f0">20</text>
+    </svg>
+                <div style="font-size:.85rem; font-weight:600; color:var(--color-bear); margin-top:4px;">WEAKENING</div>
+                <div style="font-size:.7rem; color:var(--text-secondary);">Breadth Health</div>
+            </div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1rem; margin-bottom:1rem;">
+            <div style="padding:1rem; background:rgba(255,255,255,.03); border-radius:8px; border:1px solid rgba(255,255,255,.07);">
+                <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase; margin-bottom:6px;">% Above 20-Week MA</div>
+                <div style="width:100%; height:10px; background:rgba(255,255,255,.1); border-radius:5px; overflow:hidden; margin:4px 0;"><div style="width:30%; height:100%; background:var(--accent-poor); border-radius:5px;"></div></div>
+                <div style="font-size:1.3rem; font-weight:700; color:var(--accent-poor);">30.0%</div>
+                <div style="font-size:.7rem; color:var(--text-secondary);">Healthy: &gt;60% · Washed out: &lt;30%</div>
+            </div>
+            <div style="padding:1rem; background:rgba(255,255,255,.03); border-radius:8px; border:1px solid rgba(255,255,255,.07);">
+                <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase; margin-bottom:6px;">% Above 40-Week MA (≈200d)</div>
+                <div style="width:100%; height:10px; background:rgba(255,255,255,.1); border-radius:5px; overflow:hidden; margin:4px 0;"><div style="width:37%; height:100%; background:var(--accent-marginal); border-radius:5px;"></div></div>
+                <div style="font-size:1.3rem; font-weight:700; color:var(--accent-marginal);">36.7%</div>
+                <div style="font-size:.7rem; color:var(--text-secondary);">Bull market: &gt;50% · Bear: &lt;30%</div>
+            </div>
+            <div style="padding:1rem; background:rgba(255,255,255,.03); border-radius:8px; border:1px solid rgba(255,255,255,.07);">
+                <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase; margin-bottom:6px;">Net New 52-Week Highs</div>
+                <div style="font-size:1.3rem; font-weight:700; color:var(--accent-poor);">-1</div>
+                <div style="font-size:.7rem; color:var(--text-secondary);">Positive = more new highs than lows</div>
+            </div>
+            <div style="padding:1rem; background:rgba(255,255,255,.03); border-radius:8px; border:1px solid rgba(255,255,255,.07);">
+                <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase; margin-bottom:6px;">Breadth Trend (4-Week A/D)</div>
+                <div style="font-size:1.3rem; font-weight:700; color:var(--accent-poor);">-3.3</div>
+                <div style="font-size:.7rem; color:var(--text-secondary);">Positive = improving participation</div>
+            </div>
+        </div>
+        <div style="padding:1rem; background:rgba(255,255,255,.03); border-radius:8px;">
+            <p style="margin:0; font-size:.85em; color:var(--text-secondary);">30.0% of S&P 500 stocks are above their 20-week MA and 36.7% are above their 40-week MA. Net new 52-week highs: -1. Breadth trend over 4 weeks is deteriorating (-3.3 pp). Market breadth is classified as WEAKENING (score 20/100). Most stocks are below key moving averages. Reduce position size and increase selectivity. Many technical setups will fail.</p>
+        </div>
+    </section>
+        
+    <section class="glass-card" style="margin-bottom:2rem; border:1px solid rgba(251,191,36,.15);">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1.5rem; margin-bottom:1.5rem;">
+            <div>
+                <h2 style="margin:0 0 .4rem 0;">Macro Regime (FRED)</h2>
+                <p class="text-muted" style="margin:0; font-size:.85em; max-width:520px;">The macro regime tells you the ocean your trades are swimming in. A RISK_ON environment means credit markets are calm, the yield curve is healthy, and volatility is low — technical setups have a higher probability of working. A RISK_OFF environment means even great technical entries will fight headwinds because institutions are reducing exposure across the board. Never fight a RISK_OFF regime with aggressive entries.</p>
+            </div>
+            <div style="text-align:center;">
+                
+    <svg width="120" height="120" style="display:block; margin:0 auto;">
+        <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="8"/>
+        <circle cx="60" cy="60" r="54" fill="none"
+            stroke="var(--color-neutral)" stroke-width="8" stroke-linecap="round"
+            stroke-dasharray="339.3" stroke-dashoffset="101.8"
+            transform="rotate(-90 60 60)"/>
+        <text x="60" y="66" text-anchor="middle"
+            font-size="18" font-weight="700" fill="#e2e8f0">70</text>
+    </svg>
+                <div style="font-size:.85rem; font-weight:600; color:var(--color-neutral); margin-top:4px;">CAUTIOUS</div>
+                <div style="font-size:.7rem; color:var(--text-secondary);">Regime Score</div>
+            </div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1rem; margin-bottom:1rem;">
+            
+    <div style="padding:1.25rem; background:rgba(255,255,255,.04); border-radius:10px;
+        border:1px solid rgba(255,255,255,.08);">
+        <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase;
+            letter-spacing:.07em; margin-bottom:6px;">Yield Curve (10Y–2Y)</div>
+        <div style="font-size:1.4rem; font-weight:700; color:#e2e8f0;">0.50%</div>
+        <div style="font-size:.75rem; color:#e2e8f0; margin-top:2px;">FLATTENING</div>
+        <p style="font-size:.7rem; color:var(--text-secondary); margin:.5rem 0 0 0; line-height:1.4;">Positive = healthy. Negative = inverted = recession historically follows within 12–18 months.</p>
+    </div>
+            
+    <div style="padding:1.25rem; background:rgba(255,255,255,.04); border-radius:10px;
+        border:1px solid rgba(255,255,255,.08);">
+        <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase;
+            letter-spacing:.07em; margin-bottom:6px;">HY Credit Spread</div>
+        <div style="font-size:1.4rem; font-weight:700; color:#e2e8f0;">3.05%</div>
+        <div style="font-size:.75rem; color:#e2e8f0; margin-top:2px;">TIGHT</div>
+        <p style="font-size:.7rem; color:var(--text-secondary); margin:.5rem 0 0 0; line-height:1.4;">High yield spread is the credit market's fear gauge. Wide spreads mean institutions price in defaults and credit stress.</p>
+    </div>
+            
+    <div style="padding:1.25rem; background:rgba(255,255,255,.04); border-radius:10px;
+        border:1px solid rgba(255,255,255,.08);">
+        <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase;
+            letter-spacing:.07em; margin-bottom:6px;">5Y Inflation Break-even</div>
+        <div style="font-size:1.4rem; font-weight:700; color:#e2e8f0;">2.60%</div>
+        <div style="font-size:.75rem; color:#e2e8f0; margin-top:2px;">ELEVATED</div>
+        <p style="font-size:.7rem; color:var(--text-secondary); margin:.5rem 0 0 0; line-height:1.4;">Market-implied inflation expectation. Above 2.5% creates headwinds for long-duration and growth stocks.</p>
+    </div>
+            
+    <div style="padding:1.25rem; background:rgba(255,255,255,.04); border-radius:10px;
+        border:1px solid rgba(255,255,255,.08);">
+        <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase;
+            letter-spacing:.07em; margin-bottom:6px;">NFCI (Financial Conditions)</div>
+        <div style="font-size:1.4rem; font-weight:700; color:#e2e8f0;">-0.434</div>
+        <div style="font-size:.75rem; color:#e2e8f0; margin-top:2px;">LOOSE</div>
+        <p style="font-size:.7rem; color:var(--text-secondary); margin:.5rem 0 0 0; line-height:1.4;">Chicago Fed index of 105 financial indicators. Negative = loose/supportive. Positive = tight = headwind.</p>
+    </div>
+        </div>
+        <div style="padding:1rem; background:rgba(255,255,255,.03); border-radius:8px;">
+            <p style="margin:0; font-size:.85em; color:var(--text-secondary);">Current macro regime is CAUTIOUS (score 70/100). Key risks: elevated inflation expectations (rate headwind). Tailwinds: tight credit spreads (risk appetite intact); loose financial conditions (credit accommodative). Be selective — take only the highest-quality setups.</p>
+        </div>
+    </section>
+        
+        <section class="glass-card" style="margin-bottom:2rem; border:1px solid rgba(74,222,128,.3);">
+            <h2 style="margin:0 0 .5rem 0;">Basket Intelligence — GVIP vs SPY</h2>
+            <p class="text-muted" style="font-size:.85em; margin:0 0 1rem 0;">
+                GVIP tracks the 50 most widely held hedge fund stocks. When GVIP lags SPY,
+                the rally is likely short-squeeze driven rather than fundamentally led.
+            </p>
+            <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:1rem;">
+                <span style="font-size:1.2rem; font-weight:600; color:var(--accent-optimal);">Long Basket Leading</span>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:1rem; margin-bottom:1rem;">
+                
+    <div style="padding:1.25rem; background:rgba(255,255,255,.04); border-radius:10px;
+        border:1px solid rgba(255,255,255,.08);">
+        <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase;
+            letter-spacing:.07em; margin-bottom:6px;">GVIP 5D</div>
+        <div style="font-size:1.4rem; font-weight:700; color:var(--accent-optimal);">+6.2%</div>
+        <div style="font-size:.75rem; color:var(--accent-optimal); margin-top:2px;">$148.34</div>
+        
+    </div>
+                
+    <div style="padding:1.25rem; background:rgba(255,255,255,.04); border-radius:10px;
+        border:1px solid rgba(255,255,255,.08);">
+        <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase;
+            letter-spacing:.07em; margin-bottom:6px;">SPY 5D</div>
+        <div style="font-size:1.4rem; font-weight:700; color:var(--accent-optimal);">+3.7%</div>
+        <div style="font-size:.75rem; color:var(--accent-optimal); margin-top:2px;">$655.20</div>
+        
+    </div>
+                
+    <div style="padding:1.25rem; background:rgba(255,255,255,.04); border-radius:10px;
+        border:1px solid rgba(255,255,255,.08);">
+        <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase;
+            letter-spacing:.07em; margin-bottom:6px;">Relative 5D (GVIP−SPY)</div>
+        <div style="font-size:1.4rem; font-weight:700; color:var(--accent-optimal);">+2.5%</div>
+        <div style="font-size:.75rem; color:var(--accent-optimal); margin-top:2px;">Key signal</div>
+        
+    </div>
+                
+    <div style="padding:1.25rem; background:rgba(255,255,255,.04); border-radius:10px;
+        border:1px solid rgba(255,255,255,.08);">
+        <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase;
+            letter-spacing:.07em; margin-bottom:6px;">Relative 20D trend</div>
+        <div style="font-size:1.4rem; font-weight:700; color:var(--accent-optimal);">+1.1%</div>
+        <div style="font-size:.75rem; color:var(--accent-optimal); margin-top:2px;">Longer trend</div>
+        
+    </div>
+            </div>
+            <div style="padding:1rem; background:rgba(255,255,255,.03); border-radius:8px;">
+                <p style="margin:0; font-size:.85em; color:var(--text-secondary);">Hedge fund VIP longs are leading the market. Rallies are fundamentally driven — technical setups have higher follow-through probability in this environment.</p>
+            </div>
+        </section>
+
+        <footer style="margin-top:3rem; text-align:center; color:var(--text-secondary); font-size:.875rem; border-top:1px solid rgba(255,255,255,.05); padding-top:2rem;">
+            <p>Sentiment &amp; Breadth Dashboard · Generated 2026-04-07 09:18</p>
+        </footer>
+    </div>
+    
+<script>
+// Sortable Tables
+function initSortableTables() {
+    document.querySelectorAll('.modern-table').forEach(table => {
+        const headers = table.querySelectorAll('th.sortable');
+        headers.forEach((header, colIndex) => {
+            header.addEventListener('click', () => {
+                const tbody = table.querySelector('tbody');
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                const isAsc = header.classList.contains('asc');
+
+                // Clear other headers
+                headers.forEach(h => h.classList.remove('asc', 'desc'));
+                header.classList.add(isAsc ? 'desc' : 'asc');
+
+                rows.sort((a, b) => {
+                    const aCell = a.cells[colIndex];
+                    const bCell = b.cells[colIndex];
+                    let aVal = aCell.textContent.trim();
+                    let bVal = bCell.textContent.trim();
+
+                    // Try numeric sort
+                    const aNum = parseFloat(aVal.replace(/[^0-9.-]/g, ''));
+                    const bNum = parseFloat(bVal.replace(/[^0-9.-]/g, ''));
+
+                    if (!isNaN(aNum) && !isNaN(bNum)) {
+                        return isAsc ? bNum - aNum : aNum - bNum;
+                    }
+                    return isAsc ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
+                });
+
+                rows.forEach(row => tbody.appendChild(row));
+            });
+        });
+    });
+}
+
+// Search/Filter for Stock Cards and Table Rows
+function initSearch() {
+    const searchInput = document.getElementById('stock-search');
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+
+        // Support both card-based and table-based layouts
+        const items = document.querySelectorAll('.stock-card, .modern-table tbody tr');
+        items.forEach(item => {
+            const ticker = item.dataset.ticker?.toLowerCase() || item.textContent.toLowerCase();
+            const matches = ticker.includes(query);
+            item.classList.toggle('hidden', !matches);
+        });
+
+        const visible = document.querySelectorAll('.stock-card:not(.hidden), .modern-table tbody tr:not(.hidden)').length;
+        const countEl = document.getElementById('visible-count');
+        if (countEl) countEl.textContent = visible;
+    });
+}
+
+// Filter Buttons
+function initFilterButtons() {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const filter = btn.dataset.filter;
+            const isActive = btn.classList.contains('active');
+
+            // Toggle active state
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            if (!isActive) btn.classList.add('active');
+
+            // Apply filter
+            document.querySelectorAll('.stock-card').forEach(card => {
+                if (!filter || isActive) {
+                    card.classList.remove('hidden');
+                } else if (filter === 'top5') {
+                    card.classList.toggle('hidden', parseInt(card.dataset.rank) > 5);
+                } else if (filter === 'trade-ready') {
+                    card.classList.toggle('hidden', card.dataset.tradeReady !== 'true');
+                }
+            });
+
+            // Update count
+            const visible = document.querySelectorAll('.stock-card:not(.hidden)').length;
+            const countEl = document.getElementById('visible-count');
+            if (countEl) countEl.textContent = visible;
+        });
+    });
+}
+
+// Chart Tooltip (for SVG charts)
+function initChartTooltips() {
+    const tooltip = document.createElement('div');
+    tooltip.className = 'chart-tooltip';
+    document.body.appendChild(tooltip);
+
+    document.querySelectorAll('svg.interactive-chart').forEach(chart => {
+        chart.addEventListener('mousemove', (e) => {
+            const rect = chart.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const data = chart.dataset.values ? JSON.parse(chart.dataset.values) : null;
+
+            if (data && data.length > 0) {
+                const idx = Math.floor((x / rect.width) * data.length);
+                const point = data[Math.min(idx, data.length - 1)];
+
+                if (point) {
+                    tooltip.innerHTML = `
+                        <div><strong>${point.date || ''}</strong></div>
+                        <div>Price: $${point.price?.toFixed(2) || 'N/A'}</div>
+                        ${point.ema20 ? `<div style="color:#f59e0b">EMA20: $${point.ema20.toFixed(2)}</div>` : ''}
+                        ${point.ema50 ? `<div style="color:#8b5cf6">EMA50: $${point.ema50.toFixed(2)}</div>` : ''}
+                    `;
+                    tooltip.style.left = (e.clientX + 15) + 'px';
+                    tooltip.style.top = (e.clientY - 10) + 'px';
+                    tooltip.classList.add('visible');
+                }
+            }
+        });
+
+        chart.addEventListener('mouseleave', () => {
+            tooltip.classList.remove('visible');
+        });
+    });
+}
+
+function initWatchlist() {
+    // Merge server-side pre-populated tickers with localStorage
+    const serverList = window.__SERVER_WATCHLIST__ || [];
+    let watchlist = JSON.parse(localStorage.getItem('ema_watchlist') || '[]');
+    serverList.forEach(t => { if (!watchlist.includes(t)) watchlist.push(t); });
+    localStorage.setItem('ema_watchlist', JSON.stringify(watchlist));
+
+    // Apply saved state to all star buttons on this page
+    document.querySelectorAll('.watchlist-btn').forEach(btn => {
+        const ticker = btn.dataset.ticker;
+        if (watchlist.includes(ticker)) {
+            btn.textContent = '★';
+            btn.style.color = '#fbbf24';
+        }
+    });
+
+    // Update candidates table star buttons too (if present)
+    document.querySelectorAll('.cand-watchlist-btn').forEach(btn => {
+        if (watchlist.includes(btn.dataset.ticker)) {
+            btn.textContent = '★';
+            btn.style.color = '#fbbf24';
+        }
+    });
+}
+
+function toggleWatchlist(btn) {
+    const ticker = btn.dataset.ticker;
+    let watchlist = JSON.parse(localStorage.getItem('ema_watchlist') || '[]');
+    const idx = watchlist.indexOf(ticker);
+    if (idx === -1) {
+        watchlist.push(ticker);
+        btn.textContent = '★';
+        btn.style.color = '#fbbf24';
+    } else {
+        watchlist.splice(idx, 1);
+        btn.textContent = '☆';
+        btn.style.color = 'rgba(255,255,255,0.2)';
+    }
+    localStorage.setItem('ema_watchlist', JSON.stringify(watchlist));
+    // Sync all buttons for same ticker on this page
+    document.querySelectorAll(`.watchlist-btn[data-ticker="${ticker}"], .cand-watchlist-btn[data-ticker="${ticker}"]`).forEach(b => {
+        b.textContent = btn.textContent;
+        b.style.color = btn.style.color;
+    });
+}
+
+function exportWatchlist() {
+    const watchlist = JSON.parse(localStorage.getItem('ema_watchlist') || '[]');
+    const blob = new Blob([JSON.stringify(watchlist, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'watchlist.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+function initAdvancedFilters() {
+    // Populate sector dropdown from data-sector values in candidates table
+    const sectorSel = document.getElementById('cand-sector-filter');
+    if (sectorSel) {
+        const sectors = new Set();
+        document.querySelectorAll('#candidates-table tbody tr').forEach(r => {
+            if (r.dataset.sector) sectors.add(r.dataset.sector);
+        });
+        Array.from(sectors).sort().forEach(s => {
+            const o = document.createElement('option');
+            o.value = s; o.textContent = s; sectorSel.appendChild(o);
+        });
+    }
+
+    function applyCandFilter() {
+        const minScore = parseInt(document.getElementById('cand-score-filter')?.value || '0');
+        const regime = document.getElementById('cand-regime-filter')?.value || '';
+        const sector = document.getElementById('cand-sector-filter')?.value || '';
+        let visible = 0;
+        document.querySelectorAll('#candidates-table tbody tr').forEach(row => {
+            const show = parseFloat(row.dataset.entryScore || '0') >= minScore
+                && (regime === '' || (row.dataset.regime || '').toUpperCase().includes(regime))
+                && (sector === '' || row.dataset.sector === sector);
+            row.classList.toggle('hidden', !show);
+            if (show) visible++;
+        });
+        const el = document.getElementById('cand-visible-count');
+        if (el) el.textContent = visible;
+    }
+
+    ['cand-score-filter', 'cand-regime-filter', 'cand-sector-filter'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', applyCandFilter);
+    });
+
+    // Projections confidence filter
+    document.getElementById('proj-conf-filter')?.addEventListener('change', function() {
+        const val = this.value;
+        let vis = 0;
+        document.querySelectorAll('#projections-table tbody tr').forEach(row => {
+            const show = val === '' || row.dataset.confidence === val;
+            row.classList.toggle('hidden', !show);
+            if (show) vis++;
+        });
+        const el = document.getElementById('proj-visible-count');
+        if (el) el.textContent = vis;
+    });
+}
+
+// Initialize on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+    initSortableTables();
+    initSearch();
+    initFilterButtons();
+    initChartTooltips();
+    initAdvancedFilters();
+    initWatchlist();
+});
+</script>
+
+</body>
+</html>

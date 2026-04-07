@@ -9,6 +9,9 @@ import numpy as np
 from typing import Dict, List, Optional
 from src.dashboard import CSS_DARK_THEME, INTERACTIVE_JS, generate_top_nav
 from src.baskets import fetch_basket_context
+from src.breadth import fetch_market_breadth
+from src.macro_fred import fetch_macro_regime
+from src.sectors.rrg import calculate_rrg, generate_rrg_html
 from src.sectors.charts import generate_detailed_driver_chart_svg
 from src.sectors.drivers import DriverAnalysis
 
@@ -403,6 +406,155 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 # ---------------------------------------------------------------------------
+# FRED Macro Regime section
+# ---------------------------------------------------------------------------
+
+def _generate_fred_macro_html() -> str:
+    """Renders the FRED macro regime panel with yield curve, credit spreads, VIX structure."""
+    m = fetch_macro_regime()
+    if m.get('error') and not m.get('yield_curve_value'):
+        return f"""<section class="glass-card" style="margin-bottom:2rem; opacity:.6;">
+            <h3 style="margin:0 0 .3rem 0; font-size:1rem;">Macro Regime (FRED)</h3>
+            <p class="text-muted" style="font-size:.8em; margin:0;">Data unavailable — {m.get('error','check FRED connectivity')}</p>
+        </section>"""
+
+    score = m.get('regime_score', 50)
+    label = m.get('regime_label', 'CAUTIOUS')
+    color = m.get('regime_color', 'var(--accent-marginal)')
+    border = ('rgba(74,222,128,.3)' if label == 'RISK_ON'
+              else 'rgba(248,113,113,.3)' if label == 'RISK_OFF'
+              else 'rgba(251,191,36,.15)')
+
+    def _cell(name, value, signal, expl):
+        sig_color = ('var(--accent-optimal)' if 'NORMAL' in str(signal) or 'TIGHT_' not in str(signal) and 'CONTANGO' in str(signal) or 'LOOSE' in str(signal) or 'ON_TARGET' in str(signal)
+                     else 'var(--accent-poor)' if 'INVERTED' in str(signal) or 'STRESS' in str(signal) or 'BACKWARDATION' in str(signal) or 'HIGH' in str(signal) or 'TIGHT' in str(signal)
+                     else 'var(--accent-marginal)')
+        val_str = f"{value:.2f}" if isinstance(value, float) else str(value) if value else "N/A"
+        return f"""<div style="padding:.75rem 1rem; background:rgba(255,255,255,.03); border-radius:8px; border:1px solid rgba(255,255,255,.07);">
+            <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.07em; margin-bottom:3px;">{name}</div>
+            <div style="font-size:1rem; font-weight:700; color:#e2e8f0;">{val_str}</div>
+            <div style="font-size:.7rem; color:{sig_color}; font-weight:600;">{signal}</div>
+            <div style="font-size:.65rem; color:var(--text-secondary); margin-top:3px; line-height:1.4;">{expl}</div>
+        </div>"""
+
+    cells = [
+        _cell("Yield Curve (10Y–2Y)", m.get('yield_curve_value'), m.get('yield_curve_signal',''),
+              "Positive = healthy growth. Negative = recession warning."),
+        _cell("HY Credit Spread", m.get('hy_spread_value'), m.get('hy_spread_signal',''),
+              "Below 4% = calm markets. Above 6% = institutions pricing in stress."),
+        _cell("5Y Inflation Break-even", m.get('inflation_value'), m.get('inflation_signal',''),
+              "2–2.5% = on target. Above 3% = headwind for growth stocks."),
+        _cell("VIX (30d)", m.get('vix_value'), m.get('vix_signal',''),
+              "Below 15 = calm. Above 30 = fear. Term structure: VIX3M÷VIX."),
+        _cell("Financial Conditions (NFCI)", m.get('nfci_value'), m.get('nfci_signal',''),
+              "Below 0 = loose/accommodative. Above 0 = tighter = headwind."),
+    ]
+    cells_html = ''.join(cells)
+    expl = m.get('regime_explanation', '')
+
+    return f"""
+    <section class="glass-card" style="margin-bottom:2rem; padding:1.5rem; border:1px solid {border};">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1.5rem; margin-bottom:1.25rem;">
+            <div>
+                <div style="display:flex; align-items:center; gap:.75rem; margin-bottom:.4rem;">
+                    <h3 style="margin:0; font-size:1rem;">Macro Regime Dashboard (FRED)</h3>
+                    <span style="font-size:.7rem; border:1px solid {color}; color:{color}; padding:2px 8px; border-radius:4px; text-transform:uppercase; letter-spacing:.05em;">Regime Signal</span>
+                </div>
+                <p class="text-muted" style="font-size:.78em; margin:0 0 .5rem 0;">{expl}</p>
+            </div>
+            <div style="text-align:center; padding:.75rem 1.25rem; background:rgba(255,255,255,.04); border-radius:8px; border:1px solid {color}; min-width:120px;">
+                <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.07em; margin-bottom:4px;">Regime Score</div>
+                <div style="font-size:1.8rem; font-weight:700; color:{color};">{score}/100</div>
+                <div style="font-size:.75rem; font-weight:600; color:{color};">{label.replace('_',' ')}</div>
+            </div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:.75rem;">
+            {cells_html}
+        </div>
+    </section>"""
+
+
+# ---------------------------------------------------------------------------
+# Market Breadth section
+# ---------------------------------------------------------------------------
+
+def _generate_breadth_html() -> str:
+    """Renders the Market Breadth panel with % above MAs and A/D trend."""
+    b = fetch_market_breadth(use_cache=True)
+    if b.get('health_score') is None:
+        return f"""<section class="glass-card" style="margin-bottom:2rem; opacity:.6;">
+            <h3 style="margin:0 0 .3rem 0; font-size:1rem;">Market Breadth (S&amp;P 500)</h3>
+            <p class="text-muted" style="font-size:.8em; margin:0;">Data unavailable — breadth requires downloading S&amp;P 500 constituents.</p>
+        </section>"""
+
+    health   = b.get('health_score', 50)
+    label    = b.get('health_label', 'MIXED')
+    color    = b.get('health_color', 'var(--accent-marginal)')
+    pct20    = b.get('pct_above_20wk', 0)
+    pct40    = b.get('pct_above_40wk', 0)
+    net_hl   = b.get('net_new_highs', 0)
+    ad_trend = b.get('ad_trend', 0)
+    n_stocks = b.get('stocks_analyzed', 0)
+    expl     = b.get('explanation', '')
+    interp   = b.get('interpretation', '')
+
+    ad_color = 'var(--accent-optimal)' if ad_trend >= 0 else 'var(--accent-poor)'
+    hl_color = 'var(--accent-optimal)' if net_hl >= 0 else 'var(--accent-poor)'
+    border = ('rgba(74,222,128,.3)' if health >= 70
+              else 'rgba(248,113,113,.3)' if health < 35
+              else 'rgba(251,191,36,.15)')
+
+    def _bar(pct, col):
+        return (f'<div style="width:100%; height:8px; background:rgba(255,255,255,.1); border-radius:4px; overflow:hidden;">'
+                f'<div style="width:{pct:.0f}%; height:100%; background:{col}; border-radius:4px;"></div></div>')
+
+    pct20_col = 'var(--accent-optimal)' if pct20 >= 60 else 'var(--accent-marginal)' if pct20 >= 40 else 'var(--accent-poor)'
+    pct40_col = 'var(--accent-optimal)' if pct40 >= 50 else 'var(--accent-marginal)' if pct40 >= 30 else 'var(--accent-poor)'
+
+    return f"""
+    <section class="glass-card" style="margin-bottom:2rem; padding:1.5rem; border:1px solid {border};">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1.5rem; margin-bottom:1.25rem;">
+            <div>
+                <div style="display:flex; align-items:center; gap:.75rem; margin-bottom:.4rem;">
+                    <h3 style="margin:0; font-size:1rem;">Market Breadth (S&amp;P 500 — {n_stocks} stocks)</h3>
+                    <span style="font-size:.7rem; border:1px solid {color}; color:{color}; padding:2px 8px; border-radius:4px; text-transform:uppercase;">{label.replace('_',' ')}</span>
+                </div>
+                <p class="text-muted" style="font-size:.78em; margin:0 0 .5rem 0;">{expl}</p>
+            </div>
+            <div style="text-align:center; padding:.75rem 1.25rem; background:rgba(255,255,255,.04); border-radius:8px; border:1px solid {color}; min-width:120px;">
+                <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.07em; margin-bottom:4px;">Health Score</div>
+                <div style="font-size:1.8rem; font-weight:700; color:{color};">{health}/100</div>
+            </div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1rem; margin-bottom:1rem;">
+            <div style="padding:.75rem 1rem; background:rgba(255,255,255,.03); border-radius:8px; border:1px solid rgba(255,255,255,.07);">
+                <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase; margin-bottom:6px;">% Above 20-Week MA</div>
+                {_bar(pct20, pct20_col)}
+                <div style="font-size:1.1rem; font-weight:700; color:{pct20_col}; margin-top:4px;">{pct20:.1f}%</div>
+                <div style="font-size:.65rem; color:var(--text-secondary);">Target: &gt;60% for healthy market</div>
+            </div>
+            <div style="padding:.75rem 1rem; background:rgba(255,255,255,.03); border-radius:8px; border:1px solid rgba(255,255,255,.07);">
+                <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase; margin-bottom:6px;">% Above 40-Week MA (200d equiv)</div>
+                {_bar(pct40, pct40_col)}
+                <div style="font-size:1.1rem; font-weight:700; color:{pct40_col}; margin-top:4px;">{pct40:.1f}%</div>
+                <div style="font-size:.65rem; color:var(--text-secondary);">Bull market: &gt;50%. Bear: &lt;30%.</div>
+            </div>
+            <div style="padding:.75rem 1rem; background:rgba(255,255,255,.03); border-radius:8px; border:1px solid rgba(255,255,255,.07);">
+                <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase; margin-bottom:6px;">Net New 52-Week Highs</div>
+                <div style="font-size:1.1rem; font-weight:700; color:{hl_color}; margin-top:4px;">{net_hl:+d}</div>
+                <div style="font-size:.65rem; color:var(--text-secondary);">Positive = more highs than lows</div>
+            </div>
+            <div style="padding:.75rem 1rem; background:rgba(255,255,255,.03); border-radius:8px; border:1px solid rgba(255,255,255,.07);">
+                <div style="font-size:.65rem; color:var(--text-secondary); text-transform:uppercase; margin-bottom:6px;">A/D Breadth Trend (4W)</div>
+                <div style="font-size:1.1rem; font-weight:700; color:{ad_color}; margin-top:4px;">{ad_trend:+.1f}</div>
+                <div style="font-size:.65rem; color:var(--text-secondary);">Positive = improving participation</div>
+            </div>
+        </div>
+        <p style="font-size:.8em; color:var(--text-secondary); margin:0;">{interp}</p>
+    </section>"""
+
+
+# ---------------------------------------------------------------------------
 # Basket Intelligence section
 # ---------------------------------------------------------------------------
 
@@ -548,6 +700,16 @@ def generate_macro_page(
 
     # 4b. Basket Intelligence section
     basket_intel_html = _generate_basket_intelligence_html()
+
+    # 4c. FRED Macro Regime panel
+    fred_html = _generate_fred_macro_html()
+
+    # 4d. Market Breadth panel
+    breadth_html_section = _generate_breadth_html()
+
+    # 4e. Sector Rotation Map (RRG)
+    rrg_data = calculate_rrg()
+    rrg_section_html = generate_rrg_html(rrg_data)
 
     # 5. Sector filter pills
     all_etfs = sorted(sector_drivers_map.keys())
@@ -834,9 +996,21 @@ def generate_macro_page(
         <!-- Macro Regime Panel (Improvement 2) -->
         {regime_html}
 
+        <!-- FRED Macro Regime -->
+        {fred_html}
+
+        <!-- Market Breadth -->
+        {breadth_html_section}
+
         <!-- Basket Intelligence -->
         {basket_intel_html}
 
+        <main class="dashboard-layout">
+            <div class="main-content">
+                <!-- Sector Rotation Map (RRG) -->
+                {rrg_section_html}
+            </div>
+        </main>
         <main class="dashboard-layout">
             <div class="main-content">
                 <!-- Correlation Heatmap (Improvement 7) -->
