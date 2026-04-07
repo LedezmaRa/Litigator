@@ -606,7 +606,7 @@ def get_status_badge(val: float, type: str):
         return '<span class="badge badge-poor">Poor</span>'
     return ""
 
-def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekly_trend: str, output_dir: str = "reports", scorer=None) -> str:
+def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekly_trend: str, output_dir: str = "reports", scorer=None, short_interest: dict = None) -> str:
     """Generates a premium HTML dashboard for individual ticker."""
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -674,6 +674,69 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
             </div>
         </div>
         """
+
+    # --- SHORT INTEREST PANEL ---
+    si = short_interest or {}
+    float_short = si.get('float_short')
+    days_to_cover = si.get('days_to_cover')
+    mom_change_pct = si.get('mom_change_pct')
+    squeeze_score = si.get('squeeze_score')
+    squeeze_label = si.get('squeeze_label', 'N/A')
+
+    float_str = f"{float_short * 100:.1f}%" if float_short is not None else "N/A"
+    dtc_str = f"{days_to_cover:.1f}" if days_to_cover is not None else "N/A"
+    sq_str = f"{squeeze_score}" if squeeze_score is not None else "N/A"
+    sq_pct = squeeze_score if squeeze_score is not None else 0
+
+    if mom_change_pct is not None:
+        mom_arrow = "&#9650;" if mom_change_pct >= 0 else "&#9660;"
+        mom_color = "var(--accent-poor)" if mom_change_pct >= 0 else "var(--accent-optimal)"
+        mom_str = f"{mom_arrow} {mom_change_pct:+.1f}%"
+    else:
+        mom_str, mom_color = "N/A", "var(--text-secondary)"
+
+    sq_badge_class = "badge-poor" if squeeze_label == "High" else ("badge-marginal" if squeeze_label == "Moderate" else "badge-good")
+    sq_bar_color = "var(--accent-poor)" if sq_pct >= 65 else ("var(--accent-marginal)" if sq_pct >= 35 else "var(--accent-optimal)")
+
+    if squeeze_label == "High":
+        si_context = "Elevated short interest creates mechanical squeeze risk. Any positive catalyst may trigger forced covering. Verify recent strength is not already a squeeze in progress before entering."
+    elif squeeze_label == "Moderate":
+        si_context = "Moderate short interest. Squeeze potential exists but requires a strong catalyst. A technically valid entry here carries embedded upside optionality from potential covering."
+    elif squeeze_label == "Low":
+        si_context = "Low short interest. A rally in this name is unlikely to have a squeeze component — fundamentals or sector rotation are the more probable drivers."
+    else:
+        si_context = "Short interest data unavailable. FINRA reports are delayed; check ORTEX or S3 Partners for real-time utilization rates."
+
+    si_panel_html = f"""
+        <div class="glass-card" style="margin-bottom: 1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:0.05em; margin:0;">Short Interest &amp; Squeeze Potential</h3>
+                <span class="badge {sq_badge_class}">{squeeze_label} Squeeze Risk</span>
+            </div>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:1rem;">
+                <div>
+                    <span class="text-xs text-muted block">Float Short</span>
+                    <span class="font-mono" style="font-size:1.3rem; font-weight:700;">{float_str}</span>
+                </div>
+                <div>
+                    <span class="text-xs text-muted block">Days to Cover</span>
+                    <span class="font-mono" style="font-size:1.3rem; font-weight:700;">{dtc_str}</span>
+                </div>
+                <div>
+                    <span class="text-xs text-muted block">MoM Short Change</span>
+                    <span class="font-mono text-sm" style="color:{mom_color}; font-weight:600;">{mom_str}</span>
+                </div>
+                <div>
+                    <span class="text-xs text-muted block">Squeeze Score</span>
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-top:4px;">
+                        <div class="progress-bar-bg" style="width:80px;"><div class="progress-bar-fg" style="width:{sq_pct}%; background:{sq_bar_color};"></div></div>
+                        <span class="font-mono text-xs text-muted">{sq_str}/100</span>
+                    </div>
+                </div>
+            </div>
+            <p class="text-xs text-muted" style="margin:0; padding-top:0.75rem; border-top:1px solid rgba(255,255,255,0.05);">{si_context}</p>
+        </div>
+    """
 
     html = f"""
     <!DOCTYPE html>
@@ -748,6 +811,8 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
                 </div>
             </div>
 
+            {si_panel_html}
+
             <!-- Chart Area -->
             <div class="glass-card" style="padding:1rem;">
                 {chart_html}
@@ -764,7 +829,7 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
 
     return file_path
 
-def generate_index(reports: list, output_dir: str = "reports"):
+def generate_index(reports: list, output_dir: str = "reports", basket_context: dict = None):
     """Generates the Main Dashboard Index with market breadth, search, sorting, and deltas."""
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -886,6 +951,81 @@ def generate_index(reports: list, output_dir: str = "reports"):
         </tr>
         """
 
+    # --- BASKET CONTEXT WIDGET ---
+    bc = basket_context or {}
+    bc_signal = bc.get('signal', 'NEUTRAL')
+    bc_label = bc.get('signal_label', 'Neutral')
+    bc_color = bc.get('signal_color', 'var(--accent-marginal)')
+    bc_error = bc.get('error')
+
+    if bc_error or bc.get('relative_5d') is None:
+        basket_context_html = f"""
+        <div class="glass-card" style="margin-bottom:2rem; padding:1rem 1.5rem; opacity:0.6;">
+            <span class="text-xs text-muted" style="text-transform:uppercase; letter-spacing:0.05em;">Basket Intelligence (GVIP vs SPY)</span>
+            <p class="text-xs text-muted" style="margin:0.5rem 0 0 0;">Data unavailable — {bc_error or 'run analysis to populate'}</p>
+        </div>
+        """
+    else:
+        gvip_5d = bc['gvip_5d']
+        spy_5d = bc['spy_5d']
+        rel_5d = bc['relative_5d']
+        rel_20d = bc['relative_20d']
+        gvip_price = bc.get('gvip_price', 0)
+        spy_price = bc.get('spy_price', 0)
+
+        def _pct_color(v):
+            return "var(--accent-optimal)" if v >= 0 else "var(--accent-poor)"
+
+        if bc_signal == 'LONG_BASKET_LEADING':
+            interpretation = "Hedge fund VIP longs (GVIP) are outperforming the market. Technically-valid entries carry higher fundamental conviction backing."
+            bc_badge_class = "badge-optimal"
+            bc_border = "rgba(74, 222, 128, 0.25)"
+        elif bc_signal == 'SHORT_SQUEEZE_REGIME':
+            interpretation = "GVIP longs are lagging SPY — the rally is being driven by forced short covering, not fundamental buying. Entries on current strength carry elevated reversal risk."
+            bc_badge_class = "badge-poor"
+            bc_border = "rgba(248, 113, 113, 0.25)"
+        else:
+            interpretation = "No significant divergence between hedge fund longs and the broader market. Evaluate entries on their own technical merit."
+            bc_badge_class = "badge-marginal"
+            bc_border = "rgba(251, 191, 36, 0.15)"
+
+        basket_context_html = f"""
+        <div class="glass-card" style="margin-bottom:2rem; padding:1.25rem 1.5rem; border: 1px solid {bc_border};">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                <div>
+                    <span class="text-xs text-muted" style="text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:0.4rem;">Basket Intelligence &mdash; GVIP vs SPY</span>
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.4rem;">
+                        <span style="font-size:1.1rem; font-weight:600; color:{bc_color};">{bc_label}</span>
+                        <span class="badge {bc_badge_class}">Positioning Signal</span>
+                    </div>
+                    <p class="text-xs text-muted" style="margin:0; max-width:420px;">{interpretation}</p>
+                </div>
+                <div style="display:flex; gap:1.5rem; flex-wrap:wrap;">
+                    <div style="text-align:center;">
+                        <span class="text-xs text-muted block">GVIP 5D</span>
+                        <span class="font-mono" style="font-size:1rem; font-weight:600; color:{_pct_color(gvip_5d)};">{gvip_5d:+.1f}%</span>
+                        <span class="text-xs text-muted block">${gvip_price:.2f}</span>
+                    </div>
+                    <div style="text-align:center;">
+                        <span class="text-xs text-muted block">SPY 5D</span>
+                        <span class="font-mono" style="font-size:1rem; font-weight:600; color:{_pct_color(spy_5d)};">{spy_5d:+.1f}%</span>
+                        <span class="text-xs text-muted block">${spy_price:.2f}</span>
+                    </div>
+                    <div style="text-align:center; padding-left:1.25rem; border-left:1px solid rgba(255,255,255,0.1);">
+                        <span class="text-xs text-muted block">Relative 5D</span>
+                        <span class="font-mono" style="font-size:1.25rem; font-weight:700; color:{bc_color};">{rel_5d:+.1f}%</span>
+                        <span class="text-xs text-muted block">GVIP &minus; SPY</span>
+                    </div>
+                    <div style="text-align:center;">
+                        <span class="text-xs text-muted block">Relative 20D</span>
+                        <span class="font-mono" style="font-size:1rem; font-weight:600; color:{_pct_color(rel_20d)};">{rel_20d:+.1f}%</span>
+                        <span class="text-xs text-muted block">Trend</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """
+
     html = f"""
     <!DOCTYPE html>
     <html lang="en">
@@ -910,6 +1050,7 @@ def generate_index(reports: list, output_dir: str = "reports"):
             </header>
 
             {breadth_html}
+            {basket_context_html}
             {hero_html}
 
             <!-- Search & Filter Bar -->

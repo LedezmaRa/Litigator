@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 from typing import Dict, List, Optional
 from src.dashboard import CSS_DARK_THEME, INTERACTIVE_JS, generate_top_nav
+from src.baskets import fetch_basket_context
 from src.sectors.charts import generate_detailed_driver_chart_svg
 from src.sectors.drivers import DriverAnalysis
 
@@ -402,6 +403,126 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 # ---------------------------------------------------------------------------
+# Basket Intelligence section
+# ---------------------------------------------------------------------------
+
+def _generate_basket_intelligence_html() -> str:
+    """
+    Fetches GVIP vs SPY basket context and renders the Basket Intelligence panel.
+
+    First-principles logic:
+      GVIP tracks the 50 stocks most commonly held as top-10 positions by
+      fundamentally-driven hedge funds (Goldman Sachs Hedge Fund VIP ETF).
+      When GVIP underperforms SPY, the market rally is NOT being driven by
+      genuine fundamental conviction — it's being led by mechanical short
+      covering in crowded shorts. Sector-level signals should be interpreted
+      with caution in a short-squeeze regime.
+    """
+    bc = fetch_basket_context()
+
+    signal = bc.get('signal', 'NEUTRAL')
+    signal_label = bc.get('signal_label', 'Neutral')
+    signal_color = bc.get('signal_color', 'var(--accent-marginal)')
+    error = bc.get('error')
+
+    if error or bc.get('relative_5d') is None:
+        return f"""
+    <section class="glass-card" style="margin-bottom:2rem; padding:1.25rem 1.5rem; opacity:0.65;">
+        <h3 style="margin:0 0 0.4rem 0; font-size:1rem;">Basket Intelligence</h3>
+        <p class="text-muted" style="font-size:0.8em; margin:0;">Data unavailable &mdash; {error or 'run analysis to populate'}</p>
+    </section>"""
+
+    gvip_5d = bc['gvip_5d']
+    spy_5d = bc['spy_5d']
+    rel_5d = bc['relative_5d']
+    rel_20d = bc['relative_20d']
+    gvip_price = bc.get('gvip_price', 0)
+    spy_price = bc.get('spy_price', 0)
+
+    def _col(v):
+        return "#4ade80" if v >= 0 else "#f87171"
+
+    if signal == 'LONG_BASKET_LEADING':
+        interpretation = (
+            "Hedge fund VIP longs (GVIP) are outperforming the market. "
+            "Rallies are being driven by genuine fundamental conviction — sector signals and technical entries have higher reliability."
+        )
+        border_color = "rgba(74,222,128,0.3)"
+    elif signal == 'SHORT_SQUEEZE_REGIME':
+        interpretation = (
+            "GVIP longs are lagging SPY — the broader market rally is being driven by forced short covering in "
+            "crowded shorts, not fundamental buying. Sector tailwinds may be overstated; treat breakouts with caution "
+            "until GVIP catches up."
+        )
+        border_color = "rgba(248,113,113,0.3)"
+    else:
+        interpretation = (
+            "No significant divergence between hedge fund longs and the broader market. "
+            "Moves are consistent with normal participation. Evaluate sector signals on their own merit."
+        )
+        border_color = "rgba(251,191,36,0.15)"
+
+    metrics = [
+        ("GVIP 5D", f"{gvip_5d:+.1f}%", _col(gvip_5d), f"${gvip_price:.2f}"),
+        ("SPY 5D",  f"{spy_5d:+.1f}%",  _col(spy_5d),  f"${spy_price:.2f}"),
+    ]
+    metric_cells = ""
+    for label, val, col, sub in metrics:
+        metric_cells += f"""
+        <div style="text-align:center; padding:0.75rem 1rem;
+            background:rgba(255,255,255,0.03); border-radius:8px;
+            border:1px solid rgba(255,255,255,0.08);">
+            <div style="font-size:0.65rem; color:var(--text-secondary); text-transform:uppercase;
+                letter-spacing:0.07em; margin-bottom:4px;">{label}</div>
+            <div style="font-size:1.1rem; font-weight:700; color:{col};">{val}</div>
+            <div style="font-size:0.7rem; color:var(--text-secondary);">{sub}</div>
+        </div>"""
+
+    return f"""
+    <section class="glass-card" style="margin-bottom:2rem; padding:1.5rem; border:1px solid {border_color};">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1.5rem;">
+            <div style="flex:1; min-width:260px;">
+                <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
+                    <h3 style="margin:0; font-size:1rem;">Basket Intelligence</h3>
+                    <span style="font-size:0.7rem; border:1px solid {signal_color}; color:{signal_color};
+                        padding:2px 8px; border-radius:4px; text-transform:uppercase; letter-spacing:0.05em;">
+                        Positioning Signal
+                    </span>
+                </div>
+                <p class="text-muted" style="font-size:0.78em; margin:0 0 0.75rem 0;">
+                    GVIP (Goldman Sachs Hedge Fund VIP ETF) vs SPY &mdash; proxy for hedge fund crowded-long conviction
+                </p>
+                <div style="font-size:1.05rem; font-weight:600; color:{signal_color}; margin-bottom:0.5rem;">
+                    {signal_label}
+                </div>
+                <p style="font-size:0.8em; color:var(--text-secondary); margin:0; line-height:1.5;">
+                    {interpretation}
+                </p>
+            </div>
+            <div style="display:flex; gap:1rem; flex-wrap:wrap; align-items:center;">
+                {metric_cells}
+                <div style="text-align:center; padding:0.75rem 1.25rem;
+                    background:rgba(255,255,255,0.04); border-radius:8px;
+                    border:1px solid {signal_color}; min-width:110px;">
+                    <div style="font-size:0.65rem; color:var(--text-secondary); text-transform:uppercase;
+                        letter-spacing:0.07em; margin-bottom:4px;">Relative 5D</div>
+                    <div style="font-size:1.4rem; font-weight:700; color:{signal_color};">{rel_5d:+.1f}%</div>
+                    <div style="font-size:0.65rem; color:var(--text-secondary);">GVIP &minus; SPY</div>
+                </div>
+                <div style="text-align:center; padding:0.75rem 1rem;
+                    background:rgba(255,255,255,0.03); border-radius:8px;
+                    border:1px solid rgba(255,255,255,0.08);">
+                    <div style="font-size:0.65rem; color:var(--text-secondary); text-transform:uppercase;
+                        letter-spacing:0.07em; margin-bottom:4px;">Relative 20D</div>
+                    <div style="font-size:1.1rem; font-weight:700; color:{_col(rel_20d)};">{rel_20d:+.1f}%</div>
+                    <div style="font-size:0.65rem; color:var(--text-secondary);">Trend</div>
+                </div>
+            </div>
+        </div>
+    </section>"""
+
+
+# ---------------------------------------------------------------------------
 # Main page generator
 # ---------------------------------------------------------------------------
 
@@ -424,6 +545,9 @@ def generate_macro_page(
 
     # 4. Insights Sidebar (live correlations)
     sidebar_html = generate_economic_insights_sidebar(sector_drivers_map)
+
+    # 4b. Basket Intelligence section
+    basket_intel_html = _generate_basket_intelligence_html()
 
     # 5. Sector filter pills
     all_etfs = sorted(sector_drivers_map.keys())
@@ -709,6 +833,9 @@ def generate_macro_page(
 
         <!-- Macro Regime Panel (Improvement 2) -->
         {regime_html}
+
+        <!-- Basket Intelligence -->
+        {basket_intel_html}
 
         <main class="dashboard-layout">
             <div class="main-content">

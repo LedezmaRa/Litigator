@@ -17,10 +17,11 @@ from src.indicators import calculate_all_indicators
 from src.scoring import EntryScorer
 from src.config import EMA_FAST_PERIOD, EMA_SLOW_PERIOD
 from src.dashboard import generate_dashboard, generate_index
+from src.baskets import fetch_short_interest_parallel, fetch_basket_context
 
 DEFAULT_WATCHLIST = ["HAL", "AVGO", "AMZN", "NVDA", "GOOGL", "NEE", "NFLX", "HLT", "USAR", "UUUU", "MP"]
 
-def analyze_ticker(ticker: str, generate_html: bool = True, prefetched_df: pd.DataFrame = None) -> dict:
+def analyze_ticker(ticker: str, generate_html: bool = True, prefetched_df: pd.DataFrame = None, prefetched_si: dict = None) -> dict:
     """
     Analyzes a single ticker and prints the report.
     Returns a dict with summary info if successful.
@@ -87,7 +88,8 @@ def analyze_ticker(ticker: str, generate_html: bool = True, prefetched_df: pd.Da
         print(f"Target (5R):       ${target_5r:.2f}")
 
         if generate_html:
-            path = generate_dashboard(ticker, df, result, "WEEKLY", scorer=scorer)
+            si_data = prefetched_si or {}
+            path = generate_dashboard(ticker, df, result, "WEEKLY", scorer=scorer, short_interest=si_data)
             print(f"Dashboard generated: {path}")
 
             # Helper metrics
@@ -180,14 +182,16 @@ def main():
 
     # Pre-fetch all data in parallel (I/O bound), then score sequentially (CPU bound)
     data_map = fetch_data_parallel(tickers, period="2y", interval="1wk")
+    si_map = fetch_short_interest_parallel(tickers)
+    basket_context = fetch_basket_context()
 
     for t in tickers:
-        res = analyze_ticker(t, generate_html=True, prefetched_df=data_map.get(t))
+        res = analyze_ticker(t, generate_html=True, prefetched_df=data_map.get(t), prefetched_si=si_map.get(t))
         if res:
             summary_reports.append(res)
-            
+
     if summary_reports:
-        generate_index(summary_reports)
+        generate_index(summary_reports, basket_context=basket_context)
         index_path = os.path.abspath("reports/index.html")
         print(f"\nAnalysis Complete. Index generated at: {index_path}")
         # Try to open automatically
