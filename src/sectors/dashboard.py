@@ -22,7 +22,7 @@ from dataclasses import dataclass
 from src.data import fetch_data_parallel
 import src.scoring as core_scoring
 from src.indicators import calculate_all_indicators
-from src.dashboard import CSS_DARK_THEME, INTERACTIVE_JS, generate_top_nav  # Shared Theme + JS
+from src.utils.html_utils import CSS_DARK_THEME, INTERACTIVE_JS, METRICS_GUIDE_HTML, generate_top_nav, generate_breadcrumb  # Shared Theme + JS
 from src.sectors.scoring import (
     StockMetrics, CompositeScore, build_stock_metrics, 
     rank_all_sectors, get_trade_candidates
@@ -269,8 +269,8 @@ def generate_sector_leaderboard_html(sector_metrics: List[SectorMetrics], closes
 
         rows += f"""
         <tr>
-            <td style="color:{rank_color}; font-weight:bold;">#{i+1}</td>
-            <td>
+            <td data-label="Rank" style="color:{rank_color}; font-weight:bold;">#{i+1}</td>
+            <td data-label="Sector">
                 <div style="display:flex; align-items:center; gap:0.75rem;">
                     {sparkline}
                     <div>
@@ -281,23 +281,23 @@ def generate_sector_leaderboard_html(sector_metrics: List[SectorMetrics], closes
                     </div>
                 </div>
             </td>
-            <td style="text-align:center;">
+            <td data-label="Top-5 Score" style="text-align:center;">
                 <b>{m.top5_avg_score:.0f}</b>
                 <br><span class="text-xs text-muted">top 5</span>
             </td>
-            <td style="text-align:center;">{m.avg_composite_score:.0f}</td>
-            <td style="text-align:center; color:{pct_up_color}; font-weight:600;">{m.pct_trending_up:.0f}%</td>
-            <td style="text-align:center;">{ready_badge}</td>
-            <td style="text-align:center;">{rotation_cell}</td>
-            <td class="{_color_class(m.etf_ret_1w)}">{fmt_pct(m.etf_ret_1w)}</td>
-            <td class="{_color_class(m.etf_ret_1m)}">{fmt_pct(m.etf_ret_1m)}</td>
-            <td class="{_color_class(m.etf_ret_3m)}">{fmt_pct(m.etf_ret_3m)}</td>
+            <td data-label="Avg Score" style="text-align:center;">{m.avg_composite_score:.0f}</td>
+            <td data-label="% Up" style="text-align:center; color:{pct_up_color}; font-weight:600;">{m.pct_trending_up:.0f}%</td>
+            <td data-label="Ready" style="text-align:center;">{ready_badge}</td>
+            <td data-label="Rotation" style="text-align:center;">{rotation_cell}</td>
+            <td data-label="1W" class="{_color_class(m.etf_ret_1w)}">{fmt_pct(m.etf_ret_1w)}</td>
+            <td data-label="1M" class="{_color_class(m.etf_ret_1m)}">{fmt_pct(m.etf_ret_1m)}</td>
+            <td data-label="3M" class="{_color_class(m.etf_ret_3m)}">{fmt_pct(m.etf_ret_3m)}</td>
         </tr>
         """
 
     return f"""
     <h2 style="margin-top:2rem;">Sector Leaderboard</h2>
-    <p class="text-muted" style="margin-bottom:1rem;">
+    <p class="text-muted mb-2">
         Ranked by Top 5 Average Composite Score (RS 50% + Trend 30% + Volume 20%, percentile within sector, 0–100) •
         % Up = share of stocks with positive 3M relative return vs sector ETF •
         Rotation = ENTERING/HOLDING/EXITING/AVOIDING based on 1W vs 1M momentum •
@@ -528,7 +528,7 @@ def generate_benchmarks_html(closes: pd.DataFrame, data_dict: Dict) -> str:
 
     return f"""
     <h2 style="margin-top:2rem;">Market Benchmarks</h2>
-    <p class="text-muted" style="margin-bottom:1rem;">Key market indicators with historical context — where are we today vs. the past 52 weeks?</p>
+    <p class="text-muted mb-2">Key market indicators with historical context — where are we today vs. the past 52 weeks?</p>
     <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:1.5rem; margin-bottom:2rem;">
         {cards}
     </div>
@@ -598,14 +598,14 @@ def generate_sector_html(config: Dict, ranked_sectors: Dict, closes: pd.DataFram
 
             rows += f"""
             <tr style="{row_style}">
-                <td style="color:var(--text-secondary);">#{i+1}</td>
-                <td><b>{stock.ticker}</b>{stage2_marker}<br><span class="text-xs text-muted">{price_display}</span></td>
-                <td style="min-width:60px;">
+                <td data-label="#" style="color:var(--text-secondary);">#{i+1}</td>
+                <td data-label="Ticker"><b>{stock.ticker}</b>{stage2_marker}<br><span class="text-xs text-muted">{price_display}</span></td>
+                <td data-label="Score" style="min-width:60px;">
                     <span style="font-weight:600;">{stock.composite_score:.0f}</span>
                     {score_bar}
                 </td>
-                <td class="{_color_class(stock.rel_3m)}">{fmt_pct(stock.rel_3m)}</td>
-                <td><span class="{trend_badge}">{stock.trend}</span></td>
+                <td data-label="Rel 3M" class="{_color_class(stock.rel_3m)}">{fmt_pct(stock.rel_3m)}</td>
+                <td data-label="Trend"><span class="{trend_badge}">{stock.trend}</span></td>
             </tr>
             """
 
@@ -638,7 +638,7 @@ def generate_sector_html(config: Dict, ranked_sectors: Dict, closes: pd.DataFram
 
     return f"""
     <h2 style="margin-top:2rem;">Sector Analysis (Stage 1)</h2>
-    <p class="text-muted" style="margin-bottom:1rem;">25 stocks per sector ranked by Composite Score (Relative Strength 50% + Trend 30% + Volume 20%)</p>
+    <p class="text-muted mb-2">25 stocks per sector ranked by Composite Score (Relative Strength 50% + Trend 30% + Volume 20%)</p>
     <div class="grid-cols-3" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap:1.5rem;">
         {html}
     </div>
@@ -726,7 +726,7 @@ def generate_signal_performance_html(backtest: Dict) -> str:
         color = "var(--accent-optimal)" if pct >= 60 else "var(--accent-marginal)" if pct >= 40 else "var(--accent-poor)"
         return f"""
         <div class="glass-card" style="padding:1.25rem; text-align:center;">
-            <div class="text-xs text-muted" style="margin-bottom:0.5rem;">{label}</div>
+            <div class="text-xs text-muted mb-1">{label}</div>
             <div style="font-size:2rem; font-weight:bold; color:{color};">{pct:.0f}%</div>
             <div class="text-xs text-muted">{hits} of {total} signals</div>
             <div style="margin:0.5rem auto; display:inline-block;">{bar}</div>
@@ -742,7 +742,7 @@ def generate_signal_performance_html(backtest: Dict) -> str:
 
     return f"""
     <h2 style="margin-top:2rem;">Signal Performance</h2>
-    <p class="text-muted" style="margin-bottom:1rem;">
+    <p class="text-muted mb-2">
         Historical hit rates based on {total} past projection{'' if total == 1 else 's'} (last 60 days, evaluated after 5-day lag).
         Hit = price reached target within 20 trading bars (≈4 weeks) of signal date.
     </p>
@@ -787,31 +787,31 @@ def generate_global_leaderboard_html(candidates: List[TradeCandidateAnalysis]) -
 
         rows += f"""
         <tr data-entry-score="{c.entry_score:.0f}" data-regime="{c.regime}" data-sector="{c.sector_etf}">
-            <td style="{rank_style}">#{i+1}</td>
-            <td>
+            <td data-label="Rank" style="{rank_style}">#{i+1}</td>
+            <td data-label="Ticker">
                 <b>{c.ticker}</b>
                 <br><span class="text-xs text-muted">{c.name}</span>
             </td>
-            <td style="text-align:center;">
+            <td data-label="Sector" style="text-align:center;">
                 <span class="badge badge-info" style="font-size:0.65rem;">{c.sector_etf}</span>
             </td>
-            <td style="text-align:center; font-size:1.1rem; font-weight:bold; color:{combined_color};">{combined}</td>
-            <td style="text-align:center;">{c.composite_score:.0f}</td>
-            <td style="text-align:center;">
+            <td data-label="Combined" style="text-align:center; font-size:1.1rem; font-weight:bold; color:{combined_color};">{combined}</td>
+            <td data-label="Composite" style="text-align:center;">{c.composite_score:.0f}</td>
+            <td data-label="Entry Score" style="text-align:center;">
                 <b style="color:{entry_color};">{c.entry_score:.0f}</b>
                 {breakdown_html}
             </td>
-            <td>
+            <td data-label="Trend / Regime">
                 <span class="{_pill_class(c.trend)}">{c.trend}</span>
                 <br><span class="{_pill_class(c.regime)}" style="margin-top:2px; display:inline-block;">{_regime_display(c.regime)}</span>
             </td>
-            <td style="text-align:center;">{ready_star}</td>
+            <td data-label="Ready" style="text-align:center;">{ready_star}</td>
         </tr>
         """
 
     return f"""
     <h2 style="margin-top:2rem;">Global Stock Leaderboard</h2>
-    <p class="text-muted" style="margin-bottom:1rem;">
+    <p class="text-muted mb-2">
         Top 30 stocks across all sectors ranked by <b>Combined Score</b> = 50% Composite (breadth) + 50% Entry Score (quality).
         Use this view to find the best setups regardless of sector.
         Hover breakdown cells for factor explanations.
@@ -882,41 +882,41 @@ def generate_candidates_html(candidates: List[TradeCandidateAnalysis], data_dict
 
         rows += f"""
         <tr data-entry-score="{c.entry_score:.0f}" data-regime="{c.regime}" data-sector="{c.sector_etf}">
-            <td style="text-align:center;">{ready_star}{not_ready_hint}</td>
-            <td>
+            <td data-label="Ready" style="text-align:center;">{ready_star}{not_ready_hint}</td>
+            <td data-label="Ticker">
                 <b>{c.ticker}</b>
                 <br><span class="text-xs text-muted">{c.name}</span>
             </td>
-            <td style="text-align:center;">
+            <td data-label="Sector" style="text-align:center;">
                 <span class="text-xs text-muted">{c.sector_etf}</span>
             </td>
-            <td style="text-align:center;">
+            <td data-label="Price / ADX" style="text-align:center;">
                 {price_display}
                 <br><span class="text-xs text-muted">ADX {c.adx:.0f}</span>
             </td>
-            <td style="text-align:center;">
+            <td data-label="Composite" style="text-align:center;">
                 <b>{c.composite_score:.0f}</b>
                 <br><span class="text-xs text-muted">Stage 1</span>
             </td>
-            <td style="text-align:center;">
+            <td data-label="Entry Score" style="text-align:center;">
                 <b style="color:{entry_color};">{c.entry_score:.0f}</b>
                 {breakdown_html}
             </td>
-            <td>
+            <td data-label="Trend / Regime">
                 <span class="{_pill_class(c.trend)}">{c.trend}</span>
                 <br><span class="{_pill_class(c.regime)}" style="margin-top:3px; display:inline-block;">{_regime_display(c.regime)}</span>
             </td>
-            <td style="color:var(--accent-poor); font-size:0.8rem;">
+            <td data-label="Stop" style="color:var(--accent-poor); font-size:0.8rem;">
                 ${c.stop_price:.2f}
                 <br><span class="text-xs">−{stop_pct:.1f}% · {c.stop_dist_atr:.1f}×ATR</span>
             </td>
-            <td>{chart}</td>
+            <td data-label="Chart">{chart}</td>
         </tr>
         """
 
     return f"""
     <h2 style="margin-top:2rem;">Trade Candidates (Stage 2)</h2>
-    <p class="text-muted" style="margin-bottom:1rem;">
+    <p class="text-muted mb-2">
         Top 5 per sector scored by EMA-ADX-ATR Entry System (EMA Proximity 25 + ADX Stage 25 + Volume 20 + Structure 20 + R:R 10 = 100).
         ★ = Entry ≥60 <em>and</em> TRENDING regime.
     </p>
@@ -1012,7 +1012,7 @@ def generate_projections_html(ranked_projections: List[ProjectionResult]) -> str
 
     return f"""
     <h2 style="margin-top:2rem;">Projections &amp; Targets (Stage 3)</h2>
-    <p class="text-muted" style="margin-bottom:1rem;">ATR-based targets for trade-ready setups. Stop = regime-aware ATR multiple below EMA20. Targets = 2R and 3R multiples of that risk unit.</p>
+    <p class="text-muted mb-2">ATR-based targets for trade-ready setups. Stop = regime-aware ATR multiple below EMA20. Targets = 2R and 3R multiples of that risk unit.</p>
     <div class="glass-card">
         <div style="margin-bottom:1rem; display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
             <select id="proj-conf-filter" class="search-input" style="width:auto; padding:0.35rem 0.65rem; font-size:0.8rem;">
@@ -1180,7 +1180,7 @@ def generate_sector_detail_page(
                 </div>
             </div>
 
-            <div style="margin-bottom:1rem;">
+            <div class="mb-2">
                 {chart}
             </div>
 
@@ -1226,19 +1226,21 @@ def generate_sector_detail_page(
     <body>
         {generate_top_nav("")}
         <div class="container">
-            <a href="sector_analysis.html" class="back-link">&larr; Back to Sector Overview</a>
+            {generate_breadcrumb([("Command Center", "index.html"), ("Sector Analysis", "sector_analysis.html"), (sector_name, None)])}
 
-            <header style="margin-bottom:2rem;">
+            <header class="mb-4">
                 <h1>{sector_name}</h1>
                 <p class="text-muted">{etf} • Top 25 Stocks with EMA/ADX/ATR Indicators</p>
             </header>
 
-            <section style="margin-bottom:3rem;">
+            <section class="mb-6">
                 <h2>Sector ETF: {etf}</h2>
                 <div class="glass-card">
                     {etf_chart}
                 </div>
             </section>
+
+            {METRICS_GUIDE_HTML}
 
             <section>
                 <h2>Stocks by Composite Score</h2>
@@ -1250,6 +1252,11 @@ def generate_sector_detail_page(
                 </div>
                 <div class="stock-grid">
                     {stock_cards}
+                </div>
+                <div id="search-empty-state" class="hidden empty-state glass-card" style="margin-top:1rem;">
+                    <div class="empty-icon">🔍</div>
+                    <p>No stocks match your search.</p>
+                    <p class="text-xs">Try a different ticker symbol or clear the search field.</p>
                 </div>
             </section>
 
@@ -1543,8 +1550,9 @@ def run_sector_analysis(output_dir="reports", focus_sector: Optional[str] = None
     <body>
         {generate_top_nav("sector_analysis")}
         <div class="container">
+            {generate_breadcrumb([("Command Center", "index.html"), ("Sector Analysis", None)])}
 
-            <header style="margin-bottom:2rem;">
+            <header class="mb-4">
                 <h1>Sector Analysis Dashboard</h1>
                 <p class="text-muted">Top 25 Stocks per Sector • 4-Stage Screening</p>
                 <div style="margin-top: 1rem; display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
@@ -1555,6 +1563,7 @@ def run_sector_analysis(output_dir="reports", focus_sector: Optional[str] = None
                 </div>
             </header>
 
+            {METRICS_GUIDE_HTML}
             {benchmarks_html_str}
             {leaderboard_html_str}
             {global_leaderboard_html_str}

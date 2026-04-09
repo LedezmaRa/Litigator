@@ -114,7 +114,8 @@ def generate_sparkline_svg(
     # Determine trend color
     trend_color = COLORS["green"] if prices.iloc[-1] >= prices.iloc[0] else COLORS["red"]
 
-    return f'''<svg width="{width}" height="{height}" viewBox="0 0 {width} {height}">
+    return f'''<svg role="img" aria-label="Price sparkline" width="{width}" height="{height}" viewBox="0 0 {width} {height}">
+    <title>Price sparkline</title>
     <path d="{path_d}" fill="none" stroke="{trend_color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>'''
 
@@ -167,7 +168,8 @@ def generate_price_chart_svg(
     def idx_to_x(i, total):
         return padding_left + (i / (total - 1)) * chart_width
 
-    svg_parts = [f'<svg width="{width}" height="{height}" viewBox="0 0 {width} {height}">']
+    svg_parts = [f'<svg role="img" aria-label="1-year price chart with EMA overlays" width="{width}" height="{height}" viewBox="0 0 {width} {height}">']
+    svg_parts.append('<title>1-year price chart with EMA overlays</title>')
 
     # Background
     svg_parts.append(f'<rect width="{width}" height="{height}" fill="{COLORS["bg"]}" rx="8"/>')
@@ -326,7 +328,8 @@ def generate_price_with_adx_chart_svg(
         val = max(0, min(100, val))
         return adx_top + adx_height - (val / 100 * adx_height)
 
-    svg_parts = [f'<svg width="{width}" height="{height}" viewBox="0 0 {width} {height}">']
+    svg_parts = [f'<svg role="img" aria-label="Price chart with ADX indicator" width="{width}" height="{height}" viewBox="0 0 {width} {height}">']
+    svg_parts.append('<title>Price chart with ADX indicator</title>')
 
     # Background
     svg_parts.append(f'<rect width="{width}" height="{height}" fill="{COLORS["bg"]}" rx="8"/>')
@@ -491,7 +494,8 @@ def generate_projection_chart_svg(
     # Confidence affects opacity
     opacity = 0.3 + (confidence / 100) * 0.7
 
-    svg_parts = [f'<svg width="{width}" height="{height}" viewBox="0 0 {width} {height}">']
+    svg_parts = [f'<svg role="img" aria-label="ATR-based price projection chart" width="{width}" height="{height}" viewBox="0 0 {width} {height}">']
+    svg_parts.append('<title>ATR-based price projection chart</title>')
 
     # Background
     svg_parts.append(f'<rect width="{width}" height="{height}" fill="{COLORS["bg"]}" rx="8"/>')
@@ -618,8 +622,8 @@ def generate_benchmark_chart_svg(
 
     # SVG is width="100%" so it fills its container; viewBox keeps the internal coordinate system
     svg_parts = [
-        f'<svg width="100%" viewBox="0 0 {width} {height}" '
-        f'preserveAspectRatio="none" style="display:block;">'
+        f'<svg role="img" aria-label="Benchmark performance chart" width="100%" viewBox="0 0 {width} {height}" '
+        f'preserveAspectRatio="none" style="display:block;"><title>Benchmark performance chart</title>'
     ]
 
     # Background
@@ -712,7 +716,8 @@ def generate_confidence_bar_svg(
     else:
         color = COLORS["red"]
 
-    return f'''<svg width="{width}" height="{height}" viewBox="0 0 {width} {height}">
+    return f'''<svg role="img" aria-label="Confidence level: {confidence:.0f}%" width="{width}" height="{height}" viewBox="0 0 {width} {height}">
+    <title>Confidence level: {confidence:.0f}%</title>
     <rect width="{width}" height="{height}" fill="{COLORS["grid"]}" rx="2"/>
     <rect width="{filled_width:.1f}" height="{height}" fill="{color}" rx="2"/>
 </svg>'''
@@ -744,7 +749,8 @@ def generate_driver_chart_svg(prices: pd.Series, width=150, height=50) -> str:
     polyline = f'<polyline points="{" ".join(points)}" fill="none" stroke="{color}" stroke-width="2" />'
         
     return f"""
-    <svg width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg">
+    <svg role="img" aria-label="Macro driver price trend" width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg">
+        <title>Macro driver price trend</title>
         <polyline points="{" ".join(points)}" fill="none" stroke="{color}" stroke-width="2" />
     </svg>
     """
@@ -875,7 +881,8 @@ def generate_detailed_driver_chart_svg(
     polyline_points = " ".join(points)
 
     # 5. SVG Construction
-    svg = [f'<svg width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg" style="background:{bg_color}; border-radius:8px;">']
+    svg = [f'<svg role="img" aria-label="Detailed macro driver chart for {name}" width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg" style="background:{bg_color}; border-radius:8px;">']
+    svg.append(f'<title>Macro driver chart: {name} ({ticker})</title>')
 
     # Grid & Y-Axis Labels (Driver Price)
     for i in range(5):

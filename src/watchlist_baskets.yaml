@@ -1,0 +1,123 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Watchlist Baskets — Market Diagnostic Panel
+#
+# Each basket is a macro sensor. The tickers are chosen because they proxy a
+# specific economic question, not because they are "good stocks." Together
+# they let the Command Center read market regime rather than just rank picks.
+#
+# Schema per basket:
+#   name:           Display name (short, shown in regime bar pills)
+#   macro_question: The one question this basket answers (shown as subtitle)
+#   description:    One-line blurb for the basket card
+#   tickers:        Dict of TICKER: "human label" pairs
+#
+# Notes:
+#   - NVDA intentionally appears in multiple baskets (cross-basket sensor)
+#   - Ticker keys must be valid yfinance symbols
+#   - Quote single-character tickers to avoid YAML ambiguity (e.g. "O", "T")
+# ─────────────────────────────────────────────────────────────────────────────
+
+baskets:
+  risk_appetite:
+    name: "Risk Appetite"
+    macro_question: "Are investors reaching for growth or hiding in defensives?"
+    description: "Growth vs. defensive bifurcation proxy"
+    tickers:
+      NVDA: "Nvidia — AI growth proxy"
+      AMD:  "AMD — cyclical semi growth"
+      JNJ:  "Johnson & Johnson — defensive"
+      PG:   "Procter & Gamble — defensive"
+      GOOGL: "Alphabet — mega-cap growth"
+
+  financial_credit:
+    name: "Financial & Credit"
+    macro_question: "Is the credit cycle expanding or contracting?"
+    description: "Banking health and credit conditions"
+    tickers:
+      JPM:  "JPMorgan Chase — money-center bank"
+      BAC:  "Bank of America — consumer credit proxy"
+      GS:   "Goldman Sachs — capital markets"
+      BRK-B: "Berkshire Hathaway — broad financial proxy"
+
+  consumer_health:
+    name: "Consumer Health"
+    macro_question: "Is the consumer bifurcating — high-end vs. low-end?"
+    description: "Discretionary vs. value consumer spending"
+    tickers:
+      AMZN: "Amazon — e-commerce & prime spend"
+      COST: "Costco — value-premium consumer"
+      DG:   "Dollar General — low-income consumer"
+      WMT:  "Walmart — mass-market consumer"
+      NFLX: "Netflix — discretionary streaming"
+
+  industrial_capex:
+    name: "Industrial / Capex"
+    macro_question: "Is the real economy expanding capital spending?"
+    description: "Heavy equipment and industrial demand"
+    tickers:
+      CAT:  "Caterpillar — infrastructure & mining"
+      URI:  "United Rentals — equipment rental"
+      DE:   "Deere — agriculture & construction"
+      HON:  "Honeywell — industrial conglomerate"
+
+  semiconductor_cycle:
+    name: "Semiconductor Cycle"
+    macro_question: "Where are we in the chip cycle — early expansion or late?"
+    description: "Leading indicator for tech capex (leads economy 6–9 months)"
+    tickers:
+      NVDA: "Nvidia — AI GPU dominance"
+      AMAT: "Applied Materials — wafer equipment"
+      LRCX: "Lam Research — etch & dep equipment"
+      AVGO: "Broadcom — networking & custom AI silicon"
+      TSM:  "TSMC — global foundry bellwether"
+
+  housing_rates:
+    name: "Housing / Rate Sensitivity"
+    macro_question: "What are interest rate expectations implying?"
+    description: "Fed expectations proxy via homebuilders (most rate-sensitive large caps)"
+    tickers:
+      DHI:  "D.R. Horton — largest US homebuilder"
+      LEN:  "Lennar — entry-level housing"
+      NEE:  "NextEra Energy — rate-sensitive utility"
+      HLT:  "Hilton Hotels — rate & travel proxy"
+
+  energy_inflation:
+    name: "Energy & Inflation"
+    macro_question: "Is inflation re-accelerating via energy prices?"
+    description: "Crude oil services and E&P inflation resurgence signal"
+    tickers:
+      XOM:  "Exxon Mobil — integrated major"
+      HAL:  "Halliburton — oilfield services"
+      FANG: "Diamondback Energy — Permian E&P"
+      CVX:  "Chevron — integrated energy"
+
+  ai_infrastructure:
+    name: "AI Infrastructure"
+    macro_question: "Is the AI capex build-out still accelerating?"
+    description: "Data center, power, and compute infrastructure"
+    tickers:
+      NVDA: "Nvidia — GPU compute"
+      SMCI: "Super Micro — AI servers"
+      VST:  "Vistra Energy — power demand"
+      CEG:  "Constellation Energy — nuclear baseload"
+      AVGO: "Broadcom — custom AI silicon & networking"
+
+  defense_geopolitical:
+    name: "Defense / Geopolitical"
+    macro_question: "Is geopolitical risk premium rising or fading?"
+    description: "Defense spending and risk-off flight-to-safety signal"
+    tickers:
+      LMT:  "Lockheed Martin — fighter jets & missiles"
+      RTX:  "RTX Corp — defense electronics"
+      NOC:  "Northrop Grumman — stealth & space"
+      GD:   "General Dynamics — naval & land systems"
+
+  china_global_demand:
+    name: "China / Global Demand"
+    macro_question: "Is non-US economic demand recovering?"
+    description: "Rare earths, materials, and export-linked global demand proxy"
+    tickers:
+      MP:   "MP Materials — US rare earth mining"
+      UUUU: "Energy Fuels — uranium & rare earths"
+      FSLR: "First Solar — solar manufacturing"
+      ALB:  "Albemarle — lithium & EV materials"

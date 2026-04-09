@@ -27,7 +27,26 @@ from src.darkpool import fetch_darkpool_data
 from src.volume_profile import calculate_volume_profile
 from src.insiders import fetch_insider_transactions
 
-DEFAULT_WATCHLIST = ["HAL", "AVGO", "AMZN", "NVDA", "GOOGL", "NEE", "NFLX", "HLT", "USAR", "UUUU", "MP"]
+def _load_default_watchlist() -> list:
+    """
+    Derive the default watchlist by deduplicating all tickers across all
+    baskets defined in src/watchlist_baskets.yaml.
+
+    Falls back to the original hardcoded list if the YAML cannot be loaded
+    (e.g. file missing, YAML parse error) so the CLI never breaks.
+    """
+    try:
+        from src.basket_engine import get_all_basket_tickers
+        tickers = get_all_basket_tickers()
+        if tickers:
+            return tickers
+    except Exception as exc:
+        print(f"[watchlist] Could not load basket config — using fallback list. ({exc})")
+    # Original hardcoded fallback
+    return ["HAL", "AVGO", "AMZN", "NVDA", "GOOGL", "NEE", "NFLX", "HLT", "USAR", "UUUU", "MP"]
+
+
+DEFAULT_WATCHLIST = _load_default_watchlist()
 
 
 def _fetch_ticker_enrichment(ticker: str) -> dict:
@@ -55,14 +74,22 @@ def _fetch_ticker_enrichment(ticker: str) -> dict:
         'insiders':       lambda: fetch_insider_transactions(ticker),
     }
 
-    with ThreadPoolExecutor(max_workers=4) as ex:
+    ex = ThreadPoolExecutor(max_workers=4)
+    try:
         futures = {ex.submit(fn): key for key, fn in tasks.items()}
-        for future in as_completed(futures):
-            key = futures[future]
-            try:
-                enrichment[key] = future.result() or {}
-            except Exception:
-                enrichment[key] = {}
+        try:
+            for future in as_completed(futures, timeout=45):
+                key = futures[future]
+                try:
+                    enrichment[key] = future.result(timeout=30) or {}
+                except Exception:
+                    enrichment[key] = {}
+        except Exception:
+            # Overall enrichment timed out — use whatever we collected so far
+            pass
+    finally:
+        # Do NOT wait for stuck threads; daemon threads will be abandoned
+        ex.shutdown(wait=False, cancel_futures=True)
 
     return enrichment
 

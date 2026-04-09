@@ -9,6 +9,7 @@ from .fundamentals import (
     StockFundamentals, ExecutiveInfo, AnalystRatings,
     UpgradeDowngrade, NewsItem, EarningsInfo
 )
+from ..utils.ui_utils import format_date
 
 
 def format_market_cap(value: Optional[float]) -> str:
@@ -116,7 +117,7 @@ def generate_overview_section(fundamentals: StockFundamentals) -> str:
     employees = format_employees(fundamentals.employees)
 
     return f"""
-    <section class="glass-card" style="margin-bottom: 1.5rem;">
+    <section class="glass-card mb-3">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
             <h2 style="margin: 0;">Company Overview</h2>
             {website_link}
@@ -192,7 +193,7 @@ def generate_metrics_section(fundamentals: StockFundamentals) -> str:
 
     # Valuation metrics
     valuation = f"""
-    <div style="margin-bottom: 1.5rem;">
+    <div class="mb-3">
         <h3 class="text-sm text-muted" style="margin-bottom: 0.75rem;">Valuation</h3>
         <div class="metric-grid">
             {metric_card("Market Cap", format_market_cap(fundamentals.market_cap))}
@@ -210,7 +211,7 @@ def generate_metrics_section(fundamentals: StockFundamentals) -> str:
     earn_growth_class = get_color_class(fundamentals.earnings_growth)
 
     growth = f"""
-    <div style="margin-bottom: 1.5rem;">
+    <div class="mb-3">
         <h3 class="text-sm text-muted" style="margin-bottom: 0.75rem;">Growth</h3>
         <div class="metric-grid">
             {metric_card("Revenue", format_revenue(fundamentals.revenue))}
@@ -222,7 +223,7 @@ def generate_metrics_section(fundamentals: StockFundamentals) -> str:
 
     # Profitability metrics
     profitability = f"""
-    <div style="margin-bottom: 1.5rem;">
+    <div class="mb-3">
         <h3 class="text-sm text-muted" style="margin-bottom: 0.75rem;">Profitability</h3>
         <div class="metric-grid">
             {metric_card("Gross Margin", format_percent(fundamentals.gross_margin))}
@@ -251,7 +252,7 @@ def generate_metrics_section(fundamentals: StockFundamentals) -> str:
     """
 
     return f"""
-    <section class="glass-card" style="margin-bottom: 1.5rem;">
+    <section class="glass-card mb-3">
         <h2>Key Metrics</h2>
         {valuation}
         {growth}
@@ -274,12 +275,9 @@ def generate_analyst_section(
     - Recent upgrades/downgrades table
     """
     if not ratings and not actions:
-        return """
-        <section class="glass-card">
-            <h2>Analyst Sentiment</h2>
-            <p class="text-muted">Analyst data not available for this stock.</p>
-        </section>
-        """
+        # Return empty string — caller skips rendering the section entirely.
+        # An empty glass-card looks broken; a hidden section is cleaner.
+        return ""
 
     # Ratings bar
     ratings_html = ""
@@ -296,7 +294,7 @@ def generate_analyst_section(
             recommendation_badge = f'<span class="badge {badge_class}">{ratings.recommendation}</span>'
 
         ratings_html = f"""
-        <div style="margin-bottom: 1.5rem;">
+        <div class="mb-3">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                 <span class="text-sm text-muted">Analyst Ratings ({total} analysts)</span>
                 {recommendation_badge}
@@ -331,8 +329,8 @@ def generate_analyst_section(
         upside_color = "var(--accent-optimal)" if upside > 0 else "var(--accent-poor)"
 
         targets_html = f"""
-        <div style="margin-bottom: 1.5rem;">
-            <h4 class="text-sm text-muted" style="margin-bottom: 0.5rem;">Price Targets</h4>
+        <div class="mb-3">
+            <h4 class="text-sm text-muted mb-1">Price Targets</h4>
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span class="font-mono text-sm">${low:.0f}</span>
                 <div style="flex: 1; margin: 0 1rem; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; position: relative;">
@@ -369,7 +367,7 @@ def generate_analyst_section(
 
             rows += f"""
             <tr>
-                <td class="text-xs">{action.date}</td>
+                <td class="text-xs">{format_date(action.date)}</td>
                 <td class="text-sm">{action.firm[:20]}</td>
                 <td>{action_badge}</td>
                 <td class="text-sm">{action.to_grade}</td>
@@ -378,7 +376,7 @@ def generate_analyst_section(
 
         actions_html = f"""
         <div>
-            <h4 class="text-sm text-muted" style="margin-bottom: 0.5rem;">Recent Analyst Actions</h4>
+            <h4 class="text-sm text-muted mb-1">Recent Analyst Actions</h4>
             <table class="modern-table" style="font-size: 0.8rem;">
                 <thead>
                     <tr><th>Date</th><th>Firm</th><th>Action</th><th>Rating</th></tr>
@@ -431,10 +429,10 @@ def generate_catalysts_section(
 
         earnings_html = f"""
         <div>
-            <h3 class="text-sm text-muted" style="margin-bottom: 1rem;">Next Earnings</h3>
+            <h3 class="text-sm text-muted mb-2">Next Earnings</h3>
             <div class="glass-card" style="background: rgba(56, 189, 248, 0.1); border-color: rgba(56, 189, 248, 0.2);">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div style="font-size: 1.25rem; font-weight: bold;">{earnings.next_date}</div>
+                    <div style="font-size: 1.25rem; font-weight: bold;">{format_date(earnings.next_date)}</div>
                     {days_text}
                 </div>
                 <div style="margin-top: 1rem; display: flex; gap: 2rem;">
@@ -453,7 +451,7 @@ def generate_catalysts_section(
     else:
         earnings_html = """
         <div>
-            <h3 class="text-sm text-muted" style="margin-bottom: 1rem;">Next Earnings</h3>
+            <h3 class="text-sm text-muted mb-2">Next Earnings</h3>
             <div class="glass-card" style="background: rgba(255,255,255,0.03);">
                 <p class="text-muted">Earnings date not available</p>
             </div>
@@ -470,26 +468,26 @@ def generate_catalysts_section(
                 <a href="{article.link}" target="_blank" style="color: var(--text-primary); text-decoration: none;">
                     <div style="font-weight: 500; margin-bottom: 0.25rem;">{truncate_text(article.title, 80)}</div>
                 </a>
-                <div class="text-xs text-muted">{article.publisher} · {article.published}</div>
+                <div class="text-xs text-muted">{article.publisher} · {format_date(article.published)}</div>
             </div>
             """
 
         news_html = f"""
         <div>
-            <h3 class="text-sm text-muted" style="margin-bottom: 1rem;">Recent News</h3>
+            <h3 class="text-sm text-muted mb-2">Recent News</h3>
             <div>{news_items}</div>
         </div>
         """
     else:
         news_html = """
         <div>
-            <h3 class="text-sm text-muted" style="margin-bottom: 1rem;">Recent News</h3>
+            <h3 class="text-sm text-muted mb-2">Recent News</h3>
             <p class="text-muted">No recent news available.</p>
         </div>
         """
 
     return f"""
-    <section class="glass-card" style="margin-bottom: 2rem;">
+    <section class="glass-card mb-4">
         <h2>Upcoming Catalysts</h2>
         <div class="grid-cols-2" style="gap: 2rem;">
             {earnings_html}

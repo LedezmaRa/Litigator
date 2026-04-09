@@ -21,70 +21,11 @@ from .templates import (
     generate_technical_section,
 )
 
-# Import shared theme and JS from main dashboard
-from src.dashboard import CSS_DARK_THEME, INTERACTIVE_JS, generate_top_nav
-
-
-# Additional CSS for stock narrative pages
-STOCK_PAGE_CSS = """
-/* Stock Narrative Page Specific Styles */
-.metric-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 0.75rem;
-}
-
-.metric-card {
-    background: rgba(30, 41, 59, 0.5);
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    border: 1px solid rgba(255,255,255,0.05);
-}
-
-.text-positive { color: var(--accent-optimal); }
-.text-negative { color: var(--accent-poor); }
-
-.breadcrumb {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-}
-
-.breadcrumb a {
-    color: var(--text-secondary);
-    text-decoration: none;
-}
-
-.breadcrumb a:hover {
-    color: var(--text-primary);
-}
-
-.breadcrumb span {
-    color: var(--text-secondary);
-}
-
-.hero-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-@media (max-width: 768px) {
-    .grid-cols-2 {
-        grid-template-columns: 1fr !important;
-    }
-    .hero-header {
-        flex-direction: column;
-    }
-    .metric-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-"""
+# Shared theme, JS, nav, and breadcrumb helper — single source of truth
+from src.utils.html_utils import CSS_DARK_THEME, INTERACTIVE_JS, generate_top_nav, generate_breadcrumb
+# Note: .metric-grid, .metric-card, .hero-header, .text-positive/.text-negative,
+# .breadcrumb, and mobile breakpoints are all included in CSS_DARK_THEME now.
+# STOCK_PAGE_CSS was removed — no duplicate styles needed.
 
 
 def generate_stock_narrative_page(
@@ -147,6 +88,13 @@ def generate_stock_narrative_page(
         sector_etf
     )
 
+    # Pre-compute breadcrumb so it can be used inside the f-string below
+    breadcrumb_html = generate_breadcrumb([
+        ("Command Center", "index.html"),
+        (sector_name, f"sector_{sector_etf}.html"),
+        (ticker, None),
+    ])
+
     # Build full HTML
     html = f"""
     <!DOCTYPE html>
@@ -158,33 +106,25 @@ def generate_stock_narrative_page(
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
         <style>
             {CSS_DARK_THEME}
-            {STOCK_PAGE_CSS}
         </style>
     </head>
     <body>
         {generate_top_nav("")}
         <div class="container">
-            <!-- Breadcrumb Navigation -->
-            <nav class="breadcrumb">
-                <a href="sector_analysis.html">Sector Overview</a>
-                <span>/</span>
-                <a href="sector_{sector_etf}.html">{sector_name}</a>
-                <span>/</span>
-                <span style="color: var(--text-primary);">{ticker}</span>
-            </nav>
+            {breadcrumb_html}
 
             <!-- Hero Header -->
-            <header class="glass-card" style="margin-bottom: 2rem;">
+            <header class="glass-card mb-4">
                 <div class="hero-header">
                     <div>
-                        <h1 style="margin-bottom: 0.5rem;">{fundamentals.name or ticker}</h1>
+                        <h1 class="mb-1">{fundamentals.name or ticker}</h1>
                         <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                             <span class="text-xl font-mono">{ticker}</span>
                             <span class="badge badge-good">{fundamentals.sector or sector_name}</span>
                             <span class="text-muted">{fundamentals.industry or ''}</span>
                         </div>
                     </div>
-                    <div style="text-align: right;">
+                    <div class="text-right">
                         <div style="font-size: 2rem; font-weight: bold;">{price_display}</div>
                         {day_change_html}
                     </div>
@@ -192,7 +132,7 @@ def generate_stock_narrative_page(
             </header>
 
             <!-- Two-Column Layout -->
-            <div class="grid-cols-2" style="display: grid; gap: 2rem; margin-bottom: 2rem;">
+            <div class="grid-cols-2 gap-4 mb-4">
                 <!-- Left Column: Company Story -->
                 <div>
                     {overview_section}
@@ -213,9 +153,9 @@ def generate_stock_narrative_page(
             {technical_section}
 
             <!-- Footer -->
-            <footer style="margin-top: 3rem; text-align: center; color: var(--text-secondary);">
+            <footer class="mt-6 text-center text-muted">
                 <p>Macro Watch 2.1 · Stock Narrative Page</p>
-                <p class="text-xs">Fundamental data via yfinance · Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M')}</p>
+                <p class="text-xs">Fundamental data via yfinance · Last updated: {datetime.now().strftime('%b %d, %Y %H:%M')}</p>
             </footer>
         </div>
         {INTERACTIVE_JS}

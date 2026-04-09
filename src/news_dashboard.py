@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 from typing import Dict, List
 from src.news import ThematicNewsItem
-from src.dashboard import CSS_DARK_THEME, INTERACTIVE_JS, generate_top_nav
+from src.utils.html_utils import CSS_DARK_THEME, INTERACTIVE_JS, generate_top_nav
 
 def generate_news_dashboard(themes_news: Dict[str, List[ThematicNewsItem]], output_dir: str = "reports") -> str:
     if not os.path.exists(output_dir):

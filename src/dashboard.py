@@ -11,569 +11,28 @@ from html import escape as html_escape
 from datetime import datetime
 from .scoring import ScoreResult
 
-# --- MODERN UI CONSTANTS & TEMPLATES ---
+# --- SHARED UI CONSTANTS (single source of truth in src/utils/html_utils.py) ---
+# Re-exported here so existing `from src.dashboard import …` calls keep working.
+from .utils.html_utils import (  # noqa: F401  (re-export)
+    CSS_DARK_THEME,
+    INTERACTIVE_JS,
+    METRICS_GUIDE_HTML,
+    generate_top_nav,
+    generate_breadcrumb,
+    generate_page_shell,
+)
+from .utils.ui_utils import get_score_color, get_status_badge_html, format_date
 
-CSS_DARK_THEME = """
-:root {
-    --bg-color: #0f172a;
-    --card-bg: rgba(30, 41, 59, 0.7);
-    --card-border: 1px solid rgba(255, 255, 255, 0.1);
-    --text-primary: #e2e8f0;
-    --text-secondary: #94a3b8;
-    --accent-optimal: #4ade80; /* Green-400 */
-    --accent-good: #34d399;    /* Emerald-400 */
-    --accent-marginal: #fbbf24; /* Amber-400 */
-    --accent-poor: #f87171;    /* Red-400 */
-    --accent-info: #38bdf8;    /* Sky-400 */
-    --font-main: 'Inter', system-ui, -apple-system, sans-serif;
-    --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
+# Keep a local sentinel so the rest of this file knows the block was replaced.
+_THEME_IMPORTED_FROM_HTML_UTILS = True
 
-body {
-    background-color: var(--bg-color);
-    color: var(--text-primary);
-    font-family: var(--font-main);
-    margin: 0;
-    padding: 0;
-    line-height: 1.6;
-    background-image: 
-        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
-    min-height: 100vh;
-}
+# --- LEGACY BLOCK REMOVED ---
+# CSS_DARK_THEME, INTERACTIVE_JS, and generate_top_nav used to be defined here.
+# They now live in src/utils/html_utils.py and are re-exported above.
+# Do NOT re-add them below — edit html_utils.py instead.
 
-.container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 2rem;
-}
 
-/* Glassmorphism Card */
-.glass-card {
-    background: var(--card-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: var(--card-border);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    box-shadow: var(--glass-shadow);
-}
 
-/* Typography */
-h1, h2, h3, h4 { margin-top: 0; color: #fff; font-weight: 600; }
-.text-muted { color: var(--text-secondary); }
-.text-sm { font-size: 0.875rem; }
-.text-xs { font-size: 0.75rem; }
-.font-mono { font-family: 'JetBrains Mono', monospace; }
-
-/* Status Badges */
-.badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-.badge-optimal { background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
-.badge-good { background: rgba(52, 211, 153, 0.2); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
-.badge-marginal { background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
-.badge-poor { background: rgba(248, 113, 113, 0.2); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
-.badge-info { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
-
-/* Score Gauge Ring */
-.score-ring-container {
-    position: relative;
-    width: 120px;
-    height: 120px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.score-value {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #fff;
-    z-index: 10;
-}
-.score-circle-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 8; }
-.score-circle-fg { 
-    fill: none; 
-    stroke-width: 8; 
-    stroke-linecap: round; 
-    transform: rotate(-90deg); 
-    transform-origin: 50% 50%;
-    transition: stroke-dashoffset 1s ease-out;
-}
-
-/* Grid Layouts */
-.grid-cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-.grid-cols-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-@media (max-width: 1024px) {
-    .grid-cols-3 { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 768px) {
-    .grid-cols-3, .grid-cols-2 { grid-template-columns: 1fr; }
-}
-
-/* HUD Metrics */
-.metric-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-.metric-item:last-child { border-bottom: none; }
-.progress-bar-bg {
-    width: 100px;
-    height: 6px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 3px;
-    overflow: hidden;
-}
-.progress-bar-fg {
-    height: 100%;
-    border-radius: 3px;
-}
-
-/* Table */
-.modern-table { width: 100%; border-collapse: separate; border-spacing: 0 0.5rem; }
-.modern-table th { padding: 1rem; color: var(--text-secondary); font-weight: 500; font-size: 0.875rem; text-align: left; }
-.modern-table td { padding: 1rem; background: rgba(30, 41, 59, 0.5); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
-.modern-table td:first-child { border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; border-left: 1px solid rgba(255,255,255,0.05); }
-.modern-table td:last-child { border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; border-right: 1px solid rgba(255,255,255,0.05); }
-.modern-table tr:hover td { background: rgba(30, 41, 59, 0.8); cursor: pointer; transform: scale(1.005); transition: all 0.2s; }
-
-/* Links */
-a { color: inherit; text-decoration: none; }
-.back-link { 
-    display: inline-flex; align-items: center; gap: 0.5rem; 
-    color: var(--text-secondary); margin-bottom: 1.5rem; 
-    transition: color 0.2s;
-}
-.back-link:hover { color: #fff; }
-
-/* Sortable Table Headers */
-.modern-table th.sortable {
-    cursor: pointer;
-    user-select: none;
-    position: relative;
-    padding-right: 1.5rem;
-}
-.modern-table th.sortable:hover {
-    color: var(--text-primary);
-}
-.modern-table th.sortable::after {
-    content: '⇅';
-    position: absolute;
-    right: 0.5rem;
-    opacity: 0.4;
-    font-size: 0.7rem;
-}
-.modern-table th.sortable.asc::after {
-    content: '↑';
-    opacity: 1;
-    color: var(--accent-optimal);
-}
-.modern-table th.sortable.desc::after {
-    content: '↓';
-    opacity: 1;
-    color: var(--accent-optimal);
-}
-
-/* Search Input */
-.search-input {
-    background: rgba(30, 41, 59, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 0.5rem;
-    padding: 0.75rem 1rem;
-    color: var(--text-primary);
-    font-size: 1rem;
-    width: 100%;
-    max-width: 400px;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-.search-input:focus {
-    border-color: var(--accent-info);
-    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
-}
-.search-input::placeholder {
-    color: var(--text-secondary);
-}
-
-/* Filter Controls */
-.filter-bar {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-}
-.filter-btn {
-    background: rgba(30, 41, 59, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 0.5rem;
-    padding: 0.5rem 1rem;
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-.filter-btn:hover {
-    background: rgba(30, 41, 59, 0.9);
-    color: var(--text-primary);
-}
-.filter-btn.active {
-    background: rgba(74, 222, 128, 0.2);
-    border-color: rgba(74, 222, 128, 0.3);
-    color: var(--accent-optimal);
-}
-
-/* Chart Tooltip */
-.chart-tooltip {
-    position: fixed;
-    background: rgba(15, 23, 42, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 0.5rem;
-    padding: 0.75rem;
-    font-size: 0.75rem;
-    color: var(--text-primary);
-    pointer-events: none;
-    z-index: 1000;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    display: none;
-}
-.chart-tooltip.visible {
-    display: block;
-}
-
-/* Stock Card Hover Enhancement */
-.glass-card.stock-card {
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.glass-card.stock-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-}
-
-/* Hidden class for filtering */
-.hidden {
-    display: none !important;
-}
-/* Top Navigation Menu */
-.top-nav {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: rgba(15, 23, 42, 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 1rem 2rem;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    margin-bottom: 2rem;
-}
-.top-nav-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1.5rem;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-.nav-item {
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.95rem;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    transition: all 0.2s ease;
-}
-.nav-item:hover {
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.05);
-}
-.nav-item.active {
-    color: var(--accent-optimal);
-    background: rgba(74, 222, 128, 0.1);
-    border: 1px solid rgba(74, 222, 128, 0.2);
-}
-"""
-
-# Interactive JavaScript for sortable tables and search
-INTERACTIVE_JS = """
-<script>
-// Sortable Tables
-function initSortableTables() {
-    document.querySelectorAll('.modern-table').forEach(table => {
-        const headers = table.querySelectorAll('th.sortable');
-        headers.forEach((header, colIndex) => {
-            header.addEventListener('click', () => {
-                const tbody = table.querySelector('tbody');
-                const rows = Array.from(tbody.querySelectorAll('tr'));
-                const isAsc = header.classList.contains('asc');
-
-                // Clear other headers
-                headers.forEach(h => h.classList.remove('asc', 'desc'));
-                header.classList.add(isAsc ? 'desc' : 'asc');
-
-                rows.sort((a, b) => {
-                    const aCell = a.cells[colIndex];
-                    const bCell = b.cells[colIndex];
-                    let aVal = aCell.textContent.trim();
-                    let bVal = bCell.textContent.trim();
-
-                    // Try numeric sort
-                    const aNum = parseFloat(aVal.replace(/[^0-9.-]/g, ''));
-                    const bNum = parseFloat(bVal.replace(/[^0-9.-]/g, ''));
-
-                    if (!isNaN(aNum) && !isNaN(bNum)) {
-                        return isAsc ? bNum - aNum : aNum - bNum;
-                    }
-                    return isAsc ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
-                });
-
-                rows.forEach(row => tbody.appendChild(row));
-            });
-        });
-    });
-}
-
-// Search/Filter for Stock Cards and Table Rows
-function initSearch() {
-    const searchInput = document.getElementById('stock-search');
-    if (!searchInput) return;
-
-    searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase();
-
-        // Support both card-based and table-based layouts
-        const items = document.querySelectorAll('.stock-card, .modern-table tbody tr');
-        items.forEach(item => {
-            const ticker = item.dataset.ticker?.toLowerCase() || item.textContent.toLowerCase();
-            const matches = ticker.includes(query);
-            item.classList.toggle('hidden', !matches);
-        });
-
-        const visible = document.querySelectorAll('.stock-card:not(.hidden), .modern-table tbody tr:not(.hidden)').length;
-        const countEl = document.getElementById('visible-count');
-        if (countEl) countEl.textContent = visible;
-    });
-}
-
-// Filter Buttons
-function initFilterButtons() {
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const filter = btn.dataset.filter;
-            const isActive = btn.classList.contains('active');
-
-            // Toggle active state
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            if (!isActive) btn.classList.add('active');
-
-            // Apply filter
-            document.querySelectorAll('.stock-card').forEach(card => {
-                if (!filter || isActive) {
-                    card.classList.remove('hidden');
-                } else if (filter === 'top5') {
-                    card.classList.toggle('hidden', parseInt(card.dataset.rank) > 5);
-                } else if (filter === 'trade-ready') {
-                    card.classList.toggle('hidden', card.dataset.tradeReady !== 'true');
-                }
-            });
-
-            // Update count
-            const visible = document.querySelectorAll('.stock-card:not(.hidden)').length;
-            const countEl = document.getElementById('visible-count');
-            if (countEl) countEl.textContent = visible;
-        });
-    });
-}
-
-// Chart Tooltip (for SVG charts)
-function initChartTooltips() {
-    const tooltip = document.createElement('div');
-    tooltip.className = 'chart-tooltip';
-    document.body.appendChild(tooltip);
-
-    document.querySelectorAll('svg.interactive-chart').forEach(chart => {
-        chart.addEventListener('mousemove', (e) => {
-            const rect = chart.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const data = chart.dataset.values ? JSON.parse(chart.dataset.values) : null;
-
-            if (data && data.length > 0) {
-                const idx = Math.floor((x / rect.width) * data.length);
-                const point = data[Math.min(idx, data.length - 1)];
-
-                if (point) {
-                    tooltip.innerHTML = `
-                        <div><strong>${point.date || ''}</strong></div>
-                        <div>Price: $${point.price?.toFixed(2) || 'N/A'}</div>
-                        ${point.ema20 ? `<div style="color:#f59e0b">EMA20: $${point.ema20.toFixed(2)}</div>` : ''}
-                        ${point.ema50 ? `<div style="color:#8b5cf6">EMA50: $${point.ema50.toFixed(2)}</div>` : ''}
-                    `;
-                    tooltip.style.left = (e.clientX + 15) + 'px';
-                    tooltip.style.top = (e.clientY - 10) + 'px';
-                    tooltip.classList.add('visible');
-                }
-            }
-        });
-
-        chart.addEventListener('mouseleave', () => {
-            tooltip.classList.remove('visible');
-        });
-    });
-}
-
-function initWatchlist() {
-    // Merge server-side pre-populated tickers with localStorage
-    const serverList = window.__SERVER_WATCHLIST__ || [];
-    let watchlist = JSON.parse(localStorage.getItem('ema_watchlist') || '[]');
-    serverList.forEach(t => { if (!watchlist.includes(t)) watchlist.push(t); });
-    localStorage.setItem('ema_watchlist', JSON.stringify(watchlist));
-
-    // Apply saved state to all star buttons on this page
-    document.querySelectorAll('.watchlist-btn').forEach(btn => {
-        const ticker = btn.dataset.ticker;
-        if (watchlist.includes(ticker)) {
-            btn.textContent = '★';
-            btn.style.color = '#fbbf24';
-        }
-    });
-
-    // Update candidates table star buttons too (if present)
-    document.querySelectorAll('.cand-watchlist-btn').forEach(btn => {
-        if (watchlist.includes(btn.dataset.ticker)) {
-            btn.textContent = '★';
-            btn.style.color = '#fbbf24';
-        }
-    });
-}
-
-function toggleWatchlist(btn) {
-    const ticker = btn.dataset.ticker;
-    let watchlist = JSON.parse(localStorage.getItem('ema_watchlist') || '[]');
-    const idx = watchlist.indexOf(ticker);
-    if (idx === -1) {
-        watchlist.push(ticker);
-        btn.textContent = '★';
-        btn.style.color = '#fbbf24';
-    } else {
-        watchlist.splice(idx, 1);
-        btn.textContent = '☆';
-        btn.style.color = 'rgba(255,255,255,0.2)';
-    }
-    localStorage.setItem('ema_watchlist', JSON.stringify(watchlist));
-    // Sync all buttons for same ticker on this page
-    document.querySelectorAll(`.watchlist-btn[data-ticker="${ticker}"], .cand-watchlist-btn[data-ticker="${ticker}"]`).forEach(b => {
-        b.textContent = btn.textContent;
-        b.style.color = btn.style.color;
-    });
-}
-
-function exportWatchlist() {
-    const watchlist = JSON.parse(localStorage.getItem('ema_watchlist') || '[]');
-    const blob = new Blob([JSON.stringify(watchlist, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'watchlist.json';
-    a.click();
-    URL.revokeObjectURL(a.href);
-}
-
-function initAdvancedFilters() {
-    // Populate sector dropdown from data-sector values in candidates table
-    const sectorSel = document.getElementById('cand-sector-filter');
-    if (sectorSel) {
-        const sectors = new Set();
-        document.querySelectorAll('#candidates-table tbody tr').forEach(r => {
-            if (r.dataset.sector) sectors.add(r.dataset.sector);
-        });
-        Array.from(sectors).sort().forEach(s => {
-            const o = document.createElement('option');
-            o.value = s; o.textContent = s; sectorSel.appendChild(o);
-        });
-    }
-
-    function applyCandFilter() {
-        const minScore = parseInt(document.getElementById('cand-score-filter')?.value || '0');
-        const regime = document.getElementById('cand-regime-filter')?.value || '';
-        const sector = document.getElementById('cand-sector-filter')?.value || '';
-        let visible = 0;
-        document.querySelectorAll('#candidates-table tbody tr').forEach(row => {
-            const show = parseFloat(row.dataset.entryScore || '0') >= minScore
-                && (regime === '' || (row.dataset.regime || '').toUpperCase().includes(regime))
-                && (sector === '' || row.dataset.sector === sector);
-            row.classList.toggle('hidden', !show);
-            if (show) visible++;
-        });
-        const el = document.getElementById('cand-visible-count');
-        if (el) el.textContent = visible;
-    }
-
-    ['cand-score-filter', 'cand-regime-filter', 'cand-sector-filter'].forEach(id => {
-        document.getElementById(id)?.addEventListener('change', applyCandFilter);
-    });
-
-    // Projections confidence filter
-    document.getElementById('proj-conf-filter')?.addEventListener('change', function() {
-        const val = this.value;
-        let vis = 0;
-        document.querySelectorAll('#projections-table tbody tr').forEach(row => {
-            const show = val === '' || row.dataset.confidence === val;
-            row.classList.toggle('hidden', !show);
-            if (show) vis++;
-        });
-        const el = document.getElementById('proj-visible-count');
-        if (el) el.textContent = vis;
-    });
-}
-
-// Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-    initSortableTables();
-    initSearch();
-    initFilterButtons();
-    initChartTooltips();
-    initAdvancedFilters();
-    initWatchlist();
-});
-</script>
-"""
-
-def generate_top_nav(active_page: str = "command_center") -> str:
-    """Generates the shared top navigation menu HTML."""
-    pages = [
-        {"id": "command_center",  "name": "Command Center",  "url": "index.html"},
-        {"id": "sector_analysis", "name": "Sector Analysis", "url": "sector_analysis.html"},
-        {"id": "macro_drivers",   "name": "Macro Drivers",   "url": "macro_drivers.html"},
-        {"id": "sentiment",       "name": "Sentiment",       "url": "sentiment.html"},
-        {"id": "market_news",     "name": "Market News",     "url": "market_news.html"},
-        {"id": "ai_memo",         "name": "AI Strategy",     "url": "ai_memo.html"},
-        {"id": "ai_macro_memo",   "name": "Macro AI",        "url": "ai_macro_memo.html"},
-    ]
-    
-    links_html = ""
-    for p in pages:
-        active_class = " active" if p["id"] == active_page else ""
-        links_html += f'<li><a href="{p["url"]}" class="nav-item{active_class}">{p["name"]}</a></li>'
-    
-    return f"""
-    <nav class="top-nav">
-        <ul class="top-nav-list">
-            {links_html}
-        </ul>
-    </nav>
-    """
 
 def generate_gauge_svg(score: float, size: int = 120):
     """Generates an SVG circular gauge for the score."""
@@ -589,9 +48,10 @@ def generate_gauge_svg(score: float, size: int = 120):
     
     return f"""
     <div class="score-ring-container" style="width:{size}px; height:{size}px">
-        <svg width="{size}" height="{size}">
+        <svg role="img" aria-labelledby="gauge-title-{size}" width="{size}" height="{size}">
+            <title id="gauge-title-{size}">Score gauge: {score:.0f} out of 100</title>
             <circle class="score-circle-bg" cx="{size//2}" cy="{size//2}" r="{radius}"></circle>
-            <circle class="score-circle-fg" cx="{size//2}" cy="{size//2}" r="{radius}" 
+            <circle class="score-circle-fg" cx="{size//2}" cy="{size//2}" r="{radius}"
                     stroke="{color}" stroke-dasharray="{circumference}" stroke-dashoffset="{offset}"></circle>
         </svg>
         <div class="score-value">{score:.0f}</div>
@@ -709,7 +169,7 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
         si_context = "Short interest data unavailable. FINRA reports are delayed; check ORTEX or S3 Partners for real-time utilization rates."
 
     si_panel_html = f"""
-        <div class="glass-card" style="margin-bottom: 1.5rem;">
+        <div class="glass-card mb-3">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
                 <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:0.05em; margin:0;">Short Interest &amp; Squeeze Potential</h3>
                 <span class="badge {sq_badge_class}">{squeeze_label} Squeeze Risk</span>
@@ -756,7 +216,7 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
     rs_expl   = rs.get('explanation', '')
     rs_interp = rs.get('interpretation', '')
     rs_panel_html = f"""
-        <div class="glass-card" style="margin-bottom:1.5rem;">
+        <div class="glass-card mb-3">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
                 <div>
                     <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Relative Strength Rating</h3>
@@ -791,12 +251,12 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
                  else 'badge-good')
     ea_expl   = ea.get('explanation', '')
     ea_interp = ea.get('interpretation', '')
-    ea_date_str = str(ea_date)[:10] if ea_date else 'Unknown'
+    ea_date_str = format_date(ea_date) if ea_date else '—'
     ea_impl_str = f"{ea_impl:.1f}%" if ea_impl else "N/A"
     ea_surp_str = f"{ea_surp:+.1f}%" if ea_surp else "N/A"
     ea_days_str = f"{ea_days}" if ea_days is not None else "N/A"
     earnings_panel_html = f"""
-        <div class="glass-card" style="margin-bottom:1.5rem;">
+        <div class="glass-card mb-3">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
                 <div>
                     <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Earnings Calendar &amp; Binary Risk</h3>
@@ -833,7 +293,7 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
     impl_str = f"{impl_mv:.1f}%" if impl_mv else "N/A"
     iv_hv_str= f"{iv_hv:.2f}x" if iv_hv else "N/A"
     options_panel_html = f"""
-        <div class="glass-card" style="margin-bottom:1.5rem;">
+        <div class="glass-card mb-3">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
                 <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0;">Options &amp; Volatility Context</h3>
                 <span class="badge badge-info">{iv_label} IV</span>
@@ -873,7 +333,7 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
                else 'var(--accent-poor)')
         return f'<div class="progress-bar-bg" style="width:100%;"><div class="progress-bar-fg" style="width:{score}%; background:{col};"></div></div>'
     factors_panel_html = f"""
-        <div class="glass-card" style="margin-bottom:1.5rem;">
+        <div class="glass-card mb-3">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
                 <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0;">Factor Profile</h3>
                 <span class="badge badge-info">{fc_profile}</span>
@@ -902,12 +362,12 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
     ins_interp= ins.get('interpretation', '')
     ins_txns  = ins.get('recent_transactions', [])
     txn_rows  = ''.join(
-        f'<div class="metric-item"><span class="text-xs">{t.get("date","")[:10]} — {t.get("filer_name","Unknown")}</span>'
+        f'<div class="metric-item"><span class="text-xs">{format_date(t.get("date"))} — {t.get("filer_name","Unknown")}</span>'
         f'<span class="badge {"badge-optimal" if t.get("type")=="P" else "badge-poor"} text-xs">{"BUY" if t.get("type")=="P" else "SELL"}</span></div>'
         for t in ins_txns[:4]
     ) if ins_txns else '<p class="text-xs text-muted">No recent transactions on record.</p>'
     insiders_panel_html = f"""
-        <div class="glass-card" style="margin-bottom:1.5rem;">
+        <div class="glass-card mb-3">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
                 <div>
                     <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Insider Transactions (Form 4)</h3>
@@ -940,12 +400,12 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
                 else 'badge-marginal')
     dp_top   = dp.get('top_volume_days', [])
     dp_top_rows = ''.join(
-        f'<div class="metric-item"><span class="text-xs">{d.get("date","")} — ${d.get("close",0):.2f}</span>'
+        f'<div class="metric-item"><span class="text-xs">{format_date(d.get("date"))} — ${d.get("close",0):.2f}</span>'
         f'<span class="badge badge-info text-xs">{d.get("type","")}</span></div>'
         for d in dp_top[:3]
     ) if dp_top else ''
     darkpool_panel_html = f"""
-        <div class="glass-card" style="margin-bottom:1.5rem;">
+        <div class="glass-card mb-3">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
                 <div>
                     <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Institutional Flow / Dark Pool Proxy</h3>
@@ -977,7 +437,7 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
                     else 'var(--accent-poor)')
     vp_pos_label = vp_pos.replace('_', ' ').title() if vp_pos else 'N/A'
     vp_panel_html = f"""
-        <div class="glass-card" style="margin-bottom:1.5rem;">
+        <div class="glass-card mb-3">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
                 <div>
                     <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Volume Profile &amp; Price Levels</h3>
@@ -1008,14 +468,11 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
     <body>
         {generate_top_nav("")}
         <div class="container">
-            <a href="index.html" class="back-link">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                Back to Dashboard
-            </a>
+            {generate_breadcrumb([("Command Center", "index.html"), (safe_ticker, None)])}
 
-            <div class="grid-cols-3" style="margin-bottom: 2rem;">
-                <!-- Main Status Card -->
-                <div class="glass-card" style="display:flex; align-items:center; gap: 2rem;">
+            <div class="grid-cols-3 mb-4">
+                <!-- Main Status Card (hero treatment: coloured border + glow) -->
+                <div class="glass-card score-hero" style="display:flex; align-items:center; gap: 2rem; --hero-color:{get_score_color(result.total_score)};">
                     {generate_gauge_svg(result.total_score, 100)}
                     <div>
                         <h1 style="font-size:3rem; line-height:1; margin-bottom:0.5rem;">{safe_ticker}</h1>
@@ -1073,11 +530,11 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
             {earnings_panel_html}
 
             <!-- Two-column intelligence grid -->
-            <div class="grid-cols-2" style="margin-bottom:1.5rem;">
+            <div class="grid-cols-2 mb-3">
                 <div>{options_panel_html}</div>
                 <div>{factors_panel_html}</div>
             </div>
-            <div class="grid-cols-2" style="margin-bottom:1.5rem;">
+            <div class="grid-cols-2 mb-3">
                 <div>{insiders_panel_html}</div>
                 <div>{darkpool_panel_html}</div>
             </div>
@@ -1093,19 +550,38 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
     </html>
     """
 
-    file_path = os.path.join(output_dir, f"{ticker}_analysis.html")
+    file_path = os.path.join(output_dir, f"stock_{ticker}.html")
     with open(file_path, "w") as f:
         f.write(html)
 
     return file_path
 
-def generate_index(reports: list, output_dir: str = "reports", basket_context: dict = None):
-    """Generates the Main Dashboard Index with market breadth, search, sorting, and deltas."""
+def generate_index(reports: list, output_dir: str = "reports", basket_context: dict = None,
+                   baskets_yaml_path: str = None):
+    """Generates the Main Dashboard Index with market breadth, basket diagnostics, search, sorting."""
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
     reports.sort(key=lambda x: x['score'], reverse=True)
     total = len(reports)
+
+    # ── Basket diagnostic panel ───────────────────────────────────────────────
+    # Imports are local to avoid module-level circular dependency risk.
+    # Both functions are safe to call even when basket data is incomplete.
+    try:
+        from .basket_engine import load_watchlist_baskets, compute_basket_signals, compute_overall_regime
+        from .basket_renderer import render_regime_summary_bar, render_basket_cards_section
+        _baskets_config  = load_watchlist_baskets(config_path=baskets_yaml_path)
+        _basket_order    = list(_baskets_config.keys())
+        _basket_signals  = compute_basket_signals(reports, _baskets_config)
+        _overall_regime  = compute_overall_regime(_basket_signals)
+        regime_bar_html      = render_regime_summary_bar(_overall_regime, _basket_signals, _basket_order)
+        basket_cards_html    = render_basket_cards_section(_basket_signals, _basket_order)
+    except Exception as _exc:
+        import logging as _log
+        _log.getLogger(__name__).warning("Basket panel unavailable: %s", _exc)
+        regime_bar_html   = ""
+        basket_cards_html = ""
 
     # --- MARKET BREADTH STATS ---
     scores = [r['score'] for r in reports]
@@ -1156,12 +632,12 @@ def generate_index(reports: list, output_dir: str = "reports", basket_context: d
         bp_chg_color = "var(--accent-optimal)" if bp_chg >= 0 else "var(--accent-poor)"
 
         hero_html = f"""
-        <div class="glass-card" style="margin-bottom:2rem; background: linear-gradient(135deg, rgba(30,41,59,0.8) 0%, rgba(15,23,42,0.9) 100%); border: 1px solid rgba(74, 222, 128, 0.2);">
+        <div class="glass-card score-hero" style="margin-bottom:2rem; --hero-color:{get_score_color(best_pick['score'])};">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div>
                     <span class="badge badge-optimal" style="margin-bottom:0.5rem; display:inline-block;">Top Pick of the Week</span>
                     <h1 style="font-size:3.5rem; margin-bottom:0rem;">{bp_ticker}</h1>
-                    <p class="text-muted text-lg">Score: <span style="color:var(--accent-optimal); font-weight:bold;">{best_pick['score']:.0f}</span> &middot; {bp_regime}</p>
+                    <p class="text-muted text-lg">Score: <span style="color:{get_score_color(best_pick['score'])}; font-weight:bold;">{best_pick['score']:.0f}</span> &middot; {bp_regime}</p>
                 </div>
                 {generate_gauge_svg(best_pick['score'], 140)}
             </div>
@@ -1326,20 +802,25 @@ def generate_index(reports: list, output_dir: str = "reports", basket_context: d
     </head>
     <body>
         {generate_top_nav("command_center")}
+        {regime_bar_html}
         <div class="container">
+            {generate_breadcrumb([("Command Center", None)])}
             <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3rem;">
                 <div>
                     <h1 style="margin-bottom:0.5rem; background: linear-gradient(to right, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Command Center</h1>
                     <p class="text-muted">EMA-ADX-ATR Optimized Framework 2.0</p>
                 </div>
                 <div>
-                    <span class="badge badge-info">{datetime.now().strftime("%Y-%m-%d")}</span>
+                    <span class="badge badge-info">{format_date(datetime.now())}</span>
                 </div>
             </header>
 
             {breadth_html}
             {basket_context_html}
+            {basket_cards_html}
             {hero_html}
+
+            {METRICS_GUIDE_HTML}
 
             <!-- Search & Filter Bar -->
             <div class="filter-bar">
@@ -1369,6 +850,11 @@ def generate_index(reports: list, output_dir: str = "reports", basket_context: d
                         {rows}
                     </tbody>
                 </table>
+            </div>
+            <div id="search-empty-state" class="hidden empty-state glass-card" style="margin-top:1rem;">
+                <div class="empty-icon">🔍</div>
+                <p>No tickers match your search.</p>
+                <p class="text-xs">Try a different symbol or <a href="sector_analysis.html">browse by sector</a>.</p>
             </div>
 
             <footer style="margin-top:3rem; text-align:center; color:var(--text-secondary); font-size:0.875rem;">

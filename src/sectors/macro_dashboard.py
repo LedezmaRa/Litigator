@@ -7,7 +7,7 @@ import os
 import pandas as pd
 import numpy as np
 from typing import Dict, List, Optional
-from src.dashboard import CSS_DARK_THEME, INTERACTIVE_JS, generate_top_nav
+from src.utils.html_utils import CSS_DARK_THEME, INTERACTIVE_JS, generate_top_nav, generate_breadcrumb
 from src.baskets import fetch_basket_context
 from src.breadth import fetch_market_breadth
 from src.macro_fred import fetch_macro_regime
@@ -26,7 +26,7 @@ def _sector_macro_signal(drivers: List[DriverAnalysis]) -> tuple:
     Positive net → TAILWIND, negative → HEADWIND, near-zero → NEUTRAL.
     """
     if not drivers:
-        return ("NEUTRAL", "#94a3b8", 0.0)
+        return ("NEUTRAL", "var(--text-secondary)", 0.0)
     total = 0.0
     for d in drivers:
         signal = 1.0 if d.trend == "BULLISH" else -1.0
@@ -34,11 +34,11 @@ def _sector_macro_signal(drivers: List[DriverAnalysis]) -> tuple:
         total += signal * abs(d.correlation_90d)
     avg = total / len(drivers)
     if avg > 0.15:
-        return ("TAILWIND", "#4ade80", avg)
+        return ("TAILWIND", "var(--accent-optimal)", avg)
     elif avg < -0.15:
-        return ("HEADWIND", "#f87171", avg)
+        return ("HEADWIND", "var(--accent-poor)", avg)
     else:
-        return ("NEUTRAL", "#fbbf24", avg)
+        return ("NEUTRAL", "var(--accent-marginal)", avg)
 
 
 def generate_macro_scorecard_html(
@@ -130,7 +130,7 @@ def generate_macro_regime_panel_html(sector_drivers_map: Dict[str, List[DriverAn
         return "↑" if v >= 0 else "↓"
 
     def _chg_color(v: float) -> str:
-        return "#4ade80" if v >= 0 else "#f87171"
+        return "var(--accent-optimal)" if v >= 0 else "var(--accent-poor)"
 
     signal_cells = []
     for ticker, (long_name, short_name) in _REGIME_TICKERS.items():
@@ -139,7 +139,7 @@ def generate_macro_regime_panel_html(sector_drivers_map: Dict[str, List[DriverAn
             continue
         arr = _arrow(d.change_1m)
         col = _chg_color(d.change_1m)
-        trend_col = "#4ade80" if d.trend == "BULLISH" else "#f87171"
+        trend_col = "var(--accent-optimal)" if d.trend == "BULLISH" else "var(--accent-poor)"
         chg_1w_col = _chg_color(d.change_1w)
         chg_1w_arr = _arrow(d.change_1w)
 
@@ -187,10 +187,10 @@ def generate_economic_insights_sidebar(
             for d in sector_drivers_map[sector]:
                 if d.ticker == ticker:
                     v = d.correlation_90d
-                    col = "#4ade80" if v > 0 else "#f87171"
+                    col = "var(--accent-optimal)" if v > 0 else "var(--accent-poor)"
                     sign = "+" if v >= 0 else ""
                     status = "CONFIRMING" if abs(v) > 0.4 else "DIVERGING"
-                    status_col = "#4ade80" if abs(v) > 0.4 else "#fbbf24"
+                    status_col = "var(--accent-optimal)" if abs(v) > 0.4 else "var(--accent-marginal)"
                     return (
                         f'<span style="color:{col}; font-weight:700;">{sign}{v:.2f}</span>'
                         f' <span style="font-size:0.7em; color:{status_col}; '
@@ -198,11 +198,11 @@ def generate_economic_insights_sidebar(
                     )
         return fallback
 
-    copper_corr = _live_corr("COPX", "XLI", '<span style="color:#4ade80">+0.80+</span>')
-    oil_xly_corr = _live_corr("CL=F", "XLY", '<span style="color:#f87171">−0.40</span>')
-    tnx_xlk_corr = _live_corr("^TNX", "XLK", '<span style="color:#f87171">Inverse</span>')
-    tnx_xlf_corr = _live_corr("^TNX", "XLF", '<span style="color:#4ade80">Positive</span>')
-    tnx_xlre_corr = _live_corr("^TNX", "XLRE", '<span style="color:#f87171">−0.70+</span>')
+    copper_corr = _live_corr("COPX", "XLI", '<span style="color:var(--accent-optimal)">+0.80+</span>')
+    oil_xly_corr = _live_corr("CL=F", "XLY", '<span style="color:var(--accent-poor)">−0.40</span>')
+    tnx_xlk_corr = _live_corr("^TNX", "XLK", '<span style="color:var(--accent-poor)">Inverse</span>')
+    tnx_xlf_corr = _live_corr("^TNX", "XLF", '<span style="color:var(--accent-optimal)">Positive</span>')
+    tnx_xlre_corr = _live_corr("^TNX", "XLRE", '<span style="color:var(--accent-poor)">−0.70+</span>')
 
     return f"""
     <aside class="insights-sidebar">
@@ -592,7 +592,7 @@ def _generate_basket_intelligence_html() -> str:
     spy_price = bc.get('spy_price', 0)
 
     def _col(v):
-        return "#4ade80" if v >= 0 else "#f87171"
+        return "var(--accent-optimal)" if v >= 0 else "var(--accent-poor)"
 
     if signal == 'LONG_BASKET_LEADING':
         interpretation = (
@@ -730,13 +730,13 @@ def generate_macro_page(
     chart_grid = filter_pills_html
 
     def fmt_chg(v: float) -> str:
-        color = "#4ade80" if v >= 0 else "#f87171"
+        color = "var(--accent-optimal)" if v >= 0 else "var(--accent-poor)"
         sign = "+" if v >= 0 else ""
         return f'<span style="color:{color}; font-weight:600;">{sign}{v*100:.1f}%</span>'
 
     def arrow_chg(v: float) -> str:
         """Colored arrow + percent for 1W momentum."""
-        color = "#4ade80" if v >= 0 else "#f87171"
+        color = "var(--accent-optimal)" if v >= 0 else "var(--accent-poor)"
         arrow = "↑" if v >= 0 else "↓"
         return f'<span style="color:{color}; font-weight:700;">{arrow} {abs(v*100):.1f}%</span>'
 
@@ -772,7 +772,7 @@ def generate_macro_page(
                 width=380, height=250
             )
 
-            trend_color = "#4ade80" if d.trend == "BULLISH" else "#f87171"
+            trend_color = "var(--accent-optimal)" if d.trend == "BULLISH" else "var(--accent-poor)"
             curr_val_str = f"{d.current_price:.2f}"
 
             # Improvement 6: range context label
@@ -783,24 +783,24 @@ def generate_macro_page(
             off_high_html = fmt_chg(pct_off_high / 100)
 
             if pct_in_range >= 85:
-                range_context = '<span style="color:#4ade80; font-size:0.65rem; font-weight:600; margin-left:4px;">Near Highs</span>'
+                range_context = '<span style="color:var(--accent-optimal); font-size:0.65rem; font-weight:600; margin-left:4px;">Near Highs</span>'
             elif pct_in_range <= 15:
-                range_context = '<span style="color:#f87171; font-size:0.65rem; font-weight:600; margin-left:4px;">Near Lows</span>'
+                range_context = '<span style="color:var(--accent-poor); font-size:0.65rem; font-weight:600; margin-left:4px;">Near Lows</span>'
             else:
                 range_context = f'<span style="color:var(--text-secondary); font-size:0.65rem; margin-left:4px;">{pct_in_range:.0f}th pctile</span>'
 
             # Improvement 4: driver alert badges
             alert_badges = []
             if pct_in_range >= 95:
-                alert_badges.append('<span style="background:rgba(74,222,128,0.2); color:#4ade80; '
+                alert_badges.append('<span style="background:rgba(74,222,128,0.2); color:var(--accent-optimal); '
                                     'border:1px solid rgba(74,222,128,0.4); padding:1px 6px; '
                                     'border-radius:4px; font-size:0.6rem; font-weight:700;">52W HIGH</span>')
             elif pct_in_range <= 5:
-                alert_badges.append('<span style="background:rgba(248,113,113,0.2); color:#f87171; '
+                alert_badges.append('<span style="background:rgba(248,113,113,0.2); color:var(--accent-poor); '
                                     'border:1px solid rgba(248,113,113,0.4); padding:1px 6px; '
                                     'border-radius:4px; font-size:0.6rem; font-weight:700;">52W LOW</span>')
             if abs(d.change_1m) > 0.10:
-                alert_badges.append('<span style="background:rgba(251,191,36,0.2); color:#fbbf24; '
+                alert_badges.append('<span style="background:rgba(251,191,36,0.2); color:var(--accent-marginal); '
                                     'border:1px solid rgba(251,191,36,0.4); padding:1px 6px; '
                                     'border-radius:4px; font-size:0.6rem; font-weight:700;">EXTREME MOVE</span>')
             if d.change_1m * d.change_3m < 0:
@@ -830,11 +830,11 @@ def generate_macro_page(
                     </div>
                     <div>
                         <div style="font-size:0.7em; color:var(--text-muted); margin-bottom:2px;">52W HIGH</div>
-                        <div style="font-size:0.95em; font-weight:600; color:#94a3b8;">{d.high_52w:.2f}</div>
+                        <div style="font-size:0.95em; font-weight:600; color:var(--text-secondary);">{d.high_52w:.2f}</div>
                     </div>
                     <div>
                         <div style="font-size:0.7em; color:var(--text-muted); margin-bottom:2px;">52W LOW</div>
-                        <div style="font-size:0.95em; font-weight:600; color:#94a3b8;">{d.low_52w:.2f}</div>
+                        <div style="font-size:0.95em; font-weight:600; color:var(--text-secondary);">{d.low_52w:.2f}</div>
                     </div>
                 </div>
 
@@ -935,13 +935,13 @@ def generate_macro_page(
         .insight-stat {{
             display: inline-block;
             background: rgba(74,222,128,0.1);
-            color: #4ade80;
+            color: var(--accent-optimal);
             border: 1px solid rgba(74,222,128,0.3);
             padding: 2px 8px; border-radius: 4px;
             font-size: 0.8em; font-weight: bold; margin-bottom: 0.5rem;
         }}
         .insight-stat.negative {{
-            background: rgba(248,113,113,0.1); color: #f87171;
+            background: rgba(248,113,113,0.1); color: var(--accent-poor);
             border: 1px solid rgba(248,113,113,0.3);
         }}
 
@@ -976,6 +976,7 @@ def generate_macro_page(
 <body>
     {generate_top_nav("macro_drivers")}
     <div class="container" style="max-width:1600px;">
+        {generate_breadcrumb([("Command Center", "index.html"), ("Macro Drivers", None)])}
         <header style="display:flex; justify-content:space-between; align-items:center;
             margin-bottom:2rem; padding-bottom:1rem; border-bottom:1px solid var(--grid-color);">
             <div>
@@ -1017,8 +1018,8 @@ def generate_macro_page(
                 <section style="margin-bottom:3rem;">
                     <h3>Cross-Sector Correlation Matrix ("Optimizer")</h3>
                     <p class="text-muted" style="margin-bottom:1.5rem; font-size:0.9em;">
-                        <span style="color:#4ade80;">Green</span> = positive correlation,
-                        <span style="color:#f87171;">Red</span> = negative. Cells with <strong>|r| &gt; 0.50</strong>
+                        <span style="color:var(--accent-optimal);">Green</span> = positive correlation,
+                        <span style="color:var(--accent-poor);">Red</span> = negative. Cells with <strong>|r| &gt; 0.50</strong>
                         have a highlight ring. <strong>Click any sector header</strong> to sort by strength.
                     </p>
                     {heatmap_html}

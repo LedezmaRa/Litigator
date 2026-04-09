@@ -1,9 +1,17 @@
 """
 UI utilities for consistent styling across dashboards.
 
-Provides unified score-to-color mapping and badge generation
-used by both src/dashboard.py and src/sectors/dashboard.py.
+Provides:
+  - Score → color / rating / badge helpers (used in all dashboards)
+  - format_optional()  — safe display of values that may be None/NaN
+  - format_date()      — consistent date formatting across all reports
 """
+from __future__ import annotations
+
+import math
+from datetime import date, datetime
+from typing import Optional, Union
+
 from ..config import SCORE_RATING_THRESHOLDS
 
 
@@ -76,29 +84,42 @@ def get_score_badge_class(score: float) -> str:
         score: Score value (0-100)
 
     Returns:
-        CSS class string (e.g., 'badge-optimal')
+        CSS class string (e.g., 'badge-optimal', 'badge-acceptable')
+        Each rating maps 1-to-1 to a CSS class defined in CSS_DARK_THEME so
+        badge text and badge colour always stay in sync.
     """
     rating = get_score_rating(score).lower()
-    if rating == 'acceptable':
-        rating = 'marginal'  # Map to existing CSS class
     return f'badge-{rating}'
 
 
-def get_status_badge_html(score: float, show_text: bool = True) -> str:
+def get_status_badge_html(score: float, show_text: bool = True, tooltip: str = "") -> str:
     """
     Generate HTML badge for a score.
 
     Args:
-        score: Score value (0-100)
-        show_text: Whether to show rating text in badge
+        score:     Score value (0-100)
+        show_text: If True show rating text; if False show the numeric score.
+        tooltip:   Optional override for the title= attribute shown on hover.
+                   When empty a default like "Score: 78 — Good (≥75)" is used.
 
     Returns:
-        HTML string for badge element
+        HTML string for badge element with a descriptive title= tooltip.
     """
     rating = get_score_rating(score)
     badge_class = get_score_badge_class(score)
     text = rating if show_text else f'{score:.0f}'
-    return f'<span class="badge {badge_class}">{text}</span>'
+
+    _THRESHOLD_LABELS = {
+        'Optimal':    f'\u226580 \u2014 top-tier setup',
+        'Good':       f'\u226565 \u2014 strong setup',
+        'Acceptable': f'\u226550 \u2014 moderate setup',
+        'Marginal':   f'\u226535 \u2014 weak setup',
+        'Poor':       f'<35 \u2014 avoid',
+    }
+    default_tooltip = f"Score: {score:.0f} \u2014 {rating} ({_THRESHOLD_LABELS.get(rating, '')})"
+    title_attr = tooltip if tooltip else default_tooltip
+
+    return f'<span class="badge {badge_class}" title="{title_attr}">{text}</span>'
 
 
 def get_percent_bar_color(pct: float) -> str:
@@ -135,3 +156,105 @@ def format_score_cell(score: float, label: str = '') -> str:
     color = get_score_color(score)
     label_html = f'<br><span class="text-xs text-muted">{label}</span>' if label else ''
     return f'<span style="color:{color};"><b>{score:.0f}</b></span>{label_html}'
+
+
+# ---------------------------------------------------------------------------
+# Data formatting helpers
+# ---------------------------------------------------------------------------
+
+def format_optional(
+    value: object,
+    fallback: str = "—",
+    fmt: Optional[str] = None,
+    precision: int = 2,
+) -> str:
+    """Safely format a value that may be None, NaN, or a missing sentinel.
+
+    Returns *fallback* (default ``"—"``) when the value is not usable so
+    the UI never renders raw "None" or "N/A" strings.
+
+    Args:
+        value:     The value to format.  Accepts int, float, str, or None.
+        fallback:  String to return when value is absent/invalid.
+        fmt:       Named format preset:
+                     ``'pct'``      → ``"12.3%"``
+                     ``'currency'`` → ``"$1,234.56"``
+                     ``'int'``      → ``"42"``
+                     ``None``       → generic float with *precision* decimals.
+        precision: Decimal places used when fmt is None or ``'pct'``.
+
+    Examples::
+
+        format_optional(None)            # "—"
+        format_optional(float('nan'))    # "—"
+        format_optional(12.3, fmt='pct') # "12.3%"
+        format_optional(1500, fmt='currency')  # "$1,500.00"
+        format_optional(0, fmt='int')    # "0"  (zero is a valid value)
+    """
+    # Guard: None
+    if value is None:
+        return fallback
+    # Guard: NaN / Inf floats
+    if isinstance(value, float) and (math.isnan(value) or math.isinf(value)):
+        return fallback
+    # Guard: sentinel strings sometimes used when data is unavailable
+    if isinstance(value, str) and value.strip().upper() in {"N/A", "NA", "NONE", ""}:
+        return fallback
+
+    try:
+        v = float(value)
+    except (TypeError, ValueError):
+        # Non-numeric — return as-is (e.g. a label string that happens to be valid)
+        return str(value)
+
+    if fmt == 'pct':
+        return f"{v:.{precision}f}%"
+    if fmt == 'currency':
+        return f"${v:,.{precision}f}"
+    if fmt == 'int':
+        return f"{int(round(v))}"
+    return f"{v:.{precision}f}"
+
+
+def format_date(
+    dt: Union[datetime, date, str, None],
+    fmt: str = "%b %d, %Y",
+) -> str:
+    """Normalise a date/datetime/ISO-string to a consistent display format.
+
+    All date output in generated HTML should go through this function so the
+    format is uniform across pages.
+
+    Args:
+        dt:  A ``datetime``, ``date``, ISO-8601 string (``"2025-01-15"``), or
+             ``None``.
+        fmt: ``strftime`` format string.  Default is ``"%b %d, %Y"``
+             (e.g. ``"Jan 15, 2025"``).
+
+    Returns:
+        Formatted string, or ``"—"`` if input is None or unparseable.
+
+    Examples::
+
+        format_date(datetime(2025, 3, 31))        # "Mar 31, 2025"
+        format_date("2025-03-31")                 # "Mar 31, 2025"
+        format_date(None)                          # "—"
+        format_date("2025-03-31", "%Y-%m-%d")     # "2025-03-31"
+    """
+    if dt is None:
+        return "—"
+    if isinstance(dt, datetime):
+        return dt.strftime(fmt)
+    if isinstance(dt, date):
+        return dt.strftime(fmt)
+    if isinstance(dt, str):
+        dt = dt.strip()
+        if not dt:
+            return "—"
+        # Try common ISO formats
+        for iso_fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
+            try:
+                return datetime.strptime(dt, iso_fmt).strftime(fmt)
+            except ValueError:
+                continue
+    return "—"

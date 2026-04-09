@@ -5,7 +5,7 @@ import markdown
 from dotenv import load_dotenv
 
 # Import shared UI components from the framework
-from src.dashboard import CSS_DARK_THEME, INTERACTIVE_JS, generate_top_nav
+from src.utils.html_utils import CSS_DARK_THEME, INTERACTIVE_JS, generate_top_nav
 
 # Load environment variables from .env file
 load_dotenv()

@@ -12,7 +12,7 @@ Run via:  python3 -m src.main --sentiment
 """
 import os
 from datetime import datetime
-from src.dashboard import CSS_DARK_THEME, INTERACTIVE_JS, generate_top_nav
+from src.utils.html_utils import CSS_DARK_THEME, INTERACTIVE_JS, generate_top_nav
 from src.sentiment import fetch_market_sentiment
 from src.breadth import fetch_market_breadth
 from src.macro_fred import fetch_macro_regime
