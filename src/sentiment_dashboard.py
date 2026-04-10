@@ -213,13 +213,13 @@ def generate_sentiment_dashboard(output_dir: str = "reports") -> str:
             </div>
         </div>
         <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1rem; margin-bottom:1rem;">
-            {_metric_card("Yield Curve (10Y–2Y)", f"{macro.get('yield_curve_value', 0):.2f}%", macro.get('yield_curve_signal','N/A'), '#e2e8f0',
+            {_metric_card("Yield Curve (10Y–2Y)", f"{macro.get('yield_curve_value') or 0:.2f}%", macro.get('yield_curve_signal') or 'N/A', '#e2e8f0',
                 "Positive = healthy. Negative = inverted = recession historically follows within 12–18 months.")}
-            {_metric_card("HY Credit Spread", f"{macro.get('hy_spread_value', 0):.2f}%", macro.get('hy_spread_signal','N/A'), '#e2e8f0',
+            {_metric_card("HY Credit Spread", f"{macro.get('hy_spread_value') or 0:.2f}%", macro.get('hy_spread_signal') or 'N/A', '#e2e8f0',
                 "High yield spread is the credit market's fear gauge. Wide spreads mean institutions price in defaults and credit stress.")}
-            {_metric_card("5Y Inflation Break-even", f"{macro.get('inflation_value', 0):.2f}%", macro.get('inflation_signal','N/A'), '#e2e8f0',
+            {_metric_card("5Y Inflation Break-even", f"{macro.get('inflation_value') or 0:.2f}%", macro.get('inflation_signal') or 'N/A', '#e2e8f0',
                 "Market-implied inflation expectation. Above 2.5% creates headwinds for long-duration and growth stocks.")}
-            {_metric_card("NFCI (Financial Conditions)", f"{macro.get('nfci_value', 0):.3f}", macro.get('nfci_signal','N/A'), '#e2e8f0',
+            {_metric_card("NFCI (Financial Conditions)", f"{macro.get('nfci_value') or 0:.3f}", macro.get('nfci_signal') or 'N/A', '#e2e8f0',
                 "Chicago Fed index of 105 financial indicators. Negative = loose/supportive. Positive = tight = headwind.")}
         </div>
         <div style="padding:1rem; background:rgba(255,255,255,.03); border-radius:8px;">
