@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basket Renderer Test</title>
+    <style>
+:root {
+    --bg-color: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --card-border: 1px solid rgba(255, 255, 255, 0.1);
+    --text-primary: #e2e8f0;
+    --text-secondary: #a8b4c2;
+    --accent-optimal: #4ade80;
+    --accent-good: #34d399;
+    --accent-marginal: #fbbf24;
+    --accent-poor: #f87171;
+    --accent-info: #38bdf8;
+    --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+    --glass-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────── */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    background-image:
+        radial-gradient(at 0%   0%, hsla(253,16%,7%,1) 0, transparent 50%),
+        radial-gradient(at 50%  0%, hsla(225,39%,30%,1) 0, transparent 50%),
+        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* ── Glassmorphism Card ─────────────────────────────────────────────────── */
+.glass-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: var(--card-border);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--glass-shadow);
+}
+
+/* ── Typography ─────────────────────────────────────────────────────────── */
+h1, h2, h3, h4 { margin-top: 0; color: #fff; font-weight: 600; }
+.text-muted   { color: var(--text-secondary); }
+.text-sm      { font-size: 0.875rem; }
+.text-xs      { font-size: 0.75rem; }
+.font-mono    { font-family: 'JetBrains Mono', monospace; }
+
+/* ── Status Badges ──────────────────────────────────────────────────────── */
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.badge-optimal    { background: rgba(74,222,128,0.2);  color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+.badge-good       { background: rgba(52,211,153,0.2);  color: #34d399; border: 1px solid rgba(52,211,153,0.3); }
+.badge-acceptable { background: rgba(251,191,36,0.15); color: #e2b84a; border: 1px solid rgba(251,191,36,0.4); }
+.badge-marginal   { background: rgba(251,191,36,0.2);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+.badge-poor       { background: rgba(248,113,113,0.2); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+.badge-info       { background: rgba(56,189,248,0.2);  color: #38bdf8; border: 1px solid rgba(56,189,248,0.3); }
+
+/* ── Score Hero ─────────────────────────────────────────────────────────── */
+/*
+ * Add class="score-hero" (or .score-hero-card) to the primary status card to
+ * give it a coloured glow matching the score tier.
+ * Set --hero-color inline on the element: style="--hero-color:var(--accent-optimal)"
+ *
+ * .score-hero-value  — large standalone number (use when NOT embedding a gauge ring)
+ * .score-hero-label  — small uppercase caption beneath the number
+ *
+ * NOTE: the existing .score-value class is used INSIDE .score-ring-container;
+ * we intentionally avoid overriding it here to prevent gauge ring conflicts.
+ */
+.score-hero {
+    border-color: var(--hero-color, rgba(74,222,128,0.25)) !important;
+    background: linear-gradient(
+        135deg,
+        rgba(30,41,59,0.85) 0%,
+        rgba(15,23,42,0.95) 100%
+    ) !important;
+    box-shadow: 0 0 0 1px var(--hero-color, rgba(74,222,128,0.2)),
+                0 8px 32px rgba(0,0,0,0.3);
+    position: relative;
+}
+/* Subtle coloured top-edge accent */
+.score-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--hero-color, var(--accent-optimal));
+    border-radius: 1rem 1rem 0 0;
+    opacity: 0.7;
+}
+.score-hero-value {
+    font-size: 4rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--hero-color, var(--accent-optimal));
+}
+.score-hero-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+}
+
+/* ── Score Gauge Ring ───────────────────────────────────────────────────── */
+.score-ring-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.score-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #fff;
+    z-index: 10;
+}
+.score-circle-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 8; }
+.score-circle-fg {
+    fill: none;
+    stroke-width: 8;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    transition: stroke-dashoffset 1s ease-out;
+}
+
+/* ── Grid Layouts ───────────────────────────────────────────────────────── */
+.grid-cols-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+.grid-cols-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 1.5rem; }
+@media (max-width: 1024px) { .grid-cols-3 { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 768px)  { .grid-cols-3, .grid-cols-2 { grid-template-columns: 1fr; } }
+
+/* ── HUD Metrics ────────────────────────────────────────────────────────── */
+.metric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.metric-item:last-child { border-bottom: none; }
+.progress-bar-bg {
+    width: 100px;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+.progress-bar-fg { height: 100%; border-radius: 3px; }
+
+/* ── Data Table ─────────────────────────────────────────────────────────── */
+.modern-table { width: 100%; border-collapse: separate; border-spacing: 0 0.5rem; }
+.modern-table th {
+    padding: 1rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.875rem;
+    text-align: left;
+}
+.modern-table td {
+    padding: 1rem;
+    background: rgba(30,41,59,0.5);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.modern-table td:first-child {
+    border-top-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.modern-table td:last-child {
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+    border-right: 1px solid rgba(255,255,255,0.05);
+}
+.modern-table tr:hover td {
+    background: rgba(30,41,59,0.8);
+    cursor: pointer;
+    transform: scale(1.005);
+    transition: all 0.2s;
+}
+
+/* ── Mobile-Responsive Table (stacks as cards below 720 px) ────────────── */
+@media (max-width: 720px) {
+    .modern-table thead { display: none; }
+    .modern-table,
+    .modern-table tbody,
+    .modern-table tr,
+    .modern-table td { display: block; width: 100%; }
+    .modern-table tr {
+        background: rgba(30,41,59,0.5);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 0.75rem;
+        margin-bottom: 0.75rem;
+        padding: 0.5rem;
+    }
+    .modern-table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.4rem 0.75rem;
+        border: none;
+        border-radius: 0;
+    }
+    /* Each <td data-label="Score"> shows its column label via pseudo-element */
+    .modern-table td[data-label]::before {
+        content: attr(data-label);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+        margin-right: 0.5rem;
+    }
+    /* Reset first/last child border radius overrides from desktop */
+    .modern-table td:first-child,
+    .modern-table td:last-child {
+        border-radius: 0;
+        border: none;
+    }
+}
+
+/* ── Links ──────────────────────────────────────────────────────────────── */
+a { color: inherit; text-decoration: none; }
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    transition: color 0.2s;
+}
+.back-link:hover { color: #fff; }
+
+/* ── Breadcrumb ─────────────────────────────────────────────────────────── */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    font-size: 0.875rem;
+}
+.breadcrumb a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.breadcrumb a:hover { color: var(--text-primary); }
+.breadcrumb .bc-sep { color: var(--text-secondary); opacity: 0.5; }
+.breadcrumb .bc-current { color: var(--text-primary); font-weight: 500; }
+
+/* ── Sortable Table Headers ─────────────────────────────────────────────── */
+.modern-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-right: 1.5rem;
+}
+.modern-table th.sortable:hover { color: var(--text-primary); }
+.modern-table th.sortable::after      { content: '⇅'; position: absolute; right: 0.5rem; opacity: 0.4; font-size: 0.7rem; }
+.modern-table th.sortable.asc::after  { content: '↑'; opacity: 1; color: var(--accent-optimal); }
+.modern-table th.sortable.desc::after { content: '↓'; opacity: 1; color: var(--accent-optimal); }
+
+/* ── Search Input ───────────────────────────────────────────────────────── */
+.search-input {
+    background: rgba(30,41,59,0.7);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+    width: 100%;
+    max-width: 600px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-input:focus {
+    border-color: var(--accent-info);
+    box-shadow: 0 0 0 3px rgba(56,189,248,0.1);
+}
+.search-input::placeholder { color: var(--text-secondary); }
+
+/* ── Filter Controls ────────────────────────────────────────────────────── */
+.filter-bar { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.filter-btn {
+    background: rgba(30,41,59,0.7);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.filter-btn:hover { background: rgba(30,41,59,0.9); color: var(--text-primary); }
+.filter-btn.active {
+    background: rgba(74,222,128,0.2);
+    border-color: rgba(74,222,128,0.3);
+    color: var(--accent-optimal);
+}
+
+/* ── Chart Tooltip ──────────────────────────────────────────────────────── */
+.chart-tooltip {
+    position: fixed;
+    background: rgba(15,23,42,0.95);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    display: none;
+}
+.chart-tooltip.visible { display: block; }
+
+/* ── Stock Card Hover ───────────────────────────────────────────────────── */
+.glass-card.stock-card { transition: transform 0.2s, box-shadow 0.2s; }
+.glass-card.stock-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+
+/* ── Utility ────────────────────────────────────────────────────────────── */
+.hidden         { display: none !important; }
+.text-positive  { color: var(--accent-optimal); }
+.text-negative  { color: var(--accent-poor); }
+.flex-between   { display: flex; justify-content: space-between; align-items: center; }
+.flex-center    { display: flex; justify-content: center; align-items: center; }
+.flex-wrap      { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.flex-col       { display: flex; flex-direction: column; }
+.text-center    { text-align: center; }
+.text-right     { text-align: right; }
+.m-0            { margin: 0; }
+.mb-0           { margin-bottom: 0 !important; }
+.mb-1           { margin-bottom: 0.5rem; }
+.mb-2           { margin-bottom: 1rem; }
+.mb-3           { margin-bottom: 1.5rem; }
+.mb-4           { margin-bottom: 2rem; }
+.mb-6           { margin-bottom: 3rem; }
+.mt-1           { margin-top: 0.5rem; }
+.mt-2           { margin-top: 1rem; }
+.mt-3           { margin-top: 1.5rem; }
+.mt-4           { margin-top: 2rem; }
+.mt-6           { margin-top: 3rem; }
+.gap-1          { gap: 0.5rem; }
+.gap-2          { gap: 1rem; }
+.gap-3          { gap: 1.5rem; }
+.gap-4          { gap: 2rem; }
+.font-bold      { font-weight: 700; }
+.font-600       { font-weight: 600; }
+.overflow-hidden { overflow: hidden; }
+.uppercase      { text-transform: uppercase; }
+.tracking-wide  { letter-spacing: 0.05em; }
+
+/* ── Stock Narrative Extras ─────────────────────────────────────────────── */
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+}
+.metric-card {
+    background: rgba(30,41,59,0.5);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.hero-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+@media (max-width: 768px) {
+    .hero-header { flex-direction: column; }
+    .metric-grid { grid-template-columns: repeat(2,1fr); }
+}
+
+/* ── Top Navigation Menu ────────────────────────────────────────────────── */
+.top-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(15,23,42,0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    margin-bottom: 2rem;
+}
+.top-nav-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.nav-item {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+.nav-item:hover {
+    color: var(--text-primary);
+    background: rgba(255,255,255,0.05);
+}
+.nav-item.active {
+    color: var(--accent-optimal);
+    background: rgba(74,222,128,0.1);
+    border: 1px solid rgba(74,222,128,0.2);
+}
+
+/* ── Metrics Guide (collapsible help panel) ─────────────────────────────── */
+.metrics-guide {
+    margin-bottom: 1.5rem;
+}
+.metrics-guide > summary {
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+    background: rgba(30,41,59,0.5);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 0.5rem;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s, background 0.2s;
+    user-select: none;
+}
+.metrics-guide > summary:hover { color: var(--text-primary); background: rgba(30,41,59,0.8); }
+.metrics-guide > summary::marker,
+.metrics-guide > summary::-webkit-details-marker { display: none; }
+.metrics-guide[open] > summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; color: var(--text-primary); }
+.metrics-guide-body {
+    background: rgba(30,41,59,0.4);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-top: none;
+    border-bottom-left-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px,1fr));
+    gap: 0.75rem 1.5rem;
+}
+.metric-def dt {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-info);
+    margin-bottom: 0.15rem;
+}
+.metric-def dd {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ── Empty State ────────────────────────────────────────────────────────── */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--text-secondary);
+}
+.empty-state .empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    opacity: 0.5;
+}
+.empty-state p { margin: 0 0 0.5rem; font-size: 0.95rem; }
+.empty-state a { color: var(--accent-info); }
+
+/* ── Regime Summary Bar ─────────────────────────────────────────────────── */
+/*
+ * Sticky strip that sits just below the top-nav (top:60px, z-index:900).
+ * Shows the overall macro verdict + one pill per basket.
+ * The JS in INTERACTIVE_JS sets --nav-height on :root so the offset is exact.
+ */
+.regime-bar {
+    background: rgba(15,23,42,0.92);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding: 0.6rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    position: sticky;
+    top: var(--nav-height, 62px);
+    z-index: 900;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+.regime-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+.regime-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+.regime-verdict {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.regime-insight {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    max-width: 360px;
+    line-height: 1.4;
+}
+.regime-counts {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    flex-shrink: 0;
+}
+.regime-pills {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.regime-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.2rem 0.55rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(30,41,59,0.6);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    cursor: default;
+}
+.regime-pill .pill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+@media (max-width: 768px) {
+    .regime-bar { top: 0; position: relative; }
+    .regime-insight { display: none; }
+    .regime-pills { display: none; }
+}
+
+/* ── Basket Cards ───────────────────────────────────────────────────────── */
+.basket-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    padding: 1rem 1.5rem;
+    background: var(--card-bg);
+    border: var(--card-border);
+    border-radius: 1rem;
+    user-select: none;
+}
+.basket-section-header:hover { background: rgba(30,41,59,0.85); }
+.basket-section-toggle {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    transition: transform 0.2s;
+}
+details.basket-section[open] .basket-section-toggle { transform: rotate(180deg); }
+
+.basket-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+@media (max-width: 960px) { .basket-grid { grid-template-columns: 1fr; } }
+
+.basket-card {
+    background: var(--card-bg);
+    border: var(--card-border);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    box-shadow: var(--glass-shadow);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.basket-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+/* Coloured top-edge accent — driven purely by class, no inline style needed */
+.basket-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 1rem 1rem 0 0;
+}
+.basket-card.signal-bullish { border-color: rgba(74,222,128,0.25); }
+.basket-card.signal-bullish::before { background: var(--accent-optimal); }
+.basket-card.signal-neutral { border-color: rgba(251,191,36,0.2); }
+.basket-card.signal-neutral::before { background: var(--accent-marginal); }
+.basket-card.signal-bearish { border-color: rgba(248,113,113,0.25); }
+.basket-card.signal-bearish::before { background: var(--accent-poor); }
+
+.basket-meta-row {
+    display: flex;
+    gap: 1.25rem;
+    margin: 0.6rem 0 0.75rem;
+    flex-wrap: wrap;
+}
+.basket-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+.basket-meta-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-secondary);
+}
+.basket-meta-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+}
+.basket-divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin: 0.5rem 0 0.6rem;
+}
+.basket-ticker-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.8rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: background 0.1s;
+    border-radius: 4px;
+}
+.basket-ticker-row:last-of-type { border-bottom: none; }
+.basket-ticker-row:hover { background: rgba(255,255,255,0.04); padding-left: 0.3rem; }
+.basket-ticker-symbol {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 0.82rem;
+    min-width: 56px;
+}
+.basket-ticker-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 0.85rem;
+    min-width: 28px;
+    text-align: right;
+}
+.basket-ticker-chg {
+    font-size: 0.75rem;
+    min-width: 52px;
+    text-align: right;
+}
+.basket-ticker-regime {
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+    min-width: 60px;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.basket-missing {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-top: 0.5rem;
+    line-height: 1.5;
+}
+.basket-no-data {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 1rem 0;
+}
+</style>
+</head>
+<body>
+    
+    <nav class="top-nav">
+        <ul class="top-nav-list">
+            <li><a href="index.html" class="nav-item  active">Command Center</a></li><li><a href="sector_analysis.html" class="nav-item">Sector Analysis</a></li><li><a href="macro_drivers.html" class="nav-item">Macro Drivers</a></li><li><a href="sentiment.html" class="nav-item">Sentiment</a></li><li><a href="market_news.html" class="nav-item">Market News</a></li><li><a href="ai_memo.html" class="nav-item">AI Strategy</a></li><li><a href="ai_macro_memo.html" class="nav-item">Macro AI</a></li>
+        </ul>
+    </nav>
+    
+    
+<div class="regime-bar" role="banner" aria-label="Market regime summary">
+    <div class="regime-left">
+        <span class="regime-label">Market Regime</span>
+        <span class="regime-verdict" style="color:var(--accent-marginal);">Mixed</span>
+        <span class="regime-insight">Rotation underway — 2 bullish, 0 bearish. Watch Energy &amp; Inflation &amp; Defense / Geopolitical for direction confirmation.</span>
+    </div>
+    <div class="regime-counts">
+        <span class="badge badge-optimal" style="font-size:0.65rem;">2 Bullish</span><span class="badge badge-marginal" style="font-size:0.65rem;">8 Neutral</span><span class="badge badge-poor" style="font-size:0.65rem;">0 Bearish</span>
+    </div>
+    <div class="regime-pills">
+        <span class="regime-pill" title="Are investors reaching for growth or hiding in defensives?"><span class="pill-dot" style="background:var(--accent-marginal);"></span>Risk Appetite</span><span class="regime-pill" title="Is the credit cycle expanding or contracting?"><span class="pill-dot" style="background:var(--accent-marginal);"></span>Financial &amp; Credit</span><span class="regime-pill" title="Is the consumer bifurcating — high-end vs. low-end?"><span class="pill-dot" style="background:var(--accent-marginal);"></span>Consumer Health</span><span class="regime-pill" title="Is the real economy expanding capital spending?"><span class="pill-dot" style="background:var(--accent-marginal);"></span>Industrial / Capex</span><span class="regime-pill" title="Where are we in the chip cycle — early expansion or late?"><span class="pill-dot" style="background:var(--accent-marginal);"></span>Semiconductor Cycle</span><span class="regime-pill" title="What are interest rate expectations implying?"><span class="pill-dot" style="background:var(--accent-marginal);"></span>Housing / Rate Sensitivity</span><span class="regime-pill" title="Is inflation re-accelerating via energy prices?"><span class="pill-dot" style="background:var(--accent-optimal);"></span>Energy &amp; Inflation</span><span class="regime-pill" title="Is the AI capex build-out still accelerating?"><span class="pill-dot" style="background:var(--accent-marginal);"></span>AI Infrastructure</span><span class="regime-pill" title="Is geopolitical risk premium rising or fading?"><span class="pill-dot" style="background:var(--accent-optimal);"></span>Defense / Geopolitical</span><span class="regime-pill" title="Is non-US economic demand recovering?"><span class="pill-dot" style="background:var(--accent-marginal);"></span>China / Global Demand</span>
+    </div>
+</div>
+    <div class="container">
+        <nav class="breadcrumb"><span class="bc-current">Command Center</span></nav>
+        <header class="mb-4" style="margin-top:1.5rem;">
+            <h1 style="background: linear-gradient(to right, #60a5fa, #a78bfa);
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;">
+                Command Center
+            </h1>
+            <p class="text-muted">Basket Renderer — Dev Test (Synthetic Data)</p>
+        </header>
+        
+<details class="basket-section mb-4" open>
+    <summary class="basket-section-header">
+        <div>
+            <span class="font-600">Macro Basket Diagnostics</span>
+            <span class="text-xs text-muted" style="margin-left:0.75rem;">
+                10 baskets · click to collapse
+            </span>
+        </div>
+        <span class="basket-section-toggle">▾</span>
+    </summary>
+    <div class="basket-grid">
+        
+    <div class="basket-card signal-neutral" data-basket="risk_appetite">
+        
+        <div class="flex-between mb-1">
+            <div>
+                <div class="font-600" style="font-size:0.9rem;">Risk Appetite</div>
+                <div class="text-xs text-muted" style="margin-top:2px; line-height:1.4;">
+                    Are investors reaching for growth or hiding in defensives?
+                </div>
+            </div>
+            <span class="badge badge-marginal" style="flex-shrink:0; margin-left:0.75rem;">
+                NEUTRAL
+            </span>
+        </div>
+        
+        <div class="basket-meta-row">
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Avg Score</span>
+                <span class="basket-meta-value" style="color:var(--accent-marginal);">
+                    50
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Avg ADX</span>
+                <span class="basket-meta-value" style="color:var(--text-secondary);">
+                    17.4
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">% &gt; EMA20</span>
+                <span class="basket-meta-value" style="color:var(--accent-poor);">
+                    40%
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Coverage</span>
+                <span class="basket-meta-value" style="color:var(--text-secondary);">
+                    5/5
+                </span>
+            </div>
+        </div>
+        <hr class="basket-divider">
+        <a href="stock_PG.html" class="basket-ticker-row"><span class="basket-ticker-symbol">PG</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">65</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲1.9%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_JNJ.html" class="basket-ticker-row"><span class="basket-ticker-symbol">JNJ</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">59</span><span class="basket-ticker-chg" style="color:var(--accent-poor);">▼3.7%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_AMD.html" class="basket-ticker-row"><span class="basket-ticker-symbol">AMD</span><span class="basket-ticker-score" style="color:var(--accent-poor);">43</span><span class="basket-ticker-chg" style="color:var(--accent-poor);">▼3.1%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_GOOGL.html" class="basket-ticker-row"><span class="basket-ticker-symbol">GOOGL</span><span class="basket-ticker-score" style="color:var(--accent-poor);">43</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲5.6%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_NVDA.html" class="basket-ticker-row"><span class="basket-ticker-symbol">NVDA</span><span class="basket-ticker-score" style="color:var(--accent-poor);">39</span><span class="basket-ticker-chg" style="color:var(--accent-poor);">▼1.2%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a>
+        
+    </div>
+    <div class="basket-card signal-neutral" data-basket="financial_credit">
+        
+        <div class="flex-between mb-1">
+            <div>
+                <div class="font-600" style="font-size:0.9rem;">Financial &amp; Credit</div>
+                <div class="text-xs text-muted" style="margin-top:2px; line-height:1.4;">
+                    Is the credit cycle expanding or contracting?
+                </div>
+            </div>
+            <span class="badge badge-marginal" style="flex-shrink:0; margin-left:0.75rem;">
+                NEUTRAL
+            </span>
+        </div>
+        
+        <div class="basket-meta-row">
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Avg Score</span>
+                <span class="basket-meta-value" style="color:var(--accent-marginal);">
+                    56
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Avg ADX</span>
+                <span class="basket-meta-value" style="color:var(--text-secondary);">
+                    21.1
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">% &gt; EMA20</span>
+                <span class="basket-meta-value" style="color:var(--accent-optimal);">
+                    75%
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Coverage</span>
+                <span class="basket-meta-value" style="color:var(--text-secondary);">
+                    4/4
+                </span>
+            </div>
+        </div>
+        <hr class="basket-divider">
+        <a href="stock_BRK-B.html" class="basket-ticker-row"><span class="basket-ticker-symbol">BRK-B</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">62</span><span class="basket-ticker-chg" style="color:var(--accent-poor);">▼1.7%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_GS.html" class="basket-ticker-row"><span class="basket-ticker-symbol">GS</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">57</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲3.0%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_JPM.html" class="basket-ticker-row"><span class="basket-ticker-symbol">JPM</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">56</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲2.0%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_BAC.html" class="basket-ticker-row"><span class="basket-ticker-symbol">BAC</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">50</span><span class="basket-ticker-chg" style="color:var(--accent-poor);">▼3.2%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a>
+        
+    </div>
+    <div class="basket-card signal-neutral" data-basket="consumer_health">
+        
+        <div class="flex-between mb-1">
+            <div>
+                <div class="font-600" style="font-size:0.9rem;">Consumer Health</div>
+                <div class="text-xs text-muted" style="margin-top:2px; line-height:1.4;">
+                    Is the consumer bifurcating — high-end vs. low-end?
+                </div>
+            </div>
+            <span class="badge badge-marginal" style="flex-shrink:0; margin-left:0.75rem;">
+                NEUTRAL
+            </span>
+        </div>
+        
+        <div class="basket-meta-row">
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Avg Score</span>
+                <span class="basket-meta-value" style="color:var(--accent-marginal);">
+                    57
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Avg ADX</span>
+                <span class="basket-meta-value" style="color:var(--text-secondary);">
+                    21.3
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">% &gt; EMA20</span>
+                <span class="basket-meta-value" style="color:var(--accent-poor);">
+                    40%
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Coverage</span>
+                <span class="basket-meta-value" style="color:var(--text-secondary);">
+                    5/5
+                </span>
+            </div>
+        </div>
+        <hr class="basket-divider">
+        <a href="stock_COST.html" class="basket-ticker-row"><span class="basket-ticker-symbol">COST</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">73</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲2.1%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_WMT.html" class="basket-ticker-row"><span class="basket-ticker-symbol">WMT</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">69</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲3.8%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_NFLX.html" class="basket-ticker-row"><span class="basket-ticker-symbol">NFLX</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">51</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲5.1%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_AMZN.html" class="basket-ticker-row"><span class="basket-ticker-symbol">AMZN</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">47</span><span class="basket-ticker-chg" style="color:var(--accent-poor);">▼0.3%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_DG.html" class="basket-ticker-row"><span class="basket-ticker-symbol">DG</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">46</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲5.9%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a>
+        
+    </div>
+    <div class="basket-card signal-neutral" data-basket="industrial_capex">
+        
+        <div class="flex-between mb-1">
+            <div>
+                <div class="font-600" style="font-size:0.9rem;">Industrial / Capex</div>
+                <div class="text-xs text-muted" style="margin-top:2px; line-height:1.4;">
+                    Is the real economy expanding capital spending?
+                </div>
+            </div>
+            <span class="badge badge-marginal" style="flex-shrink:0; margin-left:0.75rem;">
+                NEUTRAL
+            </span>
+        </div>
+        
+        <div class="basket-meta-row">
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Avg Score</span>
+                <span class="basket-meta-value" style="color:var(--accent-marginal);">
+                    55
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Avg ADX</span>
+                <span class="basket-meta-value" style="color:var(--text-secondary);">
+                    21.6
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">% &gt; EMA20</span>
+                <span class="basket-meta-value" style="color:var(--accent-poor);">
+                    25%
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Coverage</span>
+                <span class="basket-meta-value" style="color:var(--text-secondary);">
+                    4/4
+                </span>
+            </div>
+        </div>
+        <hr class="basket-divider">
+        <a href="stock_URI.html" class="basket-ticker-row"><span class="basket-ticker-symbol">URI</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">59</span><span class="basket-ticker-chg" style="color:var(--accent-poor);">▼1.4%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_CAT.html" class="basket-ticker-row"><span class="basket-ticker-symbol">CAT</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">56</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲5.1%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_HON.html" class="basket-ticker-row"><span class="basket-ticker-symbol">HON</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">55</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲2.3%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_DE.html" class="basket-ticker-row"><span class="basket-ticker-symbol">DE</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">48</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲6.0%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a>
+        
+    </div>
+    <div class="basket-card signal-neutral" data-basket="semiconductor_cycle">
+        
+        <div class="flex-between mb-1">
+            <div>
+                <div class="font-600" style="font-size:0.9rem;">Semiconductor Cycle</div>
+                <div class="text-xs text-muted" style="margin-top:2px; line-height:1.4;">
+                    Where are we in the chip cycle — early expansion or late?
+                </div>
+            </div>
+            <span class="badge badge-marginal" style="flex-shrink:0; margin-left:0.75rem;">
+                NEUTRAL
+            </span>
+        </div>
+        
+        <div class="basket-meta-row">
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Avg Score</span>
+                <span class="basket-meta-value" style="color:var(--accent-marginal);">
+                    46
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Avg ADX</span>
+                <span class="basket-meta-value" style="color:var(--text-secondary);">
+                    16.9
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">% &gt; EMA20</span>
+                <span class="basket-meta-value" style="color:var(--accent-optimal);">
+                    60%
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Coverage</span>
+                <span class="basket-meta-value" style="color:var(--text-secondary);">
+                    5/5
+                </span>
+            </div>
+        </div>
+        <hr class="basket-divider">
+        <a href="stock_AVGO.html" class="basket-ticker-row"><span class="basket-ticker-symbol">AVGO</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">61</span><span class="basket-ticker-chg" style="color:var(--accent-poor);">▼2.4%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_TSM.html" class="basket-ticker-row"><span class="basket-ticker-symbol">TSM</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">54</span><span class="basket-ticker-chg" style="color:var(--accent-poor);">▼2.2%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_AMAT.html" class="basket-ticker-row"><span class="basket-ticker-symbol">AMAT</span><span class="basket-ticker-score" style="color:var(--accent-poor);">39</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲0.7%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_NVDA.html" class="basket-ticker-row"><span class="basket-ticker-symbol">NVDA</span><span class="basket-ticker-score" style="color:var(--accent-poor);">39</span><span class="basket-ticker-chg" style="color:var(--accent-poor);">▼1.2%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_LRCX.html" class="basket-ticker-row"><span class="basket-ticker-symbol">LRCX</span><span class="basket-ticker-score" style="color:var(--accent-poor);">35</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲2.8%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a>
+        
+    </div>
+    <div class="basket-card signal-neutral" data-basket="housing_rates">
+        
+        <div class="flex-between mb-1">
+            <div>
+                <div class="font-600" style="font-size:0.9rem;">Housing / Rate Sensitivity</div>
+                <div class="text-xs text-muted" style="margin-top:2px; line-height:1.4;">
+                    What are interest rate expectations implying?
+                </div>
+            </div>
+            <span class="badge badge-marginal" style="flex-shrink:0; margin-left:0.75rem;">
+                NEUTRAL
+            </span>
+        </div>
+        
+        <div class="basket-meta-row">
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Avg Score</span>
+                <span class="basket-meta-value" style="color:var(--accent-marginal);">
+                    52
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Avg ADX</span>
+                <span class="basket-meta-value" style="color:var(--text-secondary);">
+                    18.9
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">% &gt; EMA20</span>
+                <span class="basket-meta-value" style="color:var(--accent-optimal);">
+                    75%
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Coverage</span>
+                <span class="basket-meta-value" style="color:var(--text-secondary);">
+                    4/4
+                </span>
+            </div>
+        </div>
+        <hr class="basket-divider">
+        <a href="stock_HLT.html" class="basket-ticker-row"><span class="basket-ticker-symbol">HLT</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">60</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲3.3%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_NEE.html" class="basket-ticker-row"><span class="basket-ticker-symbol">NEE</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">57</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲4.1%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_DHI.html" class="basket-ticker-row"><span class="basket-ticker-symbol">DHI</span><span class="basket-ticker-score" style="color:var(--accent-poor);">45</span><span class="basket-ticker-chg" style="color:var(--accent-poor);">▼2.5%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_LEN.html" class="basket-ticker-row"><span class="basket-ticker-symbol">LEN</span><span class="basket-ticker-score" style="color:var(--accent-poor);">45</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲2.0%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a>
+        
+    </div>
+    <div class="basket-card signal-bullish" data-basket="energy_inflation">
+        
+        <div class="flex-between mb-1">
+            <div>
+                <div class="font-600" style="font-size:0.9rem;">Energy &amp; Inflation</div>
+                <div class="text-xs text-muted" style="margin-top:2px; line-height:1.4;">
+                    Is inflation re-accelerating via energy prices?
+                </div>
+            </div>
+            <span class="badge badge-optimal" style="flex-shrink:0; margin-left:0.75rem;">
+                BULLISH
+            </span>
+        </div>
+        
+        <div class="basket-meta-row">
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Avg Score</span>
+                <span class="basket-meta-value" style="color:var(--accent-marginal);">
+                    70
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Avg ADX</span>
+                <span class="basket-meta-value" style="color:var(--accent-optimal);">
+                    29.5
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">% &gt; EMA20</span>
+                <span class="basket-meta-value" style="color:var(--accent-optimal);">
+                    50%
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Coverage</span>
+                <span class="basket-meta-value" style="color:var(--text-secondary);">
+                    4/4
+                </span>
+            </div>
+        </div>
+        <hr class="basket-divider">
+        <a href="stock_FANG.html" class="basket-ticker-row"><span class="basket-ticker-symbol">FANG</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">73</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲2.5%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_XOM.html" class="basket-ticker-row"><span class="basket-ticker-symbol">XOM</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">70</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲1.5%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_CVX.html" class="basket-ticker-row"><span class="basket-ticker-symbol">CVX</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">68</span><span class="basket-ticker-chg" style="color:var(--accent-poor);">▼3.8%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_HAL.html" class="basket-ticker-row"><span class="basket-ticker-symbol">HAL</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">68</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲1.4%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a>
+        
+    </div>
+    <div class="basket-card signal-neutral" data-basket="ai_infrastructure">
+        
+        <div class="flex-between mb-1">
+            <div>
+                <div class="font-600" style="font-size:0.9rem;">AI Infrastructure</div>
+                <div class="text-xs text-muted" style="margin-top:2px; line-height:1.4;">
+                    Is the AI capex build-out still accelerating?
+                </div>
+            </div>
+            <span class="badge badge-marginal" style="flex-shrink:0; margin-left:0.75rem;">
+                NEUTRAL
+            </span>
+        </div>
+        
+        <div class="basket-meta-row">
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Avg Score</span>
+                <span class="basket-meta-value" style="color:var(--accent-marginal);">
+                    57
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Avg ADX</span>
+                <span class="basket-meta-value" style="color:var(--text-secondary);">
+                    22.7
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">% &gt; EMA20</span>
+                <span class="basket-meta-value" style="color:var(--accent-poor);">
+                    40%
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Coverage</span>
+                <span class="basket-meta-value" style="color:var(--text-secondary);">
+                    5/5
+                </span>
+            </div>
+        </div>
+        <hr class="basket-divider">
+        <a href="stock_CEG.html" class="basket-ticker-row"><span class="basket-ticker-symbol">CEG</span><span class="basket-ticker-score" style="color:var(--accent-good);">79</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲0.7%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_VST.html" class="basket-ticker-row"><span class="basket-ticker-symbol">VST</span><span class="basket-ticker-score" style="color:var(--accent-good);">75</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲2.7%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_AVGO.html" class="basket-ticker-row"><span class="basket-ticker-symbol">AVGO</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">61</span><span class="basket-ticker-chg" style="color:var(--accent-poor);">▼2.4%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_NVDA.html" class="basket-ticker-row"><span class="basket-ticker-symbol">NVDA</span><span class="basket-ticker-score" style="color:var(--accent-poor);">39</span><span class="basket-ticker-chg" style="color:var(--accent-poor);">▼1.2%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_SMCI.html" class="basket-ticker-row"><span class="basket-ticker-symbol">SMCI</span><span class="basket-ticker-score" style="color:var(--accent-poor);">32</span><span class="basket-ticker-chg" style="color:var(--accent-poor);">▼3.4%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a>
+        
+    </div>
+    <div class="basket-card signal-bullish" data-basket="defense_geopolitical">
+        
+        <div class="flex-between mb-1">
+            <div>
+                <div class="font-600" style="font-size:0.9rem;">Defense / Geopolitical</div>
+                <div class="text-xs text-muted" style="margin-top:2px; line-height:1.4;">
+                    Is geopolitical risk premium rising or fading?
+                </div>
+            </div>
+            <span class="badge badge-optimal" style="flex-shrink:0; margin-left:0.75rem;">
+                BULLISH
+            </span>
+        </div>
+        
+        <div class="basket-meta-row">
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Avg Score</span>
+                <span class="basket-meta-value" style="color:var(--accent-marginal);">
+                    69
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Avg ADX</span>
+                <span class="basket-meta-value" style="color:var(--accent-optimal);">
+                    28.4
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">% &gt; EMA20</span>
+                <span class="basket-meta-value" style="color:var(--accent-optimal);">
+                    75%
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Coverage</span>
+                <span class="basket-meta-value" style="color:var(--text-secondary);">
+                    4/4
+                </span>
+            </div>
+        </div>
+        <hr class="basket-divider">
+        <a href="stock_NOC.html" class="basket-ticker-row"><span class="basket-ticker-symbol">NOC</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">71</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲1.4%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_RTX.html" class="basket-ticker-row"><span class="basket-ticker-symbol">RTX</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">70</span><span class="basket-ticker-chg" style="color:var(--accent-poor);">▼3.4%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_LMT.html" class="basket-ticker-row"><span class="basket-ticker-symbol">LMT</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">69</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲0.2%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_GD.html" class="basket-ticker-row"><span class="basket-ticker-symbol">GD</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">66</span><span class="basket-ticker-chg" style="color:var(--accent-poor);">▼3.2%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a>
+        
+    </div>
+    <div class="basket-card signal-neutral" data-basket="china_global_demand">
+        
+        <div class="flex-between mb-1">
+            <div>
+                <div class="font-600" style="font-size:0.9rem;">China / Global Demand</div>
+                <div class="text-xs text-muted" style="margin-top:2px; line-height:1.4;">
+                    Is non-US economic demand recovering?
+                </div>
+            </div>
+            <span class="badge badge-marginal" style="flex-shrink:0; margin-left:0.75rem;">
+                NEUTRAL
+            </span>
+        </div>
+        
+        <div class="basket-meta-row">
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Avg Score</span>
+                <span class="basket-meta-value" style="color:var(--accent-marginal);">
+                    49
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Avg ADX</span>
+                <span class="basket-meta-value" style="color:var(--text-secondary);">
+                    17.2
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">% &gt; EMA20</span>
+                <span class="basket-meta-value" style="color:var(--accent-optimal);">
+                    100%
+                </span>
+            </div>
+            <div class="basket-meta-item">
+                <span class="basket-meta-label">Coverage</span>
+                <span class="basket-meta-value" style="color:var(--text-secondary);">
+                    4/4
+                </span>
+            </div>
+        </div>
+        <hr class="basket-divider">
+        <a href="stock_FSLR.html" class="basket-ticker-row"><span class="basket-ticker-symbol">FSLR</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">51</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲3.9%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_MP.html" class="basket-ticker-row"><span class="basket-ticker-symbol">MP</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">51</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲5.7%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_UUUU.html" class="basket-ticker-row"><span class="basket-ticker-symbol">UUUU</span><span class="basket-ticker-score" style="color:var(--accent-marginal);">48</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲5.0%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a><a href="stock_ALB.html" class="basket-ticker-row"><span class="basket-ticker-symbol">ALB</span><span class="basket-ticker-score" style="color:var(--accent-poor);">44</span><span class="basket-ticker-chg" style="color:var(--accent-optimal);">▲2.6%</span><span class="basket-ticker-regime">Normal Vol</span><span style="color:var(--text-secondary); font-size:0.7rem;">→</span></a>
+        
+    </div>
+    </div>
+</details>
+        <div class="glass-card text-center" style="margin-top:2rem; padding:2rem;">
+            <p class="text-muted text-sm">
+                ↑ Basket cards rendered from synthetic data.<br>
+                Ticker links will 404 — this is expected in the test render.
+            </p>
+        </div>
+    </div>
+    
+<script>
+// ── Sortable Tables ────────────────────────────────────────────────────────
+function initSortableTables() {
+    document.querySelectorAll('.modern-table').forEach(table => {
+        const headers = table.querySelectorAll('th.sortable');
+        headers.forEach((header, colIndex) => {
+            header.addEventListener('click', () => {
+                const tbody = table.querySelector('tbody');
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                const isAsc = header.classList.contains('asc');
+                headers.forEach(h => h.classList.remove('asc', 'desc'));
+                header.classList.add(isAsc ? 'desc' : 'asc');
+                rows.sort((a, b) => {
+                    let aVal = a.cells[colIndex].textContent.trim();
+                    let bVal = b.cells[colIndex].textContent.trim();
+                    const aNum = parseFloat(aVal.replace(/[^0-9.-]/g, ''));
+                    const bNum = parseFloat(bVal.replace(/[^0-9.-]/g, ''));
+                    if (!isNaN(aNum) && !isNaN(bNum)) return isAsc ? bNum - aNum : aNum - bNum;
+                    return isAsc ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
+                });
+                rows.forEach(row => tbody.appendChild(row));
+            });
+        });
+    });
+}
+
+// ── Search / Filter ────────────────────────────────────────────────────────
+function initSearch() {
+    const searchInput = document.getElementById('stock-search');
+    if (!searchInput) return;
+    searchInput.addEventListener('input', e => {
+        const query = e.target.value.toLowerCase();
+        const items = document.querySelectorAll('.stock-card, .modern-table tbody tr');
+        items.forEach(item => {
+            const ticker = item.dataset.ticker?.toLowerCase() || item.textContent.toLowerCase();
+            item.classList.toggle('hidden', !ticker.includes(query));
+        });
+        const visible = document.querySelectorAll('.stock-card:not(.hidden), .modern-table tbody tr:not(.hidden)').length;
+        const countEl = document.getElementById('visible-count');
+        if (countEl) countEl.textContent = visible;
+        // Empty-state feedback
+        const emptyState = document.getElementById('search-empty-state');
+        if (emptyState) emptyState.classList.toggle('hidden', visible > 0);
+    });
+}
+
+// ── Filter Buttons ─────────────────────────────────────────────────────────
+function initFilterButtons() {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const filter = btn.dataset.filter;
+            const isActive = btn.classList.contains('active');
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            if (!isActive) btn.classList.add('active');
+            document.querySelectorAll('.stock-card').forEach(card => {
+                if (!filter || isActive)         { card.classList.remove('hidden'); }
+                else if (filter === 'top5')       { card.classList.toggle('hidden', parseInt(card.dataset.rank) > 5); }
+                else if (filter === 'trade-ready'){ card.classList.toggle('hidden', card.dataset.tradeReady !== 'true'); }
+            });
+            const visible = document.querySelectorAll('.stock-card:not(.hidden)').length;
+            const countEl = document.getElementById('visible-count');
+            if (countEl) countEl.textContent = visible;
+        });
+    });
+}
+
+// ── SVG Chart Tooltips ─────────────────────────────────────────────────────
+function initChartTooltips() {
+    const tooltip = document.createElement('div');
+    tooltip.className = 'chart-tooltip';
+    document.body.appendChild(tooltip);
+    document.querySelectorAll('svg.interactive-chart').forEach(chart => {
+        chart.addEventListener('mousemove', e => {
+            const rect = chart.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const data = chart.dataset.values ? JSON.parse(chart.dataset.values) : null;
+            if (data && data.length > 0) {
+                const idx = Math.floor((x / rect.width) * data.length);
+                const point = data[Math.min(idx, data.length - 1)];
+                if (point) {
+                    tooltip.innerHTML = `
+                        <div><strong>${point.date || ''}</strong></div>
+                        <div>Price: $${point.price?.toFixed(2) || '&mdash;'}</div>
+                        ${point.ema20 ? `<div style="color:#f59e0b">EMA20: $${point.ema20.toFixed(2)}</div>` : ''}
+                        ${point.ema50 ? `<div style="color:#8b5cf6">EMA50: $${point.ema50.toFixed(2)}</div>` : ''}
+                    `;
+                    tooltip.style.left = (e.clientX + 15) + 'px';
+                    tooltip.style.top  = (e.clientY - 10) + 'px';
+                    tooltip.classList.add('visible');
+                }
+            }
+        });
+        chart.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
+    });
+}
+
+// ── Watchlist ──────────────────────────────────────────────────────────────
+function initWatchlist() {
+    const serverList = window.__SERVER_WATCHLIST__ || [];
+    let watchlist = JSON.parse(localStorage.getItem('ema_watchlist') || '[]');
+    serverList.forEach(t => { if (!watchlist.includes(t)) watchlist.push(t); });
+    localStorage.setItem('ema_watchlist', JSON.stringify(watchlist));
+    document.querySelectorAll('.watchlist-btn, .cand-watchlist-btn').forEach(btn => {
+        if (watchlist.includes(btn.dataset.ticker)) {
+            btn.textContent = '★';
+            btn.style.color = '#fbbf24';
+        }
+    });
+}
+
+function toggleWatchlist(btn) {
+    const ticker = btn.dataset.ticker;
+    let watchlist = JSON.parse(localStorage.getItem('ema_watchlist') || '[]');
+    const idx = watchlist.indexOf(ticker);
+    if (idx === -1) {
+        watchlist.push(ticker);
+        btn.textContent = '★';
+        btn.style.color = '#fbbf24';
+    } else {
+        watchlist.splice(idx, 1);
+        btn.textContent = '☆';
+        btn.style.color = 'rgba(255,255,255,0.2)';
+    }
+    localStorage.setItem('ema_watchlist', JSON.stringify(watchlist));
+    document.querySelectorAll(`.watchlist-btn[data-ticker="${ticker}"], .cand-watchlist-btn[data-ticker="${ticker}"]`).forEach(b => {
+        b.textContent = btn.textContent;
+        b.style.color = btn.style.color;
+    });
+}
+
+function exportWatchlist() {
+    const watchlist = JSON.parse(localStorage.getItem('ema_watchlist') || '[]');
+    const blob = new Blob([JSON.stringify(watchlist, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'watchlist.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+// ── Advanced Filters ───────────────────────────────────────────────────────
+function initAdvancedFilters() {
+    const sectorSel = document.getElementById('cand-sector-filter');
+    if (sectorSel) {
+        const sectors = new Set();
+        document.querySelectorAll('#candidates-table tbody tr').forEach(r => {
+            if (r.dataset.sector) sectors.add(r.dataset.sector);
+        });
+        Array.from(sectors).sort().forEach(s => {
+            const o = document.createElement('option');
+            o.value = s; o.textContent = s; sectorSel.appendChild(o);
+        });
+    }
+
+    function applyCandFilter() {
+        const minScore = parseInt(document.getElementById('cand-score-filter')?.value || '0');
+        const regime   = document.getElementById('cand-regime-filter')?.value || '';
+        const sector   = document.getElementById('cand-sector-filter')?.value || '';
+        let visible = 0;
+        document.querySelectorAll('#candidates-table tbody tr').forEach(row => {
+            const show = parseFloat(row.dataset.entryScore || '0') >= minScore
+                && (regime === '' || (row.dataset.regime || '').toUpperCase().includes(regime))
+                && (sector === '' || row.dataset.sector === sector);
+            row.classList.toggle('hidden', !show);
+            if (show) visible++;
+        });
+        const el = document.getElementById('cand-visible-count');
+        if (el) el.textContent = visible;
+    }
+
+    ['cand-score-filter', 'cand-regime-filter', 'cand-sector-filter'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', applyCandFilter);
+    });
+
+    document.getElementById('proj-conf-filter')?.addEventListener('change', function() {
+        const val = this.value;
+        let vis = 0;
+        document.querySelectorAll('#projections-table tbody tr').forEach(row => {
+            const show = val === '' || row.dataset.confidence === val;
+            row.classList.toggle('hidden', !show);
+            if (show) vis++;
+        });
+        const el = document.getElementById('proj-visible-count');
+        if (el) el.textContent = vis;
+    });
+}
+
+// ── Bootstrap (guarded — each feature only runs if its DOM anchor exists) ──
+document.addEventListener('DOMContentLoaded', () => {
+    // Set --nav-height CSS variable so .regime-bar sticky offset is exact
+    const nav = document.querySelector('.top-nav');
+    if (nav) {
+        document.documentElement.style.setProperty('--nav-height', nav.offsetHeight + 'px');
+    }
+
+    if (document.querySelector('.modern-table th.sortable')) {
+        console.info('[EMA] initSortableTables');
+        initSortableTables();
+    }
+    if (document.getElementById('stock-search')) {
+        console.info('[EMA] initSearch');
+        initSearch();
+    }
+    if (document.querySelectorAll('.filter-btn').length) {
+        console.info('[EMA] initFilterButtons');
+        initFilterButtons();
+    }
+    if (document.querySelectorAll('svg.interactive-chart').length) {
+        console.info('[EMA] initChartTooltips');
+        initChartTooltips();
+    }
+    if (document.getElementById('cand-score-filter') || document.getElementById('proj-conf-filter')) {
+        console.info('[EMA] initAdvancedFilters');
+        initAdvancedFilters();
+    }
+    if (document.querySelectorAll('.watchlist-btn, .cand-watchlist-btn').length) {
+        console.info('[EMA] initWatchlist');
+        initWatchlist();
+    }
+});
+</script>
+
+</body>
+</html>

@@ -236,7 +236,7 @@ def generate_metrics_section(fundamentals: StockFundamentals) -> str:
     """
 
     # Risk & other metrics
-    dividend = format_percent(fundamentals.dividend_yield) if fundamentals.dividend_yield else "None"
+    dividend = format_percent(fundamentals.dividend_yield) if fundamentals.dividend_yield else "N/A"
     risk = f"""
     <div>
         <h3 class="text-sm text-muted" style="margin-bottom: 0.75rem;">Risk & Other</h3>

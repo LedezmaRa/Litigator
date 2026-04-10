@@ -16,7 +16,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from src.data import fetch_data, fetch_data_parallel, validate_data
 from src.indicators import calculate_all_indicators
 from src.scoring import EntryScorer
-from src.config import EMA_FAST_PERIOD, EMA_SLOW_PERIOD
+from src.config import EMA_FAST_PERIOD, EMA_SLOW_PERIOD, TARGET_ATR_MULTIPLIER, SCORE_WEIGHTS, SCORE_RATING_THRESHOLDS, RATING_LABELS
 from src.dashboard import generate_dashboard, generate_index
 from src.baskets import fetch_short_interest_parallel, fetch_basket_context
 from src.rs_rating import calculate_rs_rating
@@ -121,24 +121,24 @@ def analyze_ticker(
         print(f"{'='*50}")
         print(f"\nTOTAL SCORE: {result.total_score:.1f}/100")
 
-        if result.total_score >= 90:
-            rating = "OPTIMAL ENTRY (90-100)"
-        elif result.total_score >= 75:
-            rating = "GOOD ENTRY (75-89)"
-        elif result.total_score >= 60:
-            rating = "ACCEPTABLE ENTRY (60-74)"
-        elif result.total_score >= 45:
-            rating = "MARGINAL ENTRY (45-59)"
+        if result.total_score >= SCORE_RATING_THRESHOLDS['optimal']:
+            rating = RATING_LABELS['optimal']
+        elif result.total_score >= SCORE_RATING_THRESHOLDS['good']:
+            rating = RATING_LABELS['good']
+        elif result.total_score >= SCORE_RATING_THRESHOLDS['acceptable']:
+            rating = RATING_LABELS['acceptable']
+        elif result.total_score >= SCORE_RATING_THRESHOLDS['marginal']:
+            rating = RATING_LABELS['marginal']
         else:
-            rating = "POOR ENTRY (<45)"
+            rating = RATING_LABELS['poor']
 
         print(f"RATING: {rating}")
         print(f"\n--- SCORE BREAKDOWN (WEEKLY) ---")
-        print(f"EMA Proximity:     {result.breakdown['ema_proximity']:>4.1f} / 25")
-        print(f"ADX Stage:         {result.breakdown['adx_stage']:>4.1f} / 25")
-        print(f"Volume Conviction: {result.breakdown['volume_conviction']:>4.1f} / 20")
-        print(f"Structure:         {result.breakdown['structure']:>4.1f} / 20")
-        print(f"Risk/Reward:       {result.breakdown['risk_reward']:>4.1f} / 10")
+        print(f"EMA Proximity:     {result.breakdown['ema_proximity']:>4.1f} / {SCORE_WEIGHTS['ema_proximity']}")
+        print(f"ADX Value:         {result.breakdown['adx_stage']:>4.1f} / {SCORE_WEIGHTS['adx_stage']}")
+        print(f"Volume (Inverted): {result.breakdown['volume_conviction']:>4.1f} / {SCORE_WEIGHTS['volume_conviction']}")
+        print(f"Structure:         {result.breakdown['structure']:>4.1f} / {SCORE_WEIGHTS['structure']}")
+        print(f"Risk/Reward:       {result.breakdown['risk_reward']:>4.1f} / {SCORE_WEIGHTS['risk_reward']}")
 
         print(f"\n--- RISK MANAGEMENT ---")
         atr = result.details['atr']
@@ -178,7 +178,7 @@ def analyze_ticker(
             stop_dist = scorer.regime_params.stop_distance_atr
             regime_stop = ema20 - (stop_dist * atr)
             risk = price - regime_stop
-            reward = target_5r - price
+            reward = TARGET_ATR_MULTIPLIER * atr
             rr_ratio = reward / risk if risk > 0 else 0
             prev_close = df['Close'].iloc[-2] if len(df) >= 2 else price
             price_change_pct = ((price - prev_close) / prev_close) * 100 if prev_close > 0 else 0
@@ -210,53 +210,35 @@ def analyze_ticker(
         return None
 
 
-def main():
-    parser = argparse.ArgumentParser(description='Analyze a ticker using the Optimized EMA-ADX-ATR Framework.')
-    parser.add_argument('ticker', nargs='*', help='Ticker symbol(s) to analyze. If empty, runs default watchlist.')
-    parser.add_argument('--sectors', action='store_true', help='Run full Sector Analysis (Macro Watch) dashboard.')
-    parser.add_argument('--sector', type=str, help='Focus on a single sector (e.g., XLK, XLF, XLV). Use with --sectors.')
-    parser.add_argument('--ai-memo', action='store_true', help='Generate AI Investment Strategy Memo of top candidates.')
-    parser.add_argument('--ai-macro-memo', action='store_true', help='Generate Macro AI Strategy Memo of sector drivers.')
-    parser.add_argument('--news', action='store_true', help='Generate Market Themes News Dashboard.')
-    parser.add_argument('--update-universe', action='store_true',
-                        help='Fetch current ETF top holdings and rewrite sectors.yaml stock lists.')
-    parser.add_argument('--sentiment', action='store_true', help='Generate Sentiment & Breadth dashboard.')
+def _generate_news():
+    """Generate the Market Themes News Dashboard."""
+    from src.news import fetch_thematic_news
+    from src.news_dashboard import generate_news_dashboard
+    from src.config import MARKET_THEMES
+    print("Fetching thematic news...")
+    news_data = fetch_thematic_news(MARKET_THEMES)
+    path = generate_news_dashboard(news_data)
+    print(f"Market News Dashboard generated at: {path}")
+    return path
 
-    args = parser.parse_args()
 
-    if args.update_universe:
-        from src.sectors.universe_updater import update_universe
-        _config_path = os.path.join(os.path.dirname(__file__), 'sectors', 'config', 'sectors.yaml')
-        print("Updating stock universe from ETF holdings…")
-        update_universe(_config_path)
-        print("Re-run with --sectors to generate an updated dashboard.")
-        return
+def _generate_sentiment():
+    """Generate the Sentiment & Breadth Dashboard."""
+    from src.sentiment_dashboard import generate_sentiment_dashboard
+    print("Generating Sentiment & Breadth dashboard...")
+    path = generate_sentiment_dashboard()
+    print(f"Sentiment & Breadth dashboard generated at: {path}")
+    return path
 
-    if args.news:
-        from src.news import fetch_thematic_news
-        from src.news_dashboard import generate_news_dashboard
-        from src.config import MARKET_THEMES
-        print("Fetching thematic news...")
-        news_data = fetch_thematic_news(MARKET_THEMES)
-        path = generate_news_dashboard(news_data)
-        print(f"Market News Dashboard generated at: {path}")
-        webbrowser.open(f"file://{os.path.abspath(path)}")
-        return
 
-    if args.sentiment:
-        from src.sentiment_dashboard import generate_sentiment_dashboard
-        path = generate_sentiment_dashboard()
-        print(f"Sentiment & Breadth dashboard generated at: {path}")
-        webbrowser.open(f"file://{os.path.abspath(path)}")
-        return
+def _run_sectors(focus_sector=None, ai_memo=False, ai_macro_memo=False):
+    """Run Sector Analysis (Macro Watch) dashboard."""
+    from src.sectors.dashboard import run_sector_analysis
+    run_sector_analysis(focus_sector=focus_sector, ai_memo=ai_memo, ai_macro_memo=ai_macro_memo)
 
-    if args.sectors or args.sector or args.ai_memo or args.ai_macro_memo:
-        from src.sectors.dashboard import run_sector_analysis
-        run_sector_analysis(focus_sector=args.sector, ai_memo=args.ai_memo, ai_macro_memo=args.ai_macro_memo)
-        return
 
-    tickers = args.ticker if args.ticker else DEFAULT_WATCHLIST
-
+def _run_tickers(tickers):
+    """Run ticker analysis and generate index + stock dashboards."""
     ticker_pattern = re.compile(r'^[A-Z0-9]{1,5}([.\-][A-Z]{1,2})?$')
     invalid = [t for t in tickers if not ticker_pattern.match(t.upper())]
     if invalid:
@@ -286,11 +268,63 @@ def main():
 
     if summary_reports:
         generate_index(summary_reports, basket_context=basket_context)
-        index_path = os.path.abspath("reports/index.html")
-        print(f"\nAnalysis Complete. Index generated at: {index_path}")
-        webbrowser.open(f"file://{index_path}")
     else:
-        print("No reports generated.")
+        print("No ticker reports generated.")
+
+    return summary_reports
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Analyze a ticker using the Optimized EMA-ADX-ATR Framework.')
+    parser.add_argument('ticker', nargs='*', help='Ticker symbol(s) to analyze. If empty, runs default watchlist.')
+    parser.add_argument('--sectors', action='store_true', help='Run full Sector Analysis (Macro Watch) dashboard.')
+    parser.add_argument('--sector', type=str, help='Focus on a single sector (e.g., XLK, XLF, XLV). Use with --sectors.')
+    parser.add_argument('--ai-memo', action='store_true', help='Generate AI Investment Strategy Memo of top candidates.')
+    parser.add_argument('--ai-macro-memo', action='store_true', help='Generate Macro AI Strategy Memo of sector drivers.')
+    parser.add_argument('--news', action='store_true', help='Generate only the Market Themes News Dashboard.')
+    parser.add_argument('--update-universe', action='store_true',
+                        help='Fetch current ETF top holdings and rewrite sectors.yaml stock lists.')
+    parser.add_argument('--sentiment', action='store_true', help='Generate only the Sentiment & Breadth dashboard.')
+
+    args = parser.parse_args()
+
+    if args.update_universe:
+        from src.sectors.universe_updater import update_universe
+        _config_path = os.path.join(os.path.dirname(__file__), 'sectors', 'config', 'sectors.yaml')
+        print("Updating stock universe from ETF holdings…")
+        update_universe(_config_path)
+        print("Re-run with --sectors to generate an updated dashboard.")
+        return
+
+    # Standalone mode: generate only news or only sentiment
+    if args.news and not args.sectors and not args.ticker:
+        _generate_news()
+        webbrowser.open(f"file://{os.path.abspath('reports/market_news.html')}")
+        return
+
+    if args.sentiment and not args.sectors and not args.ticker:
+        _generate_sentiment()
+        webbrowser.open(f"file://{os.path.abspath('reports/sentiment.html')}")
+        return
+
+    # ── Full pipeline: sectors + tickers + sentiment + news ──
+
+    # 1. Sector analysis (sector_analysis.html, sector_*.html, macro_drivers.html)
+    _run_sectors(focus_sector=args.sector, ai_memo=args.ai_memo, ai_macro_memo=args.ai_macro_memo)
+
+    # 2. Ticker analysis (index.html, stock_*.html)
+    tickers = args.ticker if args.ticker else DEFAULT_WATCHLIST
+    _run_tickers(tickers)
+
+    # 3. Sentiment & Breadth (sentiment.html)
+    _generate_sentiment()
+
+    # 4. Market News (market_news.html)
+    _generate_news()
+
+    index_path = os.path.abspath("reports/index.html")
+    print(f"\nFull pipeline complete. Opening index: {index_path}")
+    webbrowser.open(f"file://{index_path}")
 
 
 if __name__ == "__main__":

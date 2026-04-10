@@ -4,25 +4,25 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>PG | The Procter & Gamble Company | Stock Analysis</title>
+        <title>PG Analysis | Command Center</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
         <style>
-            
 :root {
     --bg-color: #0f172a;
     --card-bg: rgba(30, 41, 59, 0.7);
     --card-border: 1px solid rgba(255, 255, 255, 0.1);
     --text-primary: #e2e8f0;
-    --text-secondary: #94a3b8;
-    --accent-optimal: #4ade80; /* Green-400 */
-    --accent-good: #34d399;    /* Emerald-400 */
-    --accent-marginal: #fbbf24; /* Amber-400 */
-    --accent-poor: #f87171;    /* Red-400 */
-    --accent-info: #38bdf8;    /* Sky-400 */
+    --text-secondary: #a8b4c2;
+    --accent-optimal: #4ade80;
+    --accent-good: #34d399;
+    --accent-marginal: #fbbf24;
+    --accent-poor: #f87171;
+    --accent-info: #38bdf8;
     --font-main: 'Inter', system-ui, -apple-system, sans-serif;
-    --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --glass-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
 }
 
+/* ── Base ───────────────────────────────────────────────────────────────── */
 body {
     background-color: var(--bg-color);
     color: var(--text-primary);
@@ -30,9 +30,9 @@ body {
     margin: 0;
     padding: 0;
     line-height: 1.6;
-    background-image: 
-        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+    background-image:
+        radial-gradient(at 0%   0%, hsla(253,16%,7%,1) 0, transparent 50%),
+        radial-gradient(at 50%  0%, hsla(225,39%,30%,1) 0, transparent 50%),
         radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
     min-height: 100vh;
 }
@@ -43,7 +43,7 @@ body {
     padding: 2rem;
 }
 
-/* Glassmorphism Card */
+/* ── Glassmorphism Card ─────────────────────────────────────────────────── */
 .glass-card {
     background: var(--card-bg);
     backdrop-filter: blur(12px);
@@ -54,14 +54,14 @@ body {
     box-shadow: var(--glass-shadow);
 }
 
-/* Typography */
+/* ── Typography ─────────────────────────────────────────────────────────── */
 h1, h2, h3, h4 { margin-top: 0; color: #fff; font-weight: 600; }
-.text-muted { color: var(--text-secondary); }
-.text-sm { font-size: 0.875rem; }
-.text-xs { font-size: 0.75rem; }
-.font-mono { font-family: 'JetBrains Mono', monospace; }
+.text-muted   { color: var(--text-secondary); }
+.text-sm      { font-size: 0.875rem; }
+.text-xs      { font-size: 0.75rem; }
+.font-mono    { font-family: 'JetBrains Mono', monospace; }
 
-/* Status Badges */
+/* ── Status Badges ──────────────────────────────────────────────────────── */
 .badge {
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
@@ -70,13 +70,60 @@ h1, h2, h3, h4 { margin-top: 0; color: #fff; font-weight: 600; }
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
-.badge-optimal { background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
-.badge-good { background: rgba(52, 211, 153, 0.2); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
-.badge-marginal { background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
-.badge-poor { background: rgba(248, 113, 113, 0.2); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
-.badge-info { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+.badge-optimal    { background: rgba(74,222,128,0.2);  color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+.badge-good       { background: rgba(52,211,153,0.2);  color: #34d399; border: 1px solid rgba(52,211,153,0.3); }
+.badge-acceptable { background: rgba(251,191,36,0.15); color: #e2b84a; border: 1px solid rgba(251,191,36,0.4); }
+.badge-marginal   { background: rgba(251,191,36,0.2);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+.badge-poor       { background: rgba(248,113,113,0.2); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+.badge-info       { background: rgba(56,189,248,0.2);  color: #38bdf8; border: 1px solid rgba(56,189,248,0.3); }
 
-/* Score Gauge Ring */
+/* ── Score Hero ─────────────────────────────────────────────────────────── */
+/*
+ * Add class="score-hero" (or .score-hero-card) to the primary status card to
+ * give it a coloured glow matching the score tier.
+ * Set --hero-color inline on the element: style="--hero-color:var(--accent-optimal)"
+ *
+ * .score-hero-value  — large standalone number (use when NOT embedding a gauge ring)
+ * .score-hero-label  — small uppercase caption beneath the number
+ *
+ * NOTE: the existing .score-value class is used INSIDE .score-ring-container;
+ * we intentionally avoid overriding it here to prevent gauge ring conflicts.
+ */
+.score-hero {
+    border-color: var(--hero-color, rgba(74,222,128,0.25)) !important;
+    background: linear-gradient(
+        135deg,
+        rgba(30,41,59,0.85) 0%,
+        rgba(15,23,42,0.95) 100%
+    ) !important;
+    box-shadow: 0 0 0 1px var(--hero-color, rgba(74,222,128,0.2)),
+                0 8px 32px rgba(0,0,0,0.3);
+    position: relative;
+}
+/* Subtle coloured top-edge accent */
+.score-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--hero-color, var(--accent-optimal));
+    border-radius: 1rem 1rem 0 0;
+    opacity: 0.7;
+}
+.score-hero-value {
+    font-size: 4rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--hero-color, var(--accent-optimal));
+}
+.score-hero-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+}
+
+/* ── Score Gauge Ring ───────────────────────────────────────────────────── */
 .score-ring-container {
     position: relative;
     width: 120px;
@@ -92,26 +139,22 @@ h1, h2, h3, h4 { margin-top: 0; color: #fff; font-weight: 600; }
     z-index: 10;
 }
 .score-circle-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 8; }
-.score-circle-fg { 
-    fill: none; 
-    stroke-width: 8; 
-    stroke-linecap: round; 
-    transform: rotate(-90deg); 
+.score-circle-fg {
+    fill: none;
+    stroke-width: 8;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
     transform-origin: 50% 50%;
     transition: stroke-dashoffset 1s ease-out;
 }
 
-/* Grid Layouts */
-.grid-cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-.grid-cols-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-@media (max-width: 1024px) {
-    .grid-cols-3 { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 768px) {
-    .grid-cols-3, .grid-cols-2 { grid-template-columns: 1fr; }
-}
+/* ── Grid Layouts ───────────────────────────────────────────────────────── */
+.grid-cols-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+.grid-cols-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 1.5rem; }
+@media (max-width: 1024px) { .grid-cols-3 { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 768px)  { .grid-cols-3, .grid-cols-2 { grid-template-columns: 1fr; } }
 
-/* HUD Metrics */
+/* ── HUD Metrics ────────────────────────────────────────────────────────── */
 .metric-item {
     display: flex;
     justify-content: space-between;
@@ -127,88 +170,146 @@ h1, h2, h3, h4 { margin-top: 0; color: #fff; font-weight: 600; }
     border-radius: 3px;
     overflow: hidden;
 }
-.progress-bar-fg {
-    height: 100%;
-    border-radius: 3px;
+.progress-bar-fg { height: 100%; border-radius: 3px; }
+
+/* ── Data Table ─────────────────────────────────────────────────────────── */
+.modern-table { width: 100%; border-collapse: separate; border-spacing: 0 0.5rem; }
+.modern-table th {
+    padding: 1rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.875rem;
+    text-align: left;
+}
+.modern-table td {
+    padding: 1rem;
+    background: rgba(30,41,59,0.5);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.modern-table td:first-child {
+    border-top-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.modern-table td:last-child {
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+    border-right: 1px solid rgba(255,255,255,0.05);
+}
+.modern-table tr:hover td {
+    background: rgba(30,41,59,0.8);
+    cursor: pointer;
+    transform: scale(1.005);
+    transition: all 0.2s;
 }
 
-/* Table */
-.modern-table { width: 100%; border-collapse: separate; border-spacing: 0 0.5rem; }
-.modern-table th { padding: 1rem; color: var(--text-secondary); font-weight: 500; font-size: 0.875rem; text-align: left; }
-.modern-table td { padding: 1rem; background: rgba(30, 41, 59, 0.5); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
-.modern-table td:first-child { border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; border-left: 1px solid rgba(255,255,255,0.05); }
-.modern-table td:last-child { border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; border-right: 1px solid rgba(255,255,255,0.05); }
-.modern-table tr:hover td { background: rgba(30, 41, 59, 0.8); cursor: pointer; transform: scale(1.005); transition: all 0.2s; }
+/* ── Mobile-Responsive Table (stacks as cards below 720 px) ────────────── */
+@media (max-width: 720px) {
+    .modern-table thead { display: none; }
+    .modern-table,
+    .modern-table tbody,
+    .modern-table tr,
+    .modern-table td { display: block; width: 100%; }
+    .modern-table tr {
+        background: rgba(30,41,59,0.5);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 0.75rem;
+        margin-bottom: 0.75rem;
+        padding: 0.5rem;
+    }
+    .modern-table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.4rem 0.75rem;
+        border: none;
+        border-radius: 0;
+    }
+    /* Each <td data-label="Score"> shows its column label via pseudo-element */
+    .modern-table td[data-label]::before {
+        content: attr(data-label);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+        margin-right: 0.5rem;
+    }
+    /* Reset first/last child border radius overrides from desktop */
+    .modern-table td:first-child,
+    .modern-table td:last-child {
+        border-radius: 0;
+        border: none;
+    }
+}
 
-/* Links */
+/* ── Links ──────────────────────────────────────────────────────────────── */
 a { color: inherit; text-decoration: none; }
-.back-link { 
-    display: inline-flex; align-items: center; gap: 0.5rem; 
-    color: var(--text-secondary); margin-bottom: 1.5rem; 
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
     transition: color 0.2s;
 }
 .back-link:hover { color: #fff; }
 
-/* Sortable Table Headers */
+/* ── Breadcrumb ─────────────────────────────────────────────────────────── */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    font-size: 0.875rem;
+}
+.breadcrumb a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.breadcrumb a:hover { color: var(--text-primary); }
+.breadcrumb .bc-sep { color: var(--text-secondary); opacity: 0.5; }
+.breadcrumb .bc-current { color: var(--text-primary); font-weight: 500; }
+
+/* ── Sortable Table Headers ─────────────────────────────────────────────── */
 .modern-table th.sortable {
     cursor: pointer;
     user-select: none;
     position: relative;
     padding-right: 1.5rem;
 }
-.modern-table th.sortable:hover {
-    color: var(--text-primary);
-}
-.modern-table th.sortable::after {
-    content: '⇅';
-    position: absolute;
-    right: 0.5rem;
-    opacity: 0.4;
-    font-size: 0.7rem;
-}
-.modern-table th.sortable.asc::after {
-    content: '↑';
-    opacity: 1;
-    color: var(--accent-optimal);
-}
-.modern-table th.sortable.desc::after {
-    content: '↓';
-    opacity: 1;
-    color: var(--accent-optimal);
-}
+.modern-table th.sortable:hover { color: var(--text-primary); }
+.modern-table th.sortable::after      { content: '⇅'; position: absolute; right: 0.5rem; opacity: 0.4; font-size: 0.7rem; }
+.modern-table th.sortable.asc::after  { content: '↑'; opacity: 1; color: var(--accent-optimal); }
+.modern-table th.sortable.desc::after { content: '↓'; opacity: 1; color: var(--accent-optimal); }
 
-/* Search Input */
+/* ── Search Input ───────────────────────────────────────────────────────── */
 .search-input {
-    background: rgba(30, 41, 59, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(30,41,59,0.7);
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 0.5rem;
     padding: 0.75rem 1rem;
     color: var(--text-primary);
     font-size: 1rem;
     width: 100%;
-    max-width: 400px;
+    max-width: 600px;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 .search-input:focus {
     border-color: var(--accent-info);
-    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+    box-shadow: 0 0 0 3px rgba(56,189,248,0.1);
 }
-.search-input::placeholder {
-    color: var(--text-secondary);
-}
+.search-input::placeholder { color: var(--text-secondary); }
 
-/* Filter Controls */
-.filter-bar {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-}
+/* ── Filter Controls ────────────────────────────────────────────────────── */
+.filter-bar { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
 .filter-btn {
-    background: rgba(30, 41, 59, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(30,41,59,0.7);
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 0.5rem;
     padding: 0.5rem 1rem;
     color: var(--text-secondary);
@@ -216,56 +317,98 @@ a { color: inherit; text-decoration: none; }
     cursor: pointer;
     transition: all 0.2s;
 }
-.filter-btn:hover {
-    background: rgba(30, 41, 59, 0.9);
-    color: var(--text-primary);
-}
+.filter-btn:hover { background: rgba(30,41,59,0.9); color: var(--text-primary); }
 .filter-btn.active {
-    background: rgba(74, 222, 128, 0.2);
-    border-color: rgba(74, 222, 128, 0.3);
+    background: rgba(74,222,128,0.2);
+    border-color: rgba(74,222,128,0.3);
     color: var(--accent-optimal);
 }
 
-/* Chart Tooltip */
+/* ── Chart Tooltip ──────────────────────────────────────────────────────── */
 .chart-tooltip {
     position: fixed;
-    background: rgba(15, 23, 42, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(15,23,42,0.95);
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 0.5rem;
     padding: 0.75rem;
     font-size: 0.75rem;
     color: var(--text-primary);
     pointer-events: none;
     z-index: 1000;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
     display: none;
 }
-.chart-tooltip.visible {
-    display: block;
+.chart-tooltip.visible { display: block; }
+
+/* ── Stock Card Hover ───────────────────────────────────────────────────── */
+.glass-card.stock-card { transition: transform 0.2s, box-shadow 0.2s; }
+.glass-card.stock-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+
+/* ── Utility ────────────────────────────────────────────────────────────── */
+.hidden         { display: none !important; }
+.text-positive  { color: var(--accent-optimal); }
+.text-negative  { color: var(--accent-poor); }
+.flex-between   { display: flex; justify-content: space-between; align-items: center; }
+.flex-center    { display: flex; justify-content: center; align-items: center; }
+.flex-wrap      { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.flex-col       { display: flex; flex-direction: column; }
+.text-center    { text-align: center; }
+.text-right     { text-align: right; }
+.m-0            { margin: 0; }
+.mb-0           { margin-bottom: 0 !important; }
+.mb-1           { margin-bottom: 0.5rem; }
+.mb-2           { margin-bottom: 1rem; }
+.mb-3           { margin-bottom: 1.5rem; }
+.mb-4           { margin-bottom: 2rem; }
+.mb-6           { margin-bottom: 3rem; }
+.mt-1           { margin-top: 0.5rem; }
+.mt-2           { margin-top: 1rem; }
+.mt-3           { margin-top: 1.5rem; }
+.mt-4           { margin-top: 2rem; }
+.mt-6           { margin-top: 3rem; }
+.gap-1          { gap: 0.5rem; }
+.gap-2          { gap: 1rem; }
+.gap-3          { gap: 1.5rem; }
+.gap-4          { gap: 2rem; }
+.font-bold      { font-weight: 700; }
+.font-600       { font-weight: 600; }
+.overflow-hidden { overflow: hidden; }
+.uppercase      { text-transform: uppercase; }
+.tracking-wide  { letter-spacing: 0.05em; }
+
+/* ── Stock Narrative Extras ─────────────────────────────────────────────── */
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+}
+.metric-card {
+    background: rgba(30,41,59,0.5);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.hero-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+@media (max-width: 768px) {
+    .hero-header { flex-direction: column; }
+    .metric-grid { grid-template-columns: repeat(2,1fr); }
 }
 
-/* Stock Card Hover Enhancement */
-.glass-card.stock-card {
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.glass-card.stock-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-}
-
-/* Hidden class for filtering */
-.hidden {
-    display: none !important;
-}
-/* Top Navigation Menu */
+/* ── Top Navigation Menu ────────────────────────────────────────────────── */
 .top-nav {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: rgba(15, 23, 42, 0.8);
+    background: rgba(15,23,42,0.8);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
     padding: 1rem 2rem;
     position: sticky;
     top: 0;
@@ -292,555 +435,593 @@ a { color: inherit; text-decoration: none; }
 }
 .nav-item:hover {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255,255,255,0.05);
 }
 .nav-item.active {
     color: var(--accent-optimal);
-    background: rgba(74, 222, 128, 0.1);
-    border: 1px solid rgba(74, 222, 128, 0.2);
+    background: rgba(74,222,128,0.1);
+    border: 1px solid rgba(74,222,128,0.2);
 }
 
-            
-/* Stock Narrative Page Specific Styles */
-.metric-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 0.75rem;
+/* ── Metrics Guide (collapsible help panel) ─────────────────────────────── */
+.metrics-guide {
+    margin-bottom: 1.5rem;
 }
-
-.metric-card {
-    background: rgba(30, 41, 59, 0.5);
-    padding: 0.75rem;
+.metrics-guide > summary {
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+    background: rgba(30,41,59,0.5);
+    border: 1px solid rgba(255,255,255,0.07);
     border-radius: 0.5rem;
-    border: 1px solid rgba(255,255,255,0.05);
-}
-
-.text-positive { color: var(--accent-optimal); }
-.text-negative { color: var(--accent-poor); }
-
-.breadcrumb {
+    list-style: none;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-bottom: 1.5rem;
+    transition: color 0.2s, background 0.2s;
+    user-select: none;
+}
+.metrics-guide > summary:hover { color: var(--text-primary); background: rgba(30,41,59,0.8); }
+.metrics-guide > summary::marker,
+.metrics-guide > summary::-webkit-details-marker { display: none; }
+.metrics-guide[open] > summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; color: var(--text-primary); }
+.metrics-guide-body {
+    background: rgba(30,41,59,0.4);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-top: none;
+    border-bottom-left-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px,1fr));
+    gap: 0.75rem 1.5rem;
+}
+.metric-def dt {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-info);
+    margin-bottom: 0.15rem;
+}
+.metric-def dd {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ── Empty State ────────────────────────────────────────────────────────── */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--text-secondary);
+}
+.empty-state .empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    opacity: 0.5;
+}
+.empty-state p { margin: 0 0 0.5rem; font-size: 0.95rem; }
+.empty-state a { color: var(--accent-info); }
+
+/* ── Regime Summary Bar ─────────────────────────────────────────────────── */
+/*
+ * Sticky strip that sits just below the top-nav (top:60px, z-index:900).
+ * Shows the overall macro verdict + one pill per basket.
+ * The JS in INTERACTIVE_JS sets --nav-height on :root so the offset is exact.
+ */
+.regime-bar {
+    background: rgba(15,23,42,0.92);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding: 0.6rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
     flex-wrap: wrap;
+    position: sticky;
+    top: var(--nav-height, 62px);
+    z-index: 900;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
-
-.breadcrumb a {
+.regime-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+.regime-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
     color: var(--text-secondary);
-    text-decoration: none;
+    white-space: nowrap;
 }
-
-.breadcrumb a:hover {
-    color: var(--text-primary);
+.regime-verdict {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
 }
-
-.breadcrumb span {
+.regime-insight {
+    font-size: 0.72rem;
     color: var(--text-secondary);
+    max-width: 360px;
+    line-height: 1.4;
+}
+.regime-counts {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    flex-shrink: 0;
+}
+.regime-pills {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.regime-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.2rem 0.55rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(30,41,59,0.6);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    cursor: default;
+}
+.regime-pill .pill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+@media (max-width: 768px) {
+    .regime-bar { top: 0; position: relative; }
+    .regime-insight { display: none; }
+    .regime-pills { display: none; }
 }
 
-.hero-header {
+/* ── Basket Cards ───────────────────────────────────────────────────────── */
+.basket-section-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    padding: 1rem 1.5rem;
+    background: var(--card-bg);
+    border: var(--card-border);
+    border-radius: 1rem;
+    user-select: none;
+}
+.basket-section-header:hover { background: rgba(30,41,59,0.85); }
+.basket-section-toggle {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    transition: transform 0.2s;
+}
+details.basket-section[open] .basket-section-toggle { transform: rotate(180deg); }
+
+.basket-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+@media (max-width: 960px) { .basket-grid { grid-template-columns: 1fr; } }
+
+.basket-card {
+    background: var(--card-bg);
+    border: var(--card-border);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    box-shadow: var(--glass-shadow);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.basket-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+/* Coloured top-edge accent — driven purely by class, no inline style needed */
+.basket-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 1rem 1rem 0 0;
+}
+.basket-card.signal-bullish { border-color: rgba(74,222,128,0.25); }
+.basket-card.signal-bullish::before { background: var(--accent-optimal); }
+.basket-card.signal-neutral { border-color: rgba(251,191,36,0.2); }
+.basket-card.signal-neutral::before { background: var(--accent-marginal); }
+.basket-card.signal-bearish { border-color: rgba(248,113,113,0.25); }
+.basket-card.signal-bearish::before { background: var(--accent-poor); }
+
+.basket-meta-row {
+    display: flex;
+    gap: 1.25rem;
+    margin: 0.6rem 0 0.75rem;
     flex-wrap: wrap;
-    gap: 1rem;
 }
-
-@media (max-width: 768px) {
-    .grid-cols-2 {
-        grid-template-columns: 1fr !important;
-    }
-    .hero-header {
-        flex-direction: column;
-    }
-    .metric-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+.basket-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
 }
-
-        </style>
+.basket-meta-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-secondary);
+}
+.basket-meta-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+}
+.basket-divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin: 0.5rem 0 0.6rem;
+}
+.basket-ticker-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.8rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: background 0.1s;
+    border-radius: 4px;
+}
+.basket-ticker-row:last-of-type { border-bottom: none; }
+.basket-ticker-row:hover { background: rgba(255,255,255,0.04); padding-left: 0.3rem; }
+.basket-ticker-symbol {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 0.82rem;
+    min-width: 56px;
+}
+.basket-ticker-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 0.85rem;
+    min-width: 28px;
+    text-align: right;
+}
+.basket-ticker-chg {
+    font-size: 0.75rem;
+    min-width: 52px;
+    text-align: right;
+}
+.basket-ticker-regime {
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+    min-width: 60px;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.basket-missing {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-top: 0.5rem;
+    line-height: 1.5;
+}
+.basket-no-data {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 1rem 0;
+}
+</style>
     </head>
     <body>
         
     <nav class="top-nav">
         <ul class="top-nav-list">
-            <li><a href="index.html" class="nav-item">Command Center</a></li><li><a href="sector_analysis.html" class="nav-item">Sector Analysis</a></li><li><a href="macro_drivers.html" class="nav-item">Macro Drivers</a></li><li><a href="market_news.html" class="nav-item">Market News</a></li><li><a href="ai_memo.html" class="nav-item">AI Strategy</a></li><li><a href="ai_macro_memo.html" class="nav-item">Macro AI</a></li>
+            <li><a href="index.html" class="nav-item">Command Center</a></li><li><a href="sector_analysis.html" class="nav-item">Sector Analysis</a></li><li><a href="macro_drivers.html" class="nav-item">Macro Drivers</a></li><li><a href="sentiment.html" class="nav-item">Sentiment</a></li><li><a href="market_news.html" class="nav-item">Market News</a></li><li><a href="ai_memo.html" class="nav-item">AI Strategy</a></li><li><a href="ai_macro_memo.html" class="nav-item">Macro AI</a></li>
         </ul>
     </nav>
     
         <div class="container">
-            <!-- Breadcrumb Navigation -->
-            <nav class="breadcrumb">
-                <a href="sector_analysis.html">Sector Overview</a>
-                <span>/</span>
-                <a href="sector_XLP.html">Consumer Staples</a>
-                <span>/</span>
-                <span style="color: var(--text-primary);">PG</span>
-            </nav>
+            <nav class="breadcrumb"><a href="index.html">Command Center</a><span class="bc-sep">/</span><span class="bc-current">PG</span></nav>
 
-            <!-- Hero Header -->
-            <header class="glass-card" style="margin-bottom: 2rem;">
-                <div class="hero-header">
+            <div class="grid-cols-3 mb-4">
+                <!-- Main Status Card (hero treatment: coloured border + glow) -->
+                <div class="glass-card score-hero" style="display:flex; align-items:center; gap: 2rem; --hero-color:var(--accent-poor);">
+                    
+    <div class="score-ring-container" style="width:100px; height:100px">
+        <svg role="img" aria-labelledby="gauge-title-100" width="100" height="100">
+            <title id="gauge-title-100">Score gauge: 33 out of 100</title>
+            <circle class="score-circle-bg" cx="50" cy="50" r="46"></circle>
+            <circle class="score-circle-fg" cx="50" cy="50" r="46"
+                    stroke="var(--accent-poor)" stroke-dasharray="289.02628" stroke-dashoffset="193.6476076"></circle>
+        </svg>
+        <div class="score-value">33</div>
+    </div>
+    
                     <div>
-                        <h1 style="margin-bottom: 0.5rem;">The Procter & Gamble Company</h1>
-                        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-                            <span class="text-xl font-mono">PG</span>
-                            <span class="badge badge-good">Consumer Defensive</span>
-                            <span class="text-muted">Household & Personal Products</span>
+                        <h1 style="font-size:3rem; line-height:1; margin-bottom:0.5rem;">PG</h1>
+                        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                            <span class="text-xl font-bold">$146.66</span>
+                            <span class="font-mono text-sm" style="color:var(--accent-optimal)">&#9650; +2.5%</span>
+                            <span class="badge badge-poor">Poor</span>
+                        </div>
+                        <span class="text-sm text-muted">Weekly &middot; Normal Volatility</span>
+                    </div>
+                </div>
+
+                <!-- Score Breakdown -->
+                <div class="glass-card">
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1rem;">Score Breakdown</h3>
+                    
+        <div class="metric-item">
+            <span class="text-sm font-medium">Ema Proximity</span>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div class="progress-bar-bg"><div class="progress-bar-fg" style="width:50.0%; background:var(--accent-marginal);"></div></div>
+                <span class="text-sm font-mono text-muted">10.0/20</span>
+            </div>
+        </div>
+        
+        <div class="metric-item">
+            <span class="text-sm font-medium">Adx Stage</span>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div class="progress-bar-bg"><div class="progress-bar-fg" style="width:0.0%; background:var(--accent-poor);"></div></div>
+                <span class="text-sm font-mono text-muted">0.0/30</span>
+            </div>
+        </div>
+        
+        <div class="metric-item">
+            <span class="text-sm font-medium">Volume Conviction</span>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div class="progress-bar-bg"><div class="progress-bar-fg" style="width:68.0%; background:var(--accent-optimal);"></div></div>
+                <span class="text-sm font-mono text-muted">17.0/25</span>
+            </div>
+        </div>
+        
+        <div class="metric-item">
+            <span class="text-sm font-medium">Structure</span>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div class="progress-bar-bg"><div class="progress-bar-fg" style="width:0.0%; background:var(--accent-poor);"></div></div>
+                <span class="text-sm font-mono text-muted">0.0/15</span>
+            </div>
+        </div>
+        
+        <div class="metric-item">
+            <span class="text-sm font-medium">Risk Reward</span>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div class="progress-bar-bg"><div class="progress-bar-fg" style="width:60.0%; background:var(--accent-optimal);"></div></div>
+                <span class="text-sm font-mono text-muted">6.0/10</span>
+            </div>
+        </div>
+        
+                </div>
+
+                <!-- Risk & Targets (regime-aware) -->
+                <div class="glass-card">
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1rem;">Risk Management</h3>
+                    <div class="grid-cols-2" style="gap:1rem;">
+                        <div>
+                            <span class="text-xs text-muted block">ATR (14)</span>
+                            <span class="font-mono text-sm">$6.26</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-muted block">EMA20 Support</span>
+                            <span class="font-mono text-sm" style="color:var(--accent-info)">$149.63</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-muted block">EMA50 Trend</span>
+                            <span class="font-mono text-sm" style="color:#8b5cf6">$151.84</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-muted block">ADX</span>
+                            <span class="font-mono text-sm">14.5</span>
                         </div>
                     </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 2rem; font-weight: bold;">$143.12</div>
-                        <span style="color: var(--accent-poor); font-size: 1rem;">-0.67%</span>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Two-Column Layout -->
-            <div class="grid-cols-2" style="display: grid; gap: 2rem; margin-bottom: 2rem;">
-                <!-- Left Column: Company Story -->
-                <div>
-                    
-    <section class="glass-card" style="margin-bottom: 1.5rem;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-            <h2 style="margin: 0;">Company Overview</h2>
-            <a href="https://www.pginvestor.com" target="_blank" class="text-sm" style="color: var(--accent-info);">Visit Website</a>
-        </div>
-        <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem;">The Procter & Gamble Company provides branded consumer packaged goods worldwide. It operates through Beauty; Grooming; Health Care; Fabric & Home Care; and Baby, Feminine & Family Care segments. The company offers conditioners, shampoos, styling aids, and treatments under the Head & Shoulders, Herbal Essences, Pantene, and Rejoice brands; antiperspirants, deodorants, and personal cleansing products under the Native, Old Spice, Safeguard, and Secret brands; and facial moisturizers, cleaners, and treatments under the Olay and SK-II brands. It also provides blades, razors, shave products,...</p>
-        <div style="display: flex; gap: 2rem;">
-            <div>
-                <span class="text-xs text-muted">Employees</span><br>
-                <b>109K</b>
-            </div>
-            <div>
-                <span class="text-xs text-muted">Industry</span><br>
-                <b>Household & Personal Products</b>
-            </div>
-        </div>
-    </section>
-    
-                    
-    <section class="glass-card">
-        <h2>Leadership</h2>
-        
-        <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem;">
-            <div style="font-weight: 600;">Mr. Jon R. Moeller</div>
-            <div class="text-sm text-muted">Executive Chairman, Age 61</div>
-            <span class="text-xs text-muted">Compensation:</span> $3.8M
-        </div>
-        
-        <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem;">
-            <div style="font-weight: 600;">Mr. Shailesh G. Jejurikar</div>
-            <div class="text-sm text-muted">CEO, President & Director, Age 57</div>
-            <span class="text-xs text-muted">Compensation:</span> $2.1M
-        </div>
-        
-        <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem;">
-            <div style="font-weight: 600;">Mr. Andre  Schulten</div>
-            <div class="text-sm text-muted">Chief Financial Officer, Age 54</div>
-            <span class="text-xs text-muted">Compensation:</span> $1.8M
-        </div>
-        
-        <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem;">
-            <div style="font-weight: 600;">Ms. Jennifer L. Davis</div>
-            <div class="text-sm text-muted">Chief Executive Officer of Health Care, Age 53</div>
-            <span class="text-xs text-muted">Compensation:</span> $1.7M
-        </div>
-        
-        <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem;">
-            <div style="font-weight: 600;">Mr. Sundar G. Raman</div>
-            <div class="text-sm text-muted">Chief Executive Officer of Fabric and Home Care and P&G Ventures, Age 50</div>
-            <span class="text-xs text-muted">Compensation:</span> $2.7M
-        </div>
-        
-    </section>
-    
-                </div>
-
-                <!-- Right Column: Metrics & Data -->
-                <div>
-                    
-    <section class="glass-card" style="margin-bottom: 1.5rem;">
-        <h2>Key Metrics</h2>
-        
-    <div style="margin-bottom: 1.5rem;">
-        <h3 class="text-sm text-muted" style="margin-bottom: 0.75rem;">Valuation</h3>
-        <div class="metric-grid">
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Market Cap</span>
-            <div class="text-lg font-bold ">$334.43B</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">P/E Ratio</span>
-            <div class="text-lg font-bold ">21.2</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Forward P/E</span>
-            <div class="text-lg font-bold ">19.6</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">P/B Ratio</span>
-            <div class="text-lg font-bold ">6.4</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">PEG Ratio</span>
-            <div class="text-lg font-bold ">N/A</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">EV</span>
-            <div class="text-lg font-bold ">$359.47B</div>
-        </div>
-        
-        </div>
-    </div>
-    
-        
-    <div style="margin-bottom: 1.5rem;">
-        <h3 class="text-sm text-muted" style="margin-bottom: 0.75rem;">Growth</h3>
-        <div class="metric-grid">
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Revenue</span>
-            <div class="text-lg font-bold ">$85.3B</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Revenue Growth</span>
-            <div class="text-lg font-bold text-positive">1.5%</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Earnings Growth</span>
-            <div class="text-lg font-bold text-negative">-5.4%</div>
-        </div>
-        
-        </div>
-    </div>
-    
-        
-    <div style="margin-bottom: 1.5rem;">
-        <h3 class="text-sm text-muted" style="margin-bottom: 0.75rem;">Profitability</h3>
-        <div class="metric-grid">
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Gross Margin</span>
-            <div class="text-lg font-bold ">51.2%</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Operating Margin</span>
-            <div class="text-lg font-bold ">26.3%</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Net Margin</span>
-            <div class="text-lg font-bold ">19.3%</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">ROE</span>
-            <div class="text-lg font-bold ">31.6%</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">ROA</span>
-            <div class="text-lg font-bold ">10.9%</div>
-        </div>
-        
-        </div>
-    </div>
-    
-        
-    <div>
-        <h3 class="text-sm text-muted" style="margin-bottom: 0.75rem;">Risk & Other</h3>
-        <div class="metric-grid">
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Beta</span>
-            <div class="text-lg font-bold ">0.40</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Debt/Equity</span>
-            <div class="text-lg font-bold ">68.7</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Current Ratio</span>
-            <div class="text-lg font-bold ">0.72</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Dividend Yield</span>
-            <div class="text-lg font-bold ">295.0%</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">52W High</span>
-            <div class="text-lg font-bold ">$171.65</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">52W Low</span>
-            <div class="text-lg font-bold ">$137.62</div>
-        </div>
-        
-        </div>
-    </div>
-    
-    </section>
-    
-                    
-    <section class="glass-card">
-        <h2>Analyst Sentiment</h2>
-        
-        <div style="margin-bottom: 1.5rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <span class="text-sm text-muted">Analyst Ratings (24 analysts)</span>
-                <span class="badge badge-optimal">Buy</span>
-            </div>
-            <div style="display: flex; height: 24px; border-radius: 4px; overflow: hidden;">
-                <div style="width: 58.3%; background: var(--accent-optimal);" title="Buy: 14"></div>
-                <div style="width: 37.5%; background: var(--accent-marginal);" title="Hold: 9"></div>
-                <div style="width: 4.2%; background: var(--accent-poor);" title="Sell: 1"></div>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-top: 0.5rem;">
-                <span class="text-xs" style="color: var(--accent-optimal);">Buy 14</span>
-                <span class="text-xs" style="color: var(--accent-marginal);">Hold 9</span>
-                <span class="text-xs" style="color: var(--accent-poor);">Sell 1</span>
-            </div>
-        </div>
-        
-        
-        <div style="margin-bottom: 1.5rem;">
-            <h4 class="text-sm text-muted" style="margin-bottom: 0.5rem;">Price Targets</h4>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span class="font-mono text-sm">$142</span>
-                <div style="flex: 1; margin: 0 1rem; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; position: relative;">
-                    <div style="position: absolute; left: 3%; width: 3px; height: 16px; background: var(--accent-info); top: -4px;" title="Current: $143.12"></div>
-                    <div style="position: absolute; left: 57%; width: 3px; height: 12px; background: var(--accent-optimal); top: -2px;" title="Mean: $166.95"></div>
-                </div>
-                <span class="font-mono text-sm">$186</span>
-            </div>
-            <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 0.75rem;">
-                <div style="text-align: center;">
-                    <span class="text-xs text-muted">Mean Target</span><br>
-                    <span class="font-bold" style="color: var(--accent-optimal);">$166.95</span>
-                </div>
-                <div style="text-align: center;">
-                    <span class="text-xs text-muted">Upside</span><br>
-                    <span class="font-bold" style="color: var(--accent-optimal);">+16.7%</span>
-                </div>
-            </div>
-        </div>
-        
-        
-        <div>
-            <h4 class="text-sm text-muted" style="margin-bottom: 0.5rem;">Recent Analyst Actions</h4>
-            <table class="modern-table" style="font-size: 0.8rem;">
-                <thead>
-                    <tr><th>Date</th><th>Firm</th><th>Action</th><th>Rating</th></tr>
-                </thead>
-                <tbody>
-                    
-            <tr>
-                <td class="text-xs">2026-03-30</td>
-                <td class="text-sm">Deutsche Bank</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Hold</td>
-            </tr>
-            
-            <tr>
-                <td class="text-xs">2026-01-27</td>
-                <td class="text-sm">TD Cowen</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Hold</td>
-            </tr>
-            
-            <tr>
-                <td class="text-xs">2026-01-23</td>
-                <td class="text-sm">UBS</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Buy</td>
-            </tr>
-            
-            <tr>
-                <td class="text-xs">2026-01-23</td>
-                <td class="text-sm">Wells Fargo</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Overweight</td>
-            </tr>
-            
-            <tr>
-                <td class="text-xs">2026-01-23</td>
-                <td class="text-sm">JP Morgan</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Overweight</td>
-            </tr>
-            
-            <tr>
-                <td class="text-xs">2026-01-14</td>
-                <td class="text-sm">UBS</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Buy</td>
-            </tr>
-            
-            <tr>
-                <td class="text-xs">2026-01-08</td>
-                <td class="text-sm">TD Cowen</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Buy</td>
-            </tr>
-            
-            <tr>
-                <td class="text-xs">2026-01-05</td>
-                <td class="text-sm">Wells Fargo</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Overweight</td>
-            </tr>
-            
-                </tbody>
-            </table>
-        </div>
-        
-    </section>
-    
-                </div>
-            </div>
-
-            <!-- Catalysts Section (Full Width) -->
-            
-    <section class="glass-card" style="margin-bottom: 2rem;">
-        <h2>Upcoming Catalysts</h2>
-        <div class="grid-cols-2" style="gap: 2rem;">
-            
-        <div>
-            <h3 class="text-sm text-muted" style="margin-bottom: 1rem;">Next Earnings</h3>
-            <div class="glass-card" style="background: rgba(56, 189, 248, 0.1); border-color: rgba(56, 189, 248, 0.2);">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div style="font-size: 1.25rem; font-weight: bold;">2026-04-24</div>
-                    <span class="text-sm text-muted">18 days away</span>
-                </div>
-                <div style="margin-top: 1rem; display: flex; gap: 2rem;">
-                    <div>
-                        <span class="text-xs text-muted">EPS Estimate</span><br>
-                        <b>$1.57</b>
-                    </div>
-                    <div>
-                        <span class="text-xs text-muted">Revenue Estimate</span><br>
-                        <b>$20.6B</b>
+                    <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.1);">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                            <span class="text-sm text-muted">Stop (2.0x ATR)</span>
+                            <span class="font-mono text-sm" style="color:var(--accent-poor)">$137.10</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span class="text-sm text-muted">Target (4.0x ATR)</span>
+                            <span class="font-mono text-sm" style="color:var(--accent-optimal)">$171.71</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-            
-        <div>
-            <h3 class="text-sm text-muted" style="margin-bottom: 1rem;">Recent News</h3>
-            <div>
-            <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <a href="https://finance.yahoo.com/economy/policy/articles/why-shouldn-t-add-risk-022610547.html" target="_blank" style="color: var(--text-primary); text-decoration: none;">
-                    <div style="font-weight: 500; margin-bottom: 0.25rem;">Here’s why you shouldn’t add risk to your portfolio, according to BCA</div>
-                </a>
-                <div class="text-xs text-muted">Investing.com · 2026-04-05</div>
-            </div>
-            
-            <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <a href="https://www.packagingdive.com/news/packaging-innovations-dawn-sunset-blueland-pulpac-ufp/816370/" target="_blank" style="color: var(--text-primary); text-decoration: none;">
-                    <div style="font-weight: 500; margin-bottom: 0.25rem;">Packaging innovations: Dawn of a new jug, Sunset’s tomato love triangle</div>
-                </a>
-                <div class="text-xs text-muted">Packaging Dive · 2026-04-03</div>
-            </div>
-            
-            <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <a href="https://finance.yahoo.com/markets/stocks/articles/procter-gambles-supply-chain-3-140700130.html" target="_blank" style="color: var(--text-primary); text-decoration: none;">
-                    <div style="font-weight: 500; margin-bottom: 0.25rem;">Is Procter & Gamble's Supply Chain 3.0 a Catalyst for Margin Growth?</div>
-                </a>
-                <div class="text-xs text-muted">Zacks · 2026-04-02</div>
-            </div>
-            
-            <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <a href="https://247wallst.com/energy/2026/04/02/the-5-safest-dividend-aristocrats-are-perfect-for-retirees-needing-growth-income/" target="_blank" style="color: var(--text-primary); text-decoration: none;">
-                    <div style="font-weight: 500; margin-bottom: 0.25rem;">The 5 Safest Dividend Aristocrats Are Perfect For Retirees Needing Growth &...</div>
-                </a>
-                <div class="text-xs text-muted">24/7 Wall St. · 2026-04-02</div>
-            </div>
-            
-            <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <a href="https://finance.yahoo.com/markets/stocks/articles/td-cowen-flags-weaker-pricing-020127097.html" target="_blank" style="color: var(--text-primary); text-decoration: none;">
-                    <div style="font-weight: 500; margin-bottom: 0.25rem;">TD Cowen Flags Weaker Pricing Power, Trims P&G Target</div>
-                </a>
-                <div class="text-xs text-muted">Insider Monkey · 2026-04-02</div>
-            </div>
-            </div>
-        </div>
-        
-        </div>
-    </section>
-    
 
-            <!-- Technical Context Section -->
             
-    <section class="glass-card">
-        <h2>Technical Context</h2>
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:0.05em; margin:0;">Short Interest &amp; Squeeze Potential</h3>
+                <span class="badge badge-good">Low Squeeze Risk</span>
+            </div>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:1rem;">
                 <div>
-                    <span class="text-xs text-muted">Current Price</span>
-                    <div style="font-size: 1.5rem; font-weight: bold;">$143.12</div>
+                    <span class="text-xs text-muted block">Float Short</span>
+                    <span class="font-mono" style="font-size:1.3rem; font-weight:700;">1.0%</span>
                 </div>
                 <div>
-                    <span class="text-xs text-muted">Composite Score</span>
-                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent-good);">55</div>
+                    <span class="text-xs text-muted block">Days to Cover</span>
+                    <span class="font-mono" style="font-size:1.3rem; font-weight:700;">2.2</span>
                 </div>
                 <div>
-                    <span class="text-xs text-muted">Entry Score</span>
-                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--text-secondary);">N/A</div>
+                    <span class="text-xs text-muted block">MoM Short Change</span>
+                    <span class="font-mono text-sm" style="color:var(--accent-optimal); font-weight:600;">&#9660; -11.2%</span>
                 </div>
                 <div>
-                    <span class="text-xs text-muted">Trend</span>
-                    <div style="margin-top: 0.25rem;"><span class="badge badge-optimal">Accelerating</span></div>
+                    <span class="text-xs text-muted block">Squeeze Score</span>
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-top:4px;">
+                        <div class="progress-bar-bg" style="width:80px;"><div class="progress-bar-fg" style="width:11%; background:var(--accent-optimal);"></div></div>
+                        <span class="font-mono text-xs text-muted">11/100</span>
+                    </div>
                 </div>
             </div>
-            <a href="sector_XLP.html" class="filter-btn" style="text-decoration: none;">
-                View Full Chart in Sector Dashboard
-            </a>
+            <p class="text-xs text-muted" style="margin:0; padding-top:0.75rem; border-top:1px solid rgba(255,255,255,0.05);">Low short interest. A rally in this name is unlikely to have a squeeze component — fundamentals or sector rotation are the more probable drivers.</p>
         </div>
-    </section>
     
+            
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Relative Strength Rating</h3>
+                    <p class="text-xs text-muted" style="margin:0;">RS Rating compares how a stock has performed relative to the overall market over the past 12 months, with recent performance weighted more heavily. William O'Neil's research showed that the best-performing stocks had RS Ratings above 80 before their biggest price advances. A high RS Rating means the stock is already showing institutional accumulation — it is a market leader.</p>
+                </div>
+                <span class="badge badge-poor">Below Average</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:2rem; flex-wrap:wrap; margin-bottom:.75rem;">
+                <div style="text-align:center;">
+                    <span class="text-xs text-muted block">RS Rating</span>
+                    <span class="font-mono" style="font-size:2rem; font-weight:700; color:var(--accent-poor);">38</span>
+                    <span class="text-xs text-muted block">out of 99</span>
+                </div>
+                <div style="flex:1; min-width:180px;">
+                    <div class="progress-bar-bg" style="width:100%; margin-bottom:.5rem;"><div class="progress-bar-fg" style="width:38%; background:var(--accent-poor);"></div></div>
+                    <p class="text-xs text-muted" style="margin:0;">At 38, PG is underperforming the market. Entering a laggard while leaders exist elsewhere is a structural mistake — capital has better deployment options.</p>
+                </div>
+            </div>
+        </div>
+            
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Earnings Calendar &amp; Binary Risk</h3>
+                    <p class="text-xs text-muted" style="margin:0;">Earnings events are binary — the stock will gap significantly up or down regardless of your technical analysis. Knowing when the next report is lets you size your position appropriately and avoid accidental exposure to a catalyst you haven't evaluated.</p>
+                </div>
+                <span class="badge badge-marginal">Earnings Approaching</span>
+            </div>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:.75rem;">
+                <div><span class="text-xs text-muted block">Next Earnings</span><span class="font-mono text-sm">Apr 24, 2026</span></div>
+                <div><span class="text-xs text-muted block">Days Away</span><span class="font-mono text-sm" style="color:var(--accent-marginal); font-weight:600;">14</span></div>
+                <div><span class="text-xs text-muted block">Implied Move (options)</span><span class="font-mono text-sm">N/A</span></div>
+                <div><span class="text-xs text-muted block">Avg EPS Surprise (4Q)</span><span class="font-mono text-sm">+0.0%</span></div>
+            </div>
+            <p class="text-xs text-muted" style="margin:0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">Earnings in 14 days — on the radar but not immediate. Begin preparing your earnings protocol: know your size, know your exit. The stock has averaged a +0.0% EPS surprise over the last 4 quarters.</p>
+        </div>
 
-            <!-- Footer -->
-            <footer style="margin-top: 3rem; text-align: center; color: var(--text-secondary);">
-                <p>Macro Watch 2.1 · Stock Narrative Page</p>
-                <p class="text-xs">Fundamental data via yfinance · Last updated: 2026-04-05 11:01</p>
-            </footer>
+            <!-- Two-column intelligence grid -->
+            <div class="grid-cols-2 mb-3">
+                <div>
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0;">Options &amp; Volatility Context</h3>
+                <span class="badge badge-info">N/A IV</span>
+            </div>
+            <p class="text-xs text-muted" style="margin:0 0 1rem 0;">The options market prices in the expected range of price movement. IV Rank (IVR) shows where current volatility sits relative to its 52-week range — 0 is the calmest it's been, 100 is the most fearful. The Put/Call Ratio measures whether traders are buying more protective puts (bearish) or speculative calls (bullish).</p>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:.75rem;">
+                <div>
+                    <span class="text-xs text-muted block">IV Rank (52W)</span>
+                    <div style="display:flex; align-items:center; gap:.75rem; margin-top:4px;">
+                        <div class="progress-bar-bg" style="width:80px;"><div class="progress-bar-fg" style="width:0%; background:var(--accent-optimal);"></div></div>
+                        <span class="font-mono text-sm">N/A/100</span>
+                    </div>
+                    <span class="text-xs text-muted">FAIR</span>
+                </div>
+                <div><span class="text-xs text-muted block">IV / HV Ratio</span><span class="font-mono text-sm">N/A</span></div>
+                <div><span class="text-xs text-muted block">Put/Call Ratio</span><span class="font-mono text-sm">0.71 — Neutral</span></div>
+                <div><span class="text-xs text-muted block">Options Implied Move</span><span class="font-mono text-sm">±2.5%</span></div>
+            </div>
+            <p class="text-xs text-muted" style="margin:0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">Options on PG show normal conditions. IVR: N/A. P/C ratio: 0.71. No extreme fear or complacency detected — standard position sizing applies. The market is pricing a 2.5% move.</p>
+        </div></div>
+                <div>
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0;">Factor Profile</h3>
+                <span class="badge badge-info">Quality at a Premium</span>
+            </div>
+            <p class="text-xs text-muted" style="margin:0 0 1rem 0;">Factor investing is the science of understanding WHY a stock is moving. Momentum tells you if institutions are already chasing it (trend confirmation). Quality tells you if the underlying business deserves the price (fundamental anchor). Value tells you if you are overpaying relative to earnings and cash flow (margin of safety). The strongest entries combine strong momentum (confirmation) with decent quality (sustainability) — paying a fair price for a high-quality business that is already trending.</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-bottom:.75rem;">
+                <div><span class="text-xs text-muted block">Momentum</span><div class="progress-bar-bg" style="width:100%;"><div class="progress-bar-fg" style="width:0%; background:var(--accent-poor);"></div></div><span class="text-xs text-muted">Negative Momentum</span></div>
+                <div><span class="text-xs text-muted block">Quality</span><div class="progress-bar-bg" style="width:100%;"><div class="progress-bar-fg" style="width:90.0%; background:var(--accent-optimal);"></div></div><span class="text-xs text-muted">High Quality</span></div>
+                <div><span class="text-xs text-muted block">Value</span><div class="progress-bar-bg" style="width:100%;"><div class="progress-bar-fg" style="width:25.0%; background:var(--accent-poor);"></div></div><span class="text-xs text-muted">Expensive</span></div>
+            </div>
+            <p class="text-xs text-muted" style="margin:0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">Procter & Gamble Company (The) (PG) factor profile: Quality at a Premium | Alignment: MIXED. Momentum: Negative Momentum (0/100) — 12M-1M return -13.1%, 3M return +2.2%. Quality: High Quality (90/100) — ROE 31.6%, Gross Margin 51.2%. Value: Expensive (25/100) — Fwd P/E 20.1x, P/FCF 25.9x. High-quality business but expensive. Suitable for a core long-term hold; risky to chase short-term as a swing trade without a pullback entry.</p>
+        </div></div>
+            </div>
+            <div class="grid-cols-2 mb-3">
+                <div>
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Insider Transactions (Form 4)</h3>
+                    <p class="text-xs text-muted" style="margin:0;">Form 4 filings are public disclosures that corporate insiders (executives, directors, and >10% shareholders) must submit within 2 business days of buying or selling their company's stock. Open-market purchases — where insiders spend their own money at market price — are the most bullish signal because insiders have no incentive to buy unless they believe the stock is undervalued. Research shows companies with cluster buying (3+ insiders in 30 days) outperform the market by 6-8% over the following 6 months.</p>
+                </div>
+                <span class="badge badge-marginal">NEUTRAL</span>
+            </div>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:.75rem;">
+                <div><span class="text-xs text-muted block">Open-Market Buys (90d)</span><span class="font-mono" style="font-size:1.3rem; font-weight:700; color:var(--accent-optimal);">0</span></div>
+                <div><span class="text-xs text-muted block">Open-Market Sells (90d)</span><span class="font-mono" style="font-size:1.3rem; font-weight:700; color:var(--accent-poor);">0</span></div>
+                <div><span class="text-xs text-muted block">Unique Buyers</span><span class="font-mono text-sm">0</span></div>
+                <div><span class="text-xs text-muted block">Cluster Signal</span><span class="font-mono text-sm" style="color:var(--text-secondary);">—</span></div>
+            </div>
+            <p class="text-xs text-muted">No recent transactions on record.</p>
+            <p class="text-xs text-muted" style="margin:.75rem 0 0 0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">No significant insider buying or selling activity detected in the past 90 days. This is the most common reading — absence of signal, not a negative indicator.</p>
+        </div></div>
+                <div>
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Institutional Flow / Dark Pool Proxy</h3>
+                    <p class="text-xs text-muted" style="margin:0;">Dark pools are private trading venues where institutional investors execute large orders without tipping off the public market. They handle ~35-40% of all US equity volume. When a fund wants to accumulate a position over days or weeks, they leave a signature in the public data: high-volume sessions where the price range is unusually narrow — the institution is absorbing all available supply without letting price run. We track three proxy signals: (1) Quiet accumulation days (high vol + narrow range), (2) Block volume concentration (top-decile sessions), and (3) Volume-direction correlation (is sustained volume driving price up or down?).</p>
+                </div>
+                <span class="badge badge-optimal">ACCUMULATION (MODERATE)</span>
+            </div>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:.75rem;">
+                <div><span class="text-xs text-muted block">Quiet Absorption Days</span><span class="font-mono" style="font-size:1.3rem; font-weight:700; color:var(--accent-good);">1</span></div>
+                <div><span class="text-xs text-muted block">Vol–Price Correlation</span><span class="font-mono text-sm">+0.45</span></div>
+                <div><span class="text-xs text-muted block">Block Volume %</span><span class="font-mono text-sm">32.4%</span></div>
+            </div>
+            <div class="metric-item"><span class="text-xs">Mar 20, 2026 — $144.28</span><span class="badge badge-info text-xs">Quiet Absorption</span></div><div class="metric-item"><span class="text-xs">Mar 30, 2026 — $144.72</span><span class="badge badge-info text-xs">High Activity</span></div><div class="metric-item"><span class="text-xs">Mar 27, 2026 — $142.71</span><span class="badge badge-info text-xs">Quiet Absorption</span></div>
+            <p class="text-xs text-muted" style="margin:.75rem 0 0 0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">🔵 Moderate accumulation signal — 1 high-volume, narrow-range session(s) detected. Some evidence of institutional buying, but not yet a definitive pattern. Watch for this to develop further over the next 1-2 weeks.</p>
+        </div></div>
+            </div>
+            
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Volume Profile &amp; Price Levels</h3>
+                    <p class="text-xs text-muted" style="margin:0;">Volume Profile shows how much volume traded at each price level over a given period. The Point of Control (POC) is the price where the most volume traded — this is where institutions have the most money concentrated, and price tends to return to this level repeatedly. The Value Area is the price range containing 70% of all volume — similar to one standard deviation — and acts as a fair-value zone. Entering near the POC or Value Area Low gives you a high-probability location with institutional backing.</p>
+                </div>
+                <span class="badge badge-info" style="color:var(--accent-optimal);">In Value Area</span>
+            </div>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:.75rem;">
+                <div><span class="text-xs text-muted block">Point of Control (POC)</span><span class="font-mono text-sm" style="color:var(--accent-info);">$156.68</span></div>
+                <div><span class="text-xs text-muted block">Distance to POC</span><span class="font-mono text-sm">-6.4%</span></div>
+                <div><span class="text-xs text-muted block">Value Area High</span><span class="font-mono text-sm" style="color:var(--accent-optimal);">$158.53</span></div>
+                <div><span class="text-xs text-muted block">Value Area Low</span><span class="font-mono text-sm" style="color:var(--accent-poor);">$143.74</span></div>
+                <div><span class="text-xs text-muted block">Period VWAP</span><span class="font-mono text-sm">$151.85</span></div>
+            </div>
+            <p class="text-xs text-muted" style="margin:0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">Price at $146.66 is trading within the Value Area ($143.74 – $158.53) — the institutional 'fair value' zone. POC support at $156.68 is the high-volume magnetic level; expect rotations between VAL and VAH until a breakout resolves direction. Period VWAP $151.85; AVWAP from 52-week low $150.92.</p>
+        </div>
+
+            <!-- Chart Area -->
+            <div class="glass-card" style="padding:1rem;">
+                <div>                        <script type="text/javascript">window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.3.1.min.js" integrity="sha256-4rD3fugVb/nVJYUv5Ky3v+fYXoouHaBSP20WIJuEiWg=" crossorigin="anonymous"></script>                <div id="fa9a057f-01c7-43d8-ae9b-c50b7f0ec673" class="plotly-graph-div" style="height:800px; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("fa9a057f-01c7-43d8-ae9b-c50b7f0ec673")) {                    Plotly.newPlot(                        "fa9a057f-01c7-43d8-ae9b-c50b7f0ec673",                        [{"close":{"dtype":"f8","bdata":"AAAAQE5xYkAAAACgt8ZiQAAAACAeRmNAAAAA4BenY0AAAAAANfBjQAAAAOBfCGRAAAAAILXBY0AAAABgiqljQAAAAKCh9mNAAAAAIF\u002fuY0AAAABAVxtkQAAAAEAqtWNAAAAAgAm+Y0AAAACA3ehjQAAAAAAqEmRAAAAAYHVUZEAAAACgT3JkQAAAAKB3gGRAAAAAgOkuZEAAAAAgTlZkQAAAACA+n2RAAAAAQOIbZUAAAADAae1kQAAAAAC58WRAAAAAABrdZEAAAABAYU1kQAAAAOBkkWRAAAAAAD6XZEAAAADAgVdkQAAAAEDs9mNAAAAAALhHZEAAAACAXoBkQAAAAEAEUWVAAAAAYEStZUAAAAAg3QRlQAAAAGBsr2RAAAAAwI1SZEAAAABgD4BkQAAAAODZ92NAAAAAYHcsY0AAAACABnxjQAAAAMCV2GNAAAAAoM4xZEAAAACAeW9kQAAAAMBB0WNAAAAAwNy1ZEAAAAAATCZlQAAAAIADaGVAAAAAgHlvZEAAAADAm0dkQAAAAOBXcWRAAAAAoArsY0AAAADgdU5kQAAAAABSwmRAAAAAwAOXY0AAAADgmqZjQAAAAID5TGNAAAAAABr9Y0AAAAAg9U1kQAAAAIBBzGRAAAAAIEsUZEAAAACAFZ9jQAAAAAB6eWNAAAAAwOuRY0AAAADgUbBjQAAAAIDbOWNAAAAA4L78YkAAAABg9YJjQAAAAGCSkWJAAAAA4NDrYkAAAAAAowZjQAAAAACijmNAAAAAQDNbY0AAAAAgO7ljQAAAAEBWdmNAAAAAgKU7Y0AAAABA8stiQAAAAICwxGJAAAAAwEdzYkAAAADAPKliQAAAAKChy2JAAAAAoOqpYkAAAACAMz5iQAAAACAgVGJAAAAAgGS7YkAAAAAAsmNiQAAAAKAJzmFAAAAAwKe6YUAAAABgIe5hQAAAAOAG92FAAAAAwEqZYUAAAACA1ZthQAAAAKBa8GFAAAAAIO2iYkAAAADgo\u002fhiQAAAAKBw5WNAAAAAgD0CZEAAAADA9RhkQAAAAGBm5mRAAAAAACk0Y0AAAADAzNRiQAAAAMD1CGJAAAAAYLjWYUAAAAAA1+NhQAAAAMAeVWJA"},"high":{"dtype":"f8","bdata":"YZIZnU22YkD0KijS7sdiQLP\u002fY4XPomNAeoKgvL2uY0A3I7n+zv9jQL7GS93JHWRAd5alAOgjZEAlvayxk7BjQKPs+7cPMWRAZZr\u002fbtIKZEBN+RbUTi5kQMGpoH2FPmRA9LeR8qDcY0DvLqzhXwhkQK\u002f6owS3bGRApRSuUZ5yZECZj7Gwd4BkQM259l\u002fIpGRAoP2DDABmZEAHA7nJA6pkQG0YPOy0qWRAiAbwHoJIZUBr8cnzNGRlQLo02bDRUGVA\u002fkFK0JIPZUB3XMhg8+pkQIkqfBE+m2RAgAubLPUGZUAmO+fIbLxkQCdGdKQVhGRAfkEM8fRIZEDYzFg6QaBkQG9QGxGwc2VASRe4dXzRZUBoORrHIMllQO6VfIABA2VAsLg8JqvkZECgXLjuIqZkQLyanY0Ib2RAvVqbQGTFY0D3u53hN49jQGxgqcMHVWRAlWg1uNSsZEASQKnkhKxkQAYCcDiu2WRAwM38OtS\u002fZECte4FEhj9lQP\u002fX1kXX5WVA4WMqVdflZUAdrWrBpdBkQIYYuOeqpWRAKflFczJEZUDn5RwgCHFkQHq+ypEW4mRAwmelUCStZEASJf1OV\u002fljQB9V0ufTsmNAvaSQYs0BZEClS7LB8F1kQIvOjru67mRAsdca952xZECb0UQrSxRkQM\u002fhr6pr02NAKMou1NbMY0AEj7XEmOVjQGnf3\u002fdJu2NAbGFM4K4SY0DhLC5frZljQBdQ2nIAjmNAB8pDwZf7YkCG2ZcDQVpjQAQkHoQZ2WNAVP8eXJSPY0AnVJoPRcpjQOdW\u002fJ8ewWNAoP70UkvtY0DPql6k6DxjQERq7ZNEB2NAGlkEURbhYkCOPCnHHb1iQKZp4lSPZmNAppZViuICY0B4OMSAJqViQAWVm711imJAPg3EYNLNYkBCogQOMKtiQMTYBvLjemJAzQUFCDzDYUA0Tunw6GxiQOPDq6WfE2JAaVpLMYMBYkAB2dZOc6phQDXK0b+oO2JA0PfQfpbSYkAAAABACv9iQAAAACCu\u002f2NAAAAA4HpkZEAAAACgcEVkQAAAAAAA6GRAAAAAoJnRZEAAAADAzKRjQAAAAGC4LmNAAAAAwMxEYkAAAACAPTJiQAAAAIAUXmJA"},"low":{"dtype":"f8","bdata":"VVVrXl9fYkBdz+l\u002fSjpiQF2\u002fISGHymJAyA1TfTIrY0AEhZYDYoJjQIvZa9B9l2NA0kwFZzO8Y0D8RsVLGEpjQIAKItGzjWNAumHGXcCfY0COR3NO2cNjQAiOLpbDqmNALPwBb\u002fdSY0ADRLrv4bBjQBup5+4Xp2NAG0iTG9LnY0Cc4PTTxf9iQFBkLq5dCWRAsliX9zTvY0Cx+dvhrjVkQD+idrAlRGRAES0aAFGOZEBd7mXv8LpkQASMimWLe2RAiDIF9rOZZEDxB+l3TDpkQAiAJFUO\u002fWNAgAxVjXRAZECg+Nw171FkQET7ZIKE82NAOFlZdClTY0D3qgrgeAVkQPTqOPxjamRAQJ+NrDVkZUDd46cquPlkQOwRejtxjGRAQHfWKJM8ZEBZqmGM7R1kQD3HTvOb3GNAJTOxS7kKY0CJGkhOuiRjQLg\u002fFEDDdmNAMX\u002f7ioMZZECiBzLnIhpkQOwRFZjhvmNAoC5rA8S7Y0D6Y1OKKKhkQCIhcNwmB2VAaXyAo21FZECyDiqVkPdjQKgV0iLEu2NArg3mI1LjY0A4kgfSJxBjQNho0\u002fZDK2RAxkCpv7oMY0DhVkQ2iXhjQJtvyMYjRWNAR5SxKZMuY0B05nIPLQFkQC0zicR3O2RAJpn\u002fefjkY0BgSnkRfZNjQLroUIH5TGNAr+mlJZ49Y0BDTbcWtFtjQKQEkERiF2NAigNXhHWYYkDMG2AvXBdjQGySfek4emJANvVnkrF9YkCp\u002fX1FPuRiQIp1rBWkAGNAdE+W\u002f8YbY0BpK3BgKUpjQA9mMP\u002fpNmNAfUv2HnA5Y0Aebd9Jq5tiQFEKK5+NqWJAlDQiC7VrYkC+0pFVdB1iQLUMCBNdj2JAmfsmm4ttYkALTNhJIe5hQGwtNYJf4mFAGCF1Epv\u002fYUBVDqlvODBiQKoq22krsGFAilbi0FAlYUCwbvQkGMZhQFJj6r+BomFAataEA9GHYUDA6OTzyhRhQLQRWR3AlmFANbBCoFPjYUAAAACgR1liQAAAAAAA6GJAAAAA4KOAY0AAAADgo3hjQAAAAKCZCWRAAAAA4Hr8YkAAAACAwsViQAAAAAAACGJAAAAA4FHAYUAAAADA9chhQAAAACCul2FA"},"name":"Price","open":{"dtype":"f8","bdata":"wTSDmeCNYkDr573xb5JiQA3CIC6g7mJA7Y+yWHJCY0DRg9vY4bBjQFIifhU18GNAXs1U8p4FZEBe4PDlAqhjQFTO1ifhlmNA4rGB2hDuY0Bi2aGNndFjQENtd\u002fqiKmRAHf1pXqnJY0AIw0K3rNRjQPtZmBmV5GNAipgBoCQwZECvPh0LdUxkQIVoQmzuimRA8lOfEGJdZEBkYHRR1jdkQImUnhPXR2RAsQPlFoyPZEDdjRRdWBplQCPhZYjNAGVAxOSOEELrZEDu2eoipOJkQJQ5aVX\u002fVWRAbPjNnj2PZEBi2nVZ8qxkQPv1GCdSeGRAOuoVdx0KZEBGOMthvTFkQBC\u002ff\u002fAOc2RAHFYmHSp2ZUB4oSDY7qhlQJ\u002fUXI5K\u002f2RAVCeMDn+7ZEDSTQ\u002fOjVJkQIAj3NxvZWRAe+qbEgiwY0Due0Q97ERjQLg\u002fFEDDdmNASJzlBYtIZEAsRHuDnCFkQLzmZxzBZmRANtpdQpXfY0AS87QTjbVkQN2UkBEzHmVAl4Kf0z2BZUBhYGKo7ntkQPURC7eCP2RAog8HEoZzZEAzjmr+POljQGN90iSCUmRACyhe8UWrZECgnv+w5rZjQO1G1GkzsmNAipyIBsRFY0DaPRRqDgNkQC0zicR3O2RAa5FzmP2wZEDEBta0jABkQIN82DvjsWNAJQDStyl5Y0BmzdrfHX9jQDqxBmIzsmNAWcpp1MkLY0BAiPI+Ch1jQO92FjnRbWNA66USbPOEYkCjA4ctw+xiQJBSP4aHCGNAzigzRsyFY0C8vEBBTGVjQBGWFkZLrGNAwFizq7R1Y0DPql6k6DxjQD2XWR1syWJA7iRReWSsYkA+2iMtgl1iQNsTOpE7r2JA2tOvIlHRYkBBl+JuVqFiQKD6gQAjK2JAv0nq86pWYkB8iUt1VqFiQN2gAvLJYWJAJkHzNOG8YUAWoemZUchhQPyHcJxM1mFAt1xI6e74YUApHTk4XoNhQHYMEJLcqGFArL9CXSHuYUAAAAAA18NiQAAAAKBwDWNAAAAA4FHYY0AAAABgZv5jQAAAAIA9CmRAAAAAoEepZEAAAADAzCRjQAAAACCF+2JAAAAAwMxEYkAAAACgR+FhQAAAAOBR4GFA"},"x":["2024-04-08T00:00:00","2024-04-15T00:00:00","2024-04-22T00:00:00","2024-04-29T00:00:00","2024-05-06T00:00:00","2024-05-13T00:00:00","2024-05-20T00:00:00","2024-05-27T00:00:00","2024-06-03T00:00:00","2024-06-10T00:00:00","2024-06-17T00:00:00","2024-06-24T00:00:00","2024-07-01T00:00:00","2024-07-08T00:00:00","2024-07-15T00:00:00","2024-07-22T00:00:00","2024-07-29T00:00:00","2024-08-05T00:00:00","2024-08-12T00:00:00","2024-08-19T00:00:00","2024-08-26T00:00:00","2024-09-02T00:00:00","2024-09-09T00:00:00","2024-09-16T00:00:00","2024-09-23T00:00:00","2024-09-30T00:00:00","2024-10-07T00:00:00","2024-10-14T00:00:00","2024-10-21T00:00:00","2024-10-28T00:00:00","2024-11-04T00:00:00","2024-11-11T00:00:00","2024-11-18T00:00:00","2024-11-25T00:00:00","2024-12-02T00:00:00","2024-12-09T00:00:00","2024-12-16T00:00:00","2024-12-23T00:00:00","2024-12-30T00:00:00","2025-01-06T00:00:00","2025-01-13T00:00:00","2025-01-20T00:00:00","2025-01-27T00:00:00","2025-02-03T00:00:00","2025-02-10T00:00:00","2025-02-17T00:00:00","2025-02-24T00:00:00","2025-03-03T00:00:00","2025-03-10T00:00:00","2025-03-17T00:00:00","2025-03-24T00:00:00","2025-03-31T00:00:00","2025-04-07T00:00:00","2025-04-14T00:00:00","2025-04-21T00:00:00","2025-04-28T00:00:00","2025-05-05T00:00:00","2025-05-12T00:00:00","2025-05-19T00:00:00","2025-05-26T00:00:00","2025-06-02T00:00:00","2025-06-09T00:00:00","2025-06-16T00:00:00","2025-06-23T00:00:00","2025-06-30T00:00:00","2025-07-07T00:00:00","2025-07-14T00:00:00","2025-07-21T00:00:00","2025-07-28T00:00:00","2025-08-04T00:00:00","2025-08-11T00:00:00","2025-08-18T00:00:00","2025-08-25T00:00:00","2025-09-01T00:00:00","2025-09-08T00:00:00","2025-09-15T00:00:00","2025-09-22T00:00:00","2025-09-29T00:00:00","2025-10-06T00:00:00","2025-10-13T00:00:00","2025-10-20T00:00:00","2025-10-27T00:00:00","2025-11-03T00:00:00","2025-11-10T00:00:00","2025-11-17T00:00:00","2025-11-24T00:00:00","2025-12-01T00:00:00","2025-12-08T00:00:00","2025-12-15T00:00:00","2025-12-22T00:00:00","2025-12-29T00:00:00","2026-01-05T00:00:00","2026-01-12T00:00:00","2026-01-19T00:00:00","2026-01-26T00:00:00","2026-02-02T00:00:00","2026-02-09T00:00:00","2026-02-16T00:00:00","2026-02-23T00:00:00","2026-03-02T00:00:00","2026-03-09T00:00:00","2026-03-16T00:00:00","2026-03-23T00:00:00","2026-03-30T00:00:00","2026-04-06T00:00:00"],"type":"candlestick","xaxis":"x","yaxis":"y"},{"line":{"color":"#f59e0b","width":1.5},"name":"EMA_20","x":["2024-04-08T00:00:00","2024-04-15T00:00:00","2024-04-22T00:00:00","2024-04-29T00:00:00","2024-05-06T00:00:00","2024-05-13T00:00:00","2024-05-20T00:00:00","2024-05-27T00:00:00","2024-06-03T00:00:00","2024-06-10T00:00:00","2024-06-17T00:00:00","2024-06-24T00:00:00","2024-07-01T00:00:00","2024-07-08T00:00:00","2024-07-15T00:00:00","2024-07-22T00:00:00","2024-07-29T00:00:00","2024-08-05T00:00:00","2024-08-12T00:00:00","2024-08-19T00:00:00","2024-08-26T00:00:00","2024-09-02T00:00:00","2024-09-09T00:00:00","2024-09-16T00:00:00","2024-09-23T00:00:00","2024-09-30T00:00:00","2024-10-07T00:00:00","2024-10-14T00:00:00","2024-10-21T00:00:00","2024-10-28T00:00:00","2024-11-04T00:00:00","2024-11-11T00:00:00","2024-11-18T00:00:00","2024-11-25T00:00:00","2024-12-02T00:00:00","2024-12-09T00:00:00","2024-12-16T00:00:00","2024-12-23T00:00:00","2024-12-30T00:00:00","2025-01-06T00:00:00","2025-01-13T00:00:00","2025-01-20T00:00:00","2025-01-27T00:00:00","2025-02-03T00:00:00","2025-02-10T00:00:00","2025-02-17T00:00:00","2025-02-24T00:00:00","2025-03-03T00:00:00","2025-03-10T00:00:00","2025-03-17T00:00:00","2025-03-24T00:00:00","2025-03-31T00:00:00","2025-04-07T00:00:00","2025-04-14T00:00:00","2025-04-21T00:00:00","2025-04-28T00:00:00","2025-05-05T00:00:00","2025-05-12T00:00:00","2025-05-19T00:00:00","2025-05-26T00:00:00","2025-06-02T00:00:00","2025-06-09T00:00:00","2025-06-16T00:00:00","2025-06-23T00:00:00","2025-06-30T00:00:00","2025-07-07T00:00:00","2025-07-14T00:00:00","2025-07-21T00:00:00","2025-07-28T00:00:00","2025-08-04T00:00:00","2025-08-11T00:00:00","2025-08-18T00:00:00","2025-08-25T00:00:00","2025-09-01T00:00:00","2025-09-08T00:00:00","2025-09-15T00:00:00","2025-09-22T00:00:00","2025-09-29T00:00:00","2025-10-06T00:00:00","2025-10-13T00:00:00","2025-10-20T00:00:00","2025-10-27T00:00:00","2025-11-03T00:00:00","2025-11-10T00:00:00","2025-11-17T00:00:00","2025-11-24T00:00:00","2025-12-01T00:00:00","2025-12-08T00:00:00","2025-12-15T00:00:00","2025-12-22T00:00:00","2025-12-29T00:00:00","2026-01-05T00:00:00","2026-01-12T00:00:00","2026-01-19T00:00:00","2026-01-26T00:00:00","2026-02-02T00:00:00","2026-02-09T00:00:00","2026-02-16T00:00:00","2026-02-23T00:00:00","2026-03-02T00:00:00","2026-03-09T00:00:00","2026-03-16T00:00:00","2026-03-23T00:00:00","2026-03-30T00:00:00","2026-04-06T00:00:00"],"y":{"dtype":"f8","bdata":"AAAAQE5xYkCrqqqqcHliQKdpmubujGJAHcFOO86nYkDd97T4FMdiQItyEWSu5WJABIB916L6YkBBT6ItSwtjQPIWYu+0IWNAAOSh2zI1Y0DotWHxHUtjQInh9n43VWNAAgmKHTNfY0DRsnCIT2xjQJmVTTIbfGNA+G4VEraQY0ARD75oMqZjQDQyewz8umNAtb8BeQbGY0AqG2MnxNNjQCY9fhol52NAkAZmc4wEZEDYf2jouRpkQG6k5LkzL2RA6t3Oj8M\u002fZEDsETWID0FkQLGu2iK2SGRA3ZEzyjBQZECw8cAq41BkQJ8XEL9RSGRAqKeUGkNIZECk1NsLm01kQGTAfbtPZmRATn3fOHOFZEBTrmiwlZFkQLmd2C5tlGRAzBRKJCeOZEBv+n+Lz4xkQOs3T8SffmRAi294KGteZECWD\u002fN520hkQGOgSSsqPmRAQdoR4fw8ZEAicKLLy0FkQCvTSfsTN2RAfJo2GidDZECVf7cXyVhkQHs2suSdcmRAiADSSFFyZEABYtb+P25kQNxknWmLbmRAcmeOnx1iZEBPy71oPmBkQLXot5uVaWRATgOOt4dVZECEZPrf3kRkQArhN+9CLWRAXvwNwKwoZECedgC9OSxkQBWcDG53O2RAvu5sWrw3ZED1FMSOMilkQLlDaFB2GGRACW7kEaYLZEBeV3li8wJkQM9\u002f24nM72NA4EJxqqbYY0B1eWZmfdBjQF4Mst8dsmNAJEitHDufY0BRBGy4spBjQBkQt12AkGNAIzPK1GyLY0DjFQCfyY9jQJBEDBxdjWNAdhkLxJSFY0DMR9nP5nNjQBqKAfk2Y2NA57lWJF1MY0DpFTb20zxjQGU4wx4MMmNAyWPhHhUlY0DC+I4DGA9jQLDIXIxJ\u002fWJAqzvm+AL3YkDY7LdC++hiQFaZstEIzmJABR0D0M6zYkDsxD8\u002f+6BiQMmZs5fLkGJACwUEOjl5YkD+39KJI2RiQMFQIJgcWWJAu\u002fOKQyRgYkAvh3FSqm5iQHTDKa9bkmJA7zYBAGW1YkDYehkGQtdiQPRibD92CWNAb9OSRYcNY0D3aaksIAhjQMfZvf3S72JARpSfaA3VYkAnhtlqFL5iQLbOxGYVtGJA"},"type":"scatter","xaxis":"x","yaxis":"y"},{"line":{"color":"#3b82f6","width":1.5},"name":"EMA_50","x":["2024-04-08T00:00:00","2024-04-15T00:00:00","2024-04-22T00:00:00","2024-04-29T00:00:00","2024-05-06T00:00:00","2024-05-13T00:00:00","2024-05-20T00:00:00","2024-05-27T00:00:00","2024-06-03T00:00:00","2024-06-10T00:00:00","2024-06-17T00:00:00","2024-06-24T00:00:00","2024-07-01T00:00:00","2024-07-08T00:00:00","2024-07-15T00:00:00","2024-07-22T00:00:00","2024-07-29T00:00:00","2024-08-05T00:00:00","2024-08-12T00:00:00","2024-08-19T00:00:00","2024-08-26T00:00:00","2024-09-02T00:00:00","2024-09-09T00:00:00","2024-09-16T00:00:00","2024-09-23T00:00:00","2024-09-30T00:00:00","2024-10-07T00:00:00","2024-10-14T00:00:00","2024-10-21T00:00:00","2024-10-28T00:00:00","2024-11-04T00:00:00","2024-11-11T00:00:00","2024-11-18T00:00:00","2024-11-25T00:00:00","2024-12-02T00:00:00","2024-12-09T00:00:00","2024-12-16T00:00:00","2024-12-23T00:00:00","2024-12-30T00:00:00","2025-01-06T00:00:00","2025-01-13T00:00:00","2025-01-20T00:00:00","2025-01-27T00:00:00","2025-02-03T00:00:00","2025-02-10T00:00:00","2025-02-17T00:00:00","2025-02-24T00:00:00","2025-03-03T00:00:00","2025-03-10T00:00:00","2025-03-17T00:00:00","2025-03-24T00:00:00","2025-03-31T00:00:00","2025-04-07T00:00:00","2025-04-14T00:00:00","2025-04-21T00:00:00","2025-04-28T00:00:00","2025-05-05T00:00:00","2025-05-12T00:00:00","2025-05-19T00:00:00","2025-05-26T00:00:00","2025-06-02T00:00:00","2025-06-09T00:00:00","2025-06-16T00:00:00","2025-06-23T00:00:00","2025-06-30T00:00:00","2025-07-07T00:00:00","2025-07-14T00:00:00","2025-07-21T00:00:00","2025-07-28T00:00:00","2025-08-04T00:00:00","2025-08-11T00:00:00","2025-08-18T00:00:00","2025-08-25T00:00:00","2025-09-01T00:00:00","2025-09-08T00:00:00","2025-09-15T00:00:00","2025-09-22T00:00:00","2025-09-29T00:00:00","2025-10-06T00:00:00","2025-10-13T00:00:00","2025-10-20T00:00:00","2025-10-27T00:00:00","2025-11-03T00:00:00","2025-11-10T00:00:00","2025-11-17T00:00:00","2025-11-24T00:00:00","2025-12-01T00:00:00","2025-12-08T00:00:00","2025-12-15T00:00:00","2025-12-22T00:00:00","2025-12-29T00:00:00","2026-01-05T00:00:00","2026-01-12T00:00:00","2026-01-19T00:00:00","2026-01-26T00:00:00","2026-02-02T00:00:00","2026-02-09T00:00:00","2026-02-16T00:00:00","2026-02-23T00:00:00","2026-03-02T00:00:00","2026-03-09T00:00:00","2026-03-16T00:00:00","2026-03-23T00:00:00","2026-03-30T00:00:00","2026-04-06T00:00:00"],"y":{"dtype":"f8","bdata":"AAAAQE5xYkA3Nze3p3RiQNb9JY7efGJAkqNHfZCIYkAFeuoEq5ZiQDdwCZUqpWJAdhEJJ1OwYkCV3jAVGbpiQCYhXNSCxmJAa7GFCR3SYkCUyNU4Bt9iQHqE6wZs52JAZp03mNbvYkAriE6hmvliQBXEmzubBGNAdMu47MYRY0B1vuMWmh9jQPixvJRwLWNAqFW\u002fZok3Y0ABB+pUyEJjQMoVHZlyUGNAs9gC+nZiY0DUcLfy83FjQIaK+7EAgWNA+WarVaeOY0AnmpATIpZjQO5mA4r8n2NApCHgyq6pY0A0AoLZf7BjQArugdhCs2NAm8tyPhW5Y0BojK\u002fr5cBjQDzc2suW0GNAWJIdRUjjY0AyI9Zwo+5jQDWGltky9mNAQtHCBdL5Y0CpZPKuFf9jQI44PhDN\u002fmNAb0\u002fDd432Y0Dy7AFkv\u002fFjQJjU\u002fMbC8GNA6HF6yk\u002fzY0BDQBFKLvhjQOtq6IWn9mNAgy\u002fBGSf+Y0ApsM0nxAlkQOZOdV2AF2RAxEH9i\u002fMaZECot1fesxxkQNkUIpgFIGRAKzeZwPsdZEDtIH9s4h9kQCqn\u002fCZBJmRAur7yIqMgZEASijkH2htkQEQgDyW9E2RAtdNZ4tkSZEC4GyREKxVkQJ0Vh1BZHGRAugrDcQgcZEDblu0NIhdkQGQEo07zEGRAAc3JB\u002fgLZEB6RybyXwhkQHUNa6xGAGRASGfzMBn2Y0Cq0d9GlfFjQMwj8FvH42NA05C+AQ7aY0AvlTSJw9FjQAA655chz2NAauecvJXKY0Dpb0aE58ljQCsRqJCgxmNABpi\u002fTi3BY0AanD9ij7djQHMOLicJrmNAKFRAQbGhY0ADeej18pdjQKnYXMXvj2NA5ImujOqGY0AnLyWCBnpjQIBfyft\u002fbmNA+ZLa4nlnY0DWLf\u002fjSV1jQEFjLLmhTWNAWFrfJ9Q9Y0AjrOoBqjBjQECC61VdJGNA4zvYHd8UY0DGdYT0FQZjQH3GAb8x+2JAUFqnmrv3YkARoni2xPdiQC8Uob8WAWNAN+a9WCwLY0BJ9jjLwBVjQPE8uXv5J2NA1IA50XMoY0ASx74CLCVjQPhz374GGmNAREdtAVkNY0BqNaBCrgFjQJh5JuPp+mJA"},"type":"scatter","xaxis":"x","yaxis":"y"},{"line":{"color":"#cbd5e1","width":1.5},"name":"ADX","x":["2024-04-08T00:00:00","2024-04-15T00:00:00","2024-04-22T00:00:00","2024-04-29T00:00:00","2024-05-06T00:00:00","2024-05-13T00:00:00","2024-05-20T00:00:00","2024-05-27T00:00:00","2024-06-03T00:00:00","2024-06-10T00:00:00","2024-06-17T00:00:00","2024-06-24T00:00:00","2024-07-01T00:00:00","2024-07-08T00:00:00","2024-07-15T00:00:00","2024-07-22T00:00:00","2024-07-29T00:00:00","2024-08-05T00:00:00","2024-08-12T00:00:00","2024-08-19T00:00:00","2024-08-26T00:00:00","2024-09-02T00:00:00","2024-09-09T00:00:00","2024-09-16T00:00:00","2024-09-23T00:00:00","2024-09-30T00:00:00","2024-10-07T00:00:00","2024-10-14T00:00:00","2024-10-21T00:00:00","2024-10-28T00:00:00","2024-11-04T00:00:00","2024-11-11T00:00:00","2024-11-18T00:00:00","2024-11-25T00:00:00","2024-12-02T00:00:00","2024-12-09T00:00:00","2024-12-16T00:00:00","2024-12-23T00:00:00","2024-12-30T00:00:00","2025-01-06T00:00:00","2025-01-13T00:00:00","2025-01-20T00:00:00","2025-01-27T00:00:00","2025-02-03T00:00:00","2025-02-10T00:00:00","2025-02-17T00:00:00","2025-02-24T00:00:00","2025-03-03T00:00:00","2025-03-10T00:00:00","2025-03-17T00:00:00","2025-03-24T00:00:00","2025-03-31T00:00:00","2025-04-07T00:00:00","2025-04-14T00:00:00","2025-04-21T00:00:00","2025-04-28T00:00:00","2025-05-05T00:00:00","2025-05-12T00:00:00","2025-05-19T00:00:00","2025-05-26T00:00:00","2025-06-02T00:00:00","2025-06-09T00:00:00","2025-06-16T00:00:00","2025-06-23T00:00:00","2025-06-30T00:00:00","2025-07-07T00:00:00","2025-07-14T00:00:00","2025-07-21T00:00:00","2025-07-28T00:00:00","2025-08-04T00:00:00","2025-08-11T00:00:00","2025-08-18T00:00:00","2025-08-25T00:00:00","2025-09-01T00:00:00","2025-09-08T00:00:00","2025-09-15T00:00:00","2025-09-22T00:00:00","2025-09-29T00:00:00","2025-10-06T00:00:00","2025-10-13T00:00:00","2025-10-20T00:00:00","2025-10-27T00:00:00","2025-11-03T00:00:00","2025-11-10T00:00:00","2025-11-17T00:00:00","2025-11-24T00:00:00","2025-12-01T00:00:00","2025-12-08T00:00:00","2025-12-15T00:00:00","2025-12-22T00:00:00","2025-12-29T00:00:00","2026-01-05T00:00:00","2026-01-12T00:00:00","2026-01-19T00:00:00","2026-01-26T00:00:00","2026-02-02T00:00:00","2026-02-09T00:00:00","2026-02-16T00:00:00","2026-02-23T00:00:00","2026-03-02T00:00:00","2026-03-09T00:00:00","2026-03-16T00:00:00","2026-03-23T00:00:00","2026-03-30T00:00:00","2026-04-06T00:00:00"],"y":{"dtype":"f8","bdata":"AAAAAAAA+H8AAAAAAABZQAPJ4k24g1hAP+Se\u002flAWWECdpSVPms9XQI5ltM4rlldAEJWnbnJiV0CyVYxgRkBWQAngfWvhhVVAEAUV0czYVED2NsIAQ0pUQJWB7K12n1NAtdBcoJGPUkBvTxBUb7JRQKjTl76zH1FAveks9nyaUEBZu8bRqv5OQNHukJ8Vz0xATdhWhL7bSkAuM79L1S5JQGw+6QSPoEdApbnPYmLdRkD52WUfREFGQIKUy8XOTUVAAVS8O71rREDNdYOWZRBDQMnUbRnn5UFA3FUi8c3sQECThG65fwVAQPUp61EnET5Aq6xLWD10PUAadOVSqA88QPZI83+M5zpADLBLbShgOkBvgXdgNxE5QGrkw5COcDdASsgG7c5qNkBgecpof6Y1QKQNZTEnUjVAQvJrvvoKNkCMxs2cmrY2QNiaD8\u002ft1jVAih6\u002f7DZ4NEBB9JgajTIzQO4EMAcYkDJAl5N9wff9MUCzkjou3tcwQPxI303tuzBA0a88tvhML0DfsiPlMSAuQM32NU\u002fipy1Ag4TQpEi+K0DXdwkcM6grQBFfs\u002fUbVCpAOggRoKR3K0CWt9ViWoYsQKBa\u002foVy5i1AHCxFM941LkA2Y9d9fmwtQA76GF1ifCtAiPbglVY3KkBrOKh2EM8pQPL8HOgrEypAx6wLmLl2KkAIBU6SPn8qQKtYNgQ5NytApvHBQGcNLUDMHbwsBOYsQDIr8g8kKy5ANVyk0ApZL0A3\u002f9gr5CMvQM7Hp2LVXy1ANstnzBC8K0BPHKKDNgUqQG6h8gkYLihAFlqS\u002fIcMJ0D4Kg4e4s8mQBS2JT2RlyZAFKyKGZIhJ0BNyNfUOoQoQOGi1pf\u002fSCdAmmhCwQmPJkBisCiaalgnQI8tsOonNChAWD69DEH0J0BbqVus6rgnQHp6fBKADSlAqY\u002fGDd6tK0DYBCpWwIArQESE6J62uCtA++\u002flIXI3LEACK0\u002fLpd0tQKIyIdw9PC1AlPtzohmFK0CkbJ85qG4qQHxOex9L5CtA2Uq4XaAJLkCNomytw+ovQEy2bHpScDFABbNkIXMcMUDichNSr4IwQIVayztUSy9AMOh8WYRULkAqx6GZVW8tQAkl1ldsEi1A"},"type":"scatter","xaxis":"x2","yaxis":"y2"},{"marker":{"color":["#ef4444","#22c55e","#22c55e","#22c55e","#22c55e","#22c55e","#ef4444","#22c55e","#22c55e","#22c55e","#22c55e","#ef4444","#ef4444","#22c55e","#22c55e","#22c55e","#22c55e","#ef4444","#ef4444","#22c55e","#22c55e","#22c55e","#ef4444","#ef4444","#ef4444","#ef4444","#22c55e","#22c55e","#ef4444","#ef4444","#22c55e","#22c55e","#22c55e","#22c55e","#ef4444","#ef4444","#ef4444","#22c55e","#ef4444","#ef4444","#22c55e","#22c55e","#ef4444","#22c55e","#ef4444","#22c55e","#22c55e","#22c55e","#ef4444","#ef4444","#22c55e","#ef4444","#22c55e","#22c55e","#ef4444","#ef4444","#ef4444","#22c55e","#22c55e","#22c55e","#ef4444","#ef4444","#ef4444","#22c55e","#22c55e","#ef4444","#ef4444","#22c55e","#ef4444","#22c55e","#22c55e","#22c55e","#ef4444","#22c55e","#ef4444","#ef4444","#ef4444","#ef4444","#ef4444","#22c55e","#22c55e","#ef4444","#ef4444","#22c55e","#22c55e","#ef4444","#ef4444","#ef4444","#22c55e","#22c55e","#ef4444","#22c55e","#22c55e","#22c55e","#22c55e","#22c55e","#22c55e","#22c55e","#22c55e","#ef4444","#ef4444","#ef4444","#ef4444","#22c55e","#22c55e"]},"name":"Volume","x":["2024-04-08T00:00:00","2024-04-15T00:00:00","2024-04-22T00:00:00","2024-04-29T00:00:00","2024-05-06T00:00:00","2024-05-13T00:00:00","2024-05-20T00:00:00","2024-05-27T00:00:00","2024-06-03T00:00:00","2024-06-10T00:00:00","2024-06-17T00:00:00","2024-06-24T00:00:00","2024-07-01T00:00:00","2024-07-08T00:00:00","2024-07-15T00:00:00","2024-07-22T00:00:00","2024-07-29T00:00:00","2024-08-05T00:00:00","2024-08-12T00:00:00","2024-08-19T00:00:00","2024-08-26T00:00:00","2024-09-02T00:00:00","2024-09-09T00:00:00","2024-09-16T00:00:00","2024-09-23T00:00:00","2024-09-30T00:00:00","2024-10-07T00:00:00","2024-10-14T00:00:00","2024-10-21T00:00:00","2024-10-28T00:00:00","2024-11-04T00:00:00","2024-11-11T00:00:00","2024-11-18T00:00:00","2024-11-25T00:00:00","2024-12-02T00:00:00","2024-12-09T00:00:00","2024-12-16T00:00:00","2024-12-23T00:00:00","2024-12-30T00:00:00","2025-01-06T00:00:00","2025-01-13T00:00:00","2025-01-20T00:00:00","2025-01-27T00:00:00","2025-02-03T00:00:00","2025-02-10T00:00:00","2025-02-17T00:00:00","2025-02-24T00:00:00","2025-03-03T00:00:00","2025-03-10T00:00:00","2025-03-17T00:00:00","2025-03-24T00:00:00","2025-03-31T00:00:00","2025-04-07T00:00:00","2025-04-14T00:00:00","2025-04-21T00:00:00","2025-04-28T00:00:00","2025-05-05T00:00:00","2025-05-12T00:00:00","2025-05-19T00:00:00","2025-05-26T00:00:00","2025-06-02T00:00:00","2025-06-09T00:00:00","2025-06-16T00:00:00","2025-06-23T00:00:00","2025-06-30T00:00:00","2025-07-07T00:00:00","2025-07-14T00:00:00","2025-07-21T00:00:00","2025-07-28T00:00:00","2025-08-04T00:00:00","2025-08-11T00:00:00","2025-08-18T00:00:00","2025-08-25T00:00:00","2025-09-01T00:00:00","2025-09-08T00:00:00","2025-09-15T00:00:00","2025-09-22T00:00:00","2025-09-29T00:00:00","2025-10-06T00:00:00","2025-10-13T00:00:00","2025-10-20T00:00:00","2025-10-27T00:00:00","2025-11-03T00:00:00","2025-11-10T00:00:00","2025-11-17T00:00:00","2025-11-24T00:00:00","2025-12-01T00:00:00","2025-12-08T00:00:00","2025-12-15T00:00:00","2025-12-22T00:00:00","2025-12-29T00:00:00","2026-01-05T00:00:00","2026-01-12T00:00:00","2026-01-19T00:00:00","2026-01-26T00:00:00","2026-02-02T00:00:00","2026-02-09T00:00:00","2026-02-16T00:00:00","2026-02-23T00:00:00","2026-03-02T00:00:00","2026-03-09T00:00:00","2026-03-16T00:00:00","2026-03-23T00:00:00","2026-03-30T00:00:00","2026-04-06T00:00:00"],"y":{"dtype":"i4","bdata":"9K6hARzpSAKgji4CXKPgAWREjQFwUbABHEdQAShziwEEb64BUK1RAaChFgK8aBUCXIFYAfDafgFU\u002fvEB1OHKARw1YANo+EICVPrhAXzERQGQpa8BhJ\u002fBAfDUsQEYYDkD2D8JAohu0AFMVy0C7DMQAvCQtAFIVLIBKC89Arw\u002fIAJA1SkCzMEVAuDF3wE4kJUBYK\u002f8AtAkCgEgdyEBqMPTAUyFBAJ8LIICKO7OAej06QH4iUQCfHLYAcwtNgJg\u002fo8C4F+4AhTK4gLQggUCYEjXAlRVZwN0ueQBHNF4A3TkdwLQERwCSDY0AgTz4wHUdAoCbMoSAiy6AwLcWC0CSPfHAmgKQAJEEy0DKCWrAiyI6gHAttsCVLMKAuzk\u002fwGoVSgCtEiYAfDGkgEU+8sBHF2iAjThOAIIzR4CGIrtATQYmAJYoEYCXJogAlzo2wJ0iYICGBfdAlz1RwIo9mUDEHfKA6gv6AM0Ob4B2NapAUgtVQNMgMsDHPGUAwQgLgP8WH8DvHmFAzS6+gJsDjwD+NTBAhgLrQLICZwFEESzAkC7JQISFCYC"},"type":"bar","xaxis":"x3","yaxis":"y3"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"rgb(17,17,17)","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#f2f5fa"},"error_y":{"color":"#f2f5fa"},"marker":{"line":{"color":"rgb(17,17,17)","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#A2B1C6","gridcolor":"#506784","linecolor":"#506784","minorgridcolor":"#506784","startlinecolor":"#A2B1C6"},"baxis":{"endlinecolor":"#A2B1C6","gridcolor":"#506784","linecolor":"#506784","minorgridcolor":"#506784","startlinecolor":"#A2B1C6"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"line":{"color":"#283442"}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"marker":{"line":{"color":"#283442"}},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#506784"},"line":{"color":"rgb(17,17,17)"}},"header":{"fill":{"color":"#2a3f5f"},"line":{"color":"rgb(17,17,17)"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#f2f5fa","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#f2f5fa"},"geo":{"bgcolor":"rgb(17,17,17)","lakecolor":"rgb(17,17,17)","landcolor":"rgb(17,17,17)","showlakes":true,"showland":true,"subunitcolor":"#506784"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"dark"},"paper_bgcolor":"rgb(17,17,17)","plot_bgcolor":"rgb(17,17,17)","polar":{"angularaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"bgcolor":"rgb(17,17,17)","radialaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"},"yaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"},"zaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"}},"shapedefaults":{"line":{"color":"#f2f5fa"}},"sliderdefaults":{"bgcolor":"#C8D4E3","bordercolor":"rgb(17,17,17)","borderwidth":1,"tickwidth":0},"ternary":{"aaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"baxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"bgcolor":"rgb(17,17,17)","caxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""}},"title":{"x":0.05},"updatemenudefaults":{"bgcolor":"#506784","borderwidth":0},"xaxis":{"automargin":true,"gridcolor":"#283442","linecolor":"#506784","ticks":"","title":{"standoff":15},"zerolinecolor":"#283442","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#283442","linecolor":"#506784","ticks":"","title":{"standoff":15},"zerolinecolor":"#283442","zerolinewidth":2}}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"matches":"x3","showticklabels":false,"rangeslider":{"visible":false},"showgrid":true,"gridcolor":"rgba(255,255,255,0.05)"},"yaxis":{"anchor":"x","domain":[0.436,1.0],"showgrid":true,"gridcolor":"rgba(255,255,255,0.05)"},"xaxis2":{"anchor":"y2","domain":[0.0,1.0],"matches":"x3","showticklabels":false,"rangeslider":{"visible":false},"showgrid":true,"gridcolor":"rgba(255,255,255,0.05)"},"yaxis2":{"anchor":"x2","domain":[0.218,0.406],"showgrid":true,"gridcolor":"rgba(255,255,255,0.05)"},"xaxis3":{"anchor":"y3","domain":[0.0,1.0],"rangeslider":{"visible":false},"showgrid":true,"gridcolor":"rgba(255,255,255,0.05)"},"yaxis3":{"anchor":"x3","domain":[0.0,0.188],"showgrid":true,"gridcolor":"rgba(255,255,255,0.05)"},"shapes":[{"line":{"color":"rgba(255,255,255,0.3)","dash":"dash"},"type":"line","x0":0,"x1":1,"xref":"x2 domain","y0":25,"y1":25,"yref":"y2"}],"margin":{"l":10,"r":10,"t":10,"b":10},"font":{"family":"Inter, sans-serif","color":"#94a3b8"},"paper_bgcolor":"rgba(0,0,0,0)","plot_bgcolor":"rgba(0,0,0,0)","height":800,"showlegend":false},                        {"displayModeBar": false, "responsive": true}                    )                };            </script>        </div>
+            </div>
         </div>
         
 <script>
-// Sortable Tables
+// ── Sortable Tables ────────────────────────────────────────────────────────
 function initSortableTables() {
     document.querySelectorAll('.modern-table').forEach(table => {
         const headers = table.querySelectorAll('th.sortable');
@@ -849,78 +1030,55 @@ function initSortableTables() {
                 const tbody = table.querySelector('tbody');
                 const rows = Array.from(tbody.querySelectorAll('tr'));
                 const isAsc = header.classList.contains('asc');
-
-                // Clear other headers
                 headers.forEach(h => h.classList.remove('asc', 'desc'));
                 header.classList.add(isAsc ? 'desc' : 'asc');
-
                 rows.sort((a, b) => {
-                    const aCell = a.cells[colIndex];
-                    const bCell = b.cells[colIndex];
-                    let aVal = aCell.textContent.trim();
-                    let bVal = bCell.textContent.trim();
-
-                    // Try numeric sort
+                    let aVal = a.cells[colIndex].textContent.trim();
+                    let bVal = b.cells[colIndex].textContent.trim();
                     const aNum = parseFloat(aVal.replace(/[^0-9.-]/g, ''));
                     const bNum = parseFloat(bVal.replace(/[^0-9.-]/g, ''));
-
-                    if (!isNaN(aNum) && !isNaN(bNum)) {
-                        return isAsc ? bNum - aNum : aNum - bNum;
-                    }
+                    if (!isNaN(aNum) && !isNaN(bNum)) return isAsc ? bNum - aNum : aNum - bNum;
                     return isAsc ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
                 });
-
                 rows.forEach(row => tbody.appendChild(row));
             });
         });
     });
 }
 
-// Search/Filter for Stock Cards and Table Rows
+// ── Search / Filter ────────────────────────────────────────────────────────
 function initSearch() {
     const searchInput = document.getElementById('stock-search');
     if (!searchInput) return;
-
-    searchInput.addEventListener('input', (e) => {
+    searchInput.addEventListener('input', e => {
         const query = e.target.value.toLowerCase();
-
-        // Support both card-based and table-based layouts
         const items = document.querySelectorAll('.stock-card, .modern-table tbody tr');
         items.forEach(item => {
             const ticker = item.dataset.ticker?.toLowerCase() || item.textContent.toLowerCase();
-            const matches = ticker.includes(query);
-            item.classList.toggle('hidden', !matches);
+            item.classList.toggle('hidden', !ticker.includes(query));
         });
-
         const visible = document.querySelectorAll('.stock-card:not(.hidden), .modern-table tbody tr:not(.hidden)').length;
         const countEl = document.getElementById('visible-count');
         if (countEl) countEl.textContent = visible;
+        // Empty-state feedback
+        const emptyState = document.getElementById('search-empty-state');
+        if (emptyState) emptyState.classList.toggle('hidden', visible > 0);
     });
 }
 
-// Filter Buttons
+// ── Filter Buttons ─────────────────────────────────────────────────────────
 function initFilterButtons() {
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const filter = btn.dataset.filter;
             const isActive = btn.classList.contains('active');
-
-            // Toggle active state
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             if (!isActive) btn.classList.add('active');
-
-            // Apply filter
             document.querySelectorAll('.stock-card').forEach(card => {
-                if (!filter || isActive) {
-                    card.classList.remove('hidden');
-                } else if (filter === 'top5') {
-                    card.classList.toggle('hidden', parseInt(card.dataset.rank) > 5);
-                } else if (filter === 'trade-ready') {
-                    card.classList.toggle('hidden', card.dataset.tradeReady !== 'true');
-                }
+                if (!filter || isActive)         { card.classList.remove('hidden'); }
+                else if (filter === 'top5')       { card.classList.toggle('hidden', parseInt(card.dataset.rank) > 5); }
+                else if (filter === 'trade-ready'){ card.classList.toggle('hidden', card.dataset.tradeReady !== 'true'); }
             });
-
-            // Update count
             const visible = document.querySelectorAll('.stock-card:not(.hidden)').length;
             const countEl = document.getElementById('visible-count');
             if (countEl) countEl.textContent = visible;
@@ -928,60 +1086,43 @@ function initFilterButtons() {
     });
 }
 
-// Chart Tooltip (for SVG charts)
+// ── SVG Chart Tooltips ─────────────────────────────────────────────────────
 function initChartTooltips() {
     const tooltip = document.createElement('div');
     tooltip.className = 'chart-tooltip';
     document.body.appendChild(tooltip);
-
     document.querySelectorAll('svg.interactive-chart').forEach(chart => {
-        chart.addEventListener('mousemove', (e) => {
+        chart.addEventListener('mousemove', e => {
             const rect = chart.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const data = chart.dataset.values ? JSON.parse(chart.dataset.values) : null;
-
             if (data && data.length > 0) {
                 const idx = Math.floor((x / rect.width) * data.length);
                 const point = data[Math.min(idx, data.length - 1)];
-
                 if (point) {
                     tooltip.innerHTML = `
                         <div><strong>${point.date || ''}</strong></div>
-                        <div>Price: $${point.price?.toFixed(2) || 'N/A'}</div>
+                        <div>Price: $${point.price?.toFixed(2) || '&mdash;'}</div>
                         ${point.ema20 ? `<div style="color:#f59e0b">EMA20: $${point.ema20.toFixed(2)}</div>` : ''}
                         ${point.ema50 ? `<div style="color:#8b5cf6">EMA50: $${point.ema50.toFixed(2)}</div>` : ''}
                     `;
                     tooltip.style.left = (e.clientX + 15) + 'px';
-                    tooltip.style.top = (e.clientY - 10) + 'px';
+                    tooltip.style.top  = (e.clientY - 10) + 'px';
                     tooltip.classList.add('visible');
                 }
             }
         });
-
-        chart.addEventListener('mouseleave', () => {
-            tooltip.classList.remove('visible');
-        });
+        chart.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
     });
 }
 
+// ── Watchlist ──────────────────────────────────────────────────────────────
 function initWatchlist() {
-    // Merge server-side pre-populated tickers with localStorage
     const serverList = window.__SERVER_WATCHLIST__ || [];
     let watchlist = JSON.parse(localStorage.getItem('ema_watchlist') || '[]');
     serverList.forEach(t => { if (!watchlist.includes(t)) watchlist.push(t); });
     localStorage.setItem('ema_watchlist', JSON.stringify(watchlist));
-
-    // Apply saved state to all star buttons on this page
-    document.querySelectorAll('.watchlist-btn').forEach(btn => {
-        const ticker = btn.dataset.ticker;
-        if (watchlist.includes(ticker)) {
-            btn.textContent = '★';
-            btn.style.color = '#fbbf24';
-        }
-    });
-
-    // Update candidates table star buttons too (if present)
-    document.querySelectorAll('.cand-watchlist-btn').forEach(btn => {
+    document.querySelectorAll('.watchlist-btn, .cand-watchlist-btn').forEach(btn => {
         if (watchlist.includes(btn.dataset.ticker)) {
             btn.textContent = '★';
             btn.style.color = '#fbbf24';
@@ -1003,7 +1144,6 @@ function toggleWatchlist(btn) {
         btn.style.color = 'rgba(255,255,255,0.2)';
     }
     localStorage.setItem('ema_watchlist', JSON.stringify(watchlist));
-    // Sync all buttons for same ticker on this page
     document.querySelectorAll(`.watchlist-btn[data-ticker="${ticker}"], .cand-watchlist-btn[data-ticker="${ticker}"]`).forEach(b => {
         b.textContent = btn.textContent;
         b.style.color = btn.style.color;
@@ -1020,8 +1160,8 @@ function exportWatchlist() {
     URL.revokeObjectURL(a.href);
 }
 
+// ── Advanced Filters ───────────────────────────────────────────────────────
 function initAdvancedFilters() {
-    // Populate sector dropdown from data-sector values in candidates table
     const sectorSel = document.getElementById('cand-sector-filter');
     if (sectorSel) {
         const sectors = new Set();
@@ -1036,8 +1176,8 @@ function initAdvancedFilters() {
 
     function applyCandFilter() {
         const minScore = parseInt(document.getElementById('cand-score-filter')?.value || '0');
-        const regime = document.getElementById('cand-regime-filter')?.value || '';
-        const sector = document.getElementById('cand-sector-filter')?.value || '';
+        const regime   = document.getElementById('cand-regime-filter')?.value || '';
+        const sector   = document.getElementById('cand-sector-filter')?.value || '';
         let visible = 0;
         document.querySelectorAll('#candidates-table tbody tr').forEach(row => {
             const show = parseFloat(row.dataset.entryScore || '0') >= minScore
@@ -1054,7 +1194,6 @@ function initAdvancedFilters() {
         document.getElementById(id)?.addEventListener('change', applyCandFilter);
     });
 
-    // Projections confidence filter
     document.getElementById('proj-conf-filter')?.addEventListener('change', function() {
         const val = this.value;
         let vis = 0;
@@ -1068,14 +1207,38 @@ function initAdvancedFilters() {
     });
 }
 
-// Initialize on DOM ready
+// ── Bootstrap (guarded — each feature only runs if its DOM anchor exists) ──
 document.addEventListener('DOMContentLoaded', () => {
-    initSortableTables();
-    initSearch();
-    initFilterButtons();
-    initChartTooltips();
-    initAdvancedFilters();
-    initWatchlist();
+    // Set --nav-height CSS variable so .regime-bar sticky offset is exact
+    const nav = document.querySelector('.top-nav');
+    if (nav) {
+        document.documentElement.style.setProperty('--nav-height', nav.offsetHeight + 'px');
+    }
+
+    if (document.querySelector('.modern-table th.sortable')) {
+        console.info('[EMA] initSortableTables');
+        initSortableTables();
+    }
+    if (document.getElementById('stock-search')) {
+        console.info('[EMA] initSearch');
+        initSearch();
+    }
+    if (document.querySelectorAll('.filter-btn').length) {
+        console.info('[EMA] initFilterButtons');
+        initFilterButtons();
+    }
+    if (document.querySelectorAll('svg.interactive-chart').length) {
+        console.info('[EMA] initChartTooltips');
+        initChartTooltips();
+    }
+    if (document.getElementById('cand-score-filter') || document.getElementById('proj-conf-filter')) {
+        console.info('[EMA] initAdvancedFilters');
+        initAdvancedFilters();
+    }
+    if (document.querySelectorAll('.watchlist-btn, .cand-watchlist-btn').length) {
+        console.info('[EMA] initWatchlist');
+        initWatchlist();
+    }
 });
 </script>
 

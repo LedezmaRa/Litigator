@@ -13,16 +13,17 @@
     --card-bg: rgba(30, 41, 59, 0.7);
     --card-border: 1px solid rgba(255, 255, 255, 0.1);
     --text-primary: #e2e8f0;
-    --text-secondary: #94a3b8;
-    --accent-optimal: #4ade80; /* Green-400 */
-    --accent-good: #34d399;    /* Emerald-400 */
-    --accent-marginal: #fbbf24; /* Amber-400 */
-    --accent-poor: #f87171;    /* Red-400 */
-    --accent-info: #38bdf8;    /* Sky-400 */
+    --text-secondary: #a8b4c2;
+    --accent-optimal: #4ade80;
+    --accent-good: #34d399;
+    --accent-marginal: #fbbf24;
+    --accent-poor: #f87171;
+    --accent-info: #38bdf8;
     --font-main: 'Inter', system-ui, -apple-system, sans-serif;
-    --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --glass-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
 }
 
+/* ── Base ───────────────────────────────────────────────────────────────── */
 body {
     background-color: var(--bg-color);
     color: var(--text-primary);
@@ -30,9 +31,9 @@ body {
     margin: 0;
     padding: 0;
     line-height: 1.6;
-    background-image: 
-        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+    background-image:
+        radial-gradient(at 0%   0%, hsla(253,16%,7%,1) 0, transparent 50%),
+        radial-gradient(at 50%  0%, hsla(225,39%,30%,1) 0, transparent 50%),
         radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
     min-height: 100vh;
 }
@@ -43,7 +44,7 @@ body {
     padding: 2rem;
 }
 
-/* Glassmorphism Card */
+/* ── Glassmorphism Card ─────────────────────────────────────────────────── */
 .glass-card {
     background: var(--card-bg);
     backdrop-filter: blur(12px);
@@ -54,14 +55,14 @@ body {
     box-shadow: var(--glass-shadow);
 }
 
-/* Typography */
+/* ── Typography ─────────────────────────────────────────────────────────── */
 h1, h2, h3, h4 { margin-top: 0; color: #fff; font-weight: 600; }
-.text-muted { color: var(--text-secondary); }
-.text-sm { font-size: 0.875rem; }
-.text-xs { font-size: 0.75rem; }
-.font-mono { font-family: 'JetBrains Mono', monospace; }
+.text-muted   { color: var(--text-secondary); }
+.text-sm      { font-size: 0.875rem; }
+.text-xs      { font-size: 0.75rem; }
+.font-mono    { font-family: 'JetBrains Mono', monospace; }
 
-/* Status Badges */
+/* ── Status Badges ──────────────────────────────────────────────────────── */
 .badge {
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
@@ -70,13 +71,60 @@ h1, h2, h3, h4 { margin-top: 0; color: #fff; font-weight: 600; }
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
-.badge-optimal { background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
-.badge-good { background: rgba(52, 211, 153, 0.2); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
-.badge-marginal { background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
-.badge-poor { background: rgba(248, 113, 113, 0.2); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
-.badge-info { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+.badge-optimal    { background: rgba(74,222,128,0.2);  color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+.badge-good       { background: rgba(52,211,153,0.2);  color: #34d399; border: 1px solid rgba(52,211,153,0.3); }
+.badge-acceptable { background: rgba(251,191,36,0.15); color: #e2b84a; border: 1px solid rgba(251,191,36,0.4); }
+.badge-marginal   { background: rgba(251,191,36,0.2);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+.badge-poor       { background: rgba(248,113,113,0.2); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+.badge-info       { background: rgba(56,189,248,0.2);  color: #38bdf8; border: 1px solid rgba(56,189,248,0.3); }
 
-/* Score Gauge Ring */
+/* ── Score Hero ─────────────────────────────────────────────────────────── */
+/*
+ * Add class="score-hero" (or .score-hero-card) to the primary status card to
+ * give it a coloured glow matching the score tier.
+ * Set --hero-color inline on the element: style="--hero-color:var(--accent-optimal)"
+ *
+ * .score-hero-value  — large standalone number (use when NOT embedding a gauge ring)
+ * .score-hero-label  — small uppercase caption beneath the number
+ *
+ * NOTE: the existing .score-value class is used INSIDE .score-ring-container;
+ * we intentionally avoid overriding it here to prevent gauge ring conflicts.
+ */
+.score-hero {
+    border-color: var(--hero-color, rgba(74,222,128,0.25)) !important;
+    background: linear-gradient(
+        135deg,
+        rgba(30,41,59,0.85) 0%,
+        rgba(15,23,42,0.95) 100%
+    ) !important;
+    box-shadow: 0 0 0 1px var(--hero-color, rgba(74,222,128,0.2)),
+                0 8px 32px rgba(0,0,0,0.3);
+    position: relative;
+}
+/* Subtle coloured top-edge accent */
+.score-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--hero-color, var(--accent-optimal));
+    border-radius: 1rem 1rem 0 0;
+    opacity: 0.7;
+}
+.score-hero-value {
+    font-size: 4rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--hero-color, var(--accent-optimal));
+}
+.score-hero-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+}
+
+/* ── Score Gauge Ring ───────────────────────────────────────────────────── */
 .score-ring-container {
     position: relative;
     width: 120px;
@@ -92,26 +140,22 @@ h1, h2, h3, h4 { margin-top: 0; color: #fff; font-weight: 600; }
     z-index: 10;
 }
 .score-circle-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 8; }
-.score-circle-fg { 
-    fill: none; 
-    stroke-width: 8; 
-    stroke-linecap: round; 
-    transform: rotate(-90deg); 
+.score-circle-fg {
+    fill: none;
+    stroke-width: 8;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
     transform-origin: 50% 50%;
     transition: stroke-dashoffset 1s ease-out;
 }
 
-/* Grid Layouts */
-.grid-cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-.grid-cols-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-@media (max-width: 1024px) {
-    .grid-cols-3 { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 768px) {
-    .grid-cols-3, .grid-cols-2 { grid-template-columns: 1fr; }
-}
+/* ── Grid Layouts ───────────────────────────────────────────────────────── */
+.grid-cols-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+.grid-cols-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 1.5rem; }
+@media (max-width: 1024px) { .grid-cols-3 { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 768px)  { .grid-cols-3, .grid-cols-2 { grid-template-columns: 1fr; } }
 
-/* HUD Metrics */
+/* ── HUD Metrics ────────────────────────────────────────────────────────── */
 .metric-item {
     display: flex;
     justify-content: space-between;
@@ -127,88 +171,146 @@ h1, h2, h3, h4 { margin-top: 0; color: #fff; font-weight: 600; }
     border-radius: 3px;
     overflow: hidden;
 }
-.progress-bar-fg {
-    height: 100%;
-    border-radius: 3px;
+.progress-bar-fg { height: 100%; border-radius: 3px; }
+
+/* ── Data Table ─────────────────────────────────────────────────────────── */
+.modern-table { width: 100%; border-collapse: separate; border-spacing: 0 0.5rem; }
+.modern-table th {
+    padding: 1rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.875rem;
+    text-align: left;
+}
+.modern-table td {
+    padding: 1rem;
+    background: rgba(30,41,59,0.5);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.modern-table td:first-child {
+    border-top-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.modern-table td:last-child {
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+    border-right: 1px solid rgba(255,255,255,0.05);
+}
+.modern-table tr:hover td {
+    background: rgba(30,41,59,0.8);
+    cursor: pointer;
+    transform: scale(1.005);
+    transition: all 0.2s;
 }
 
-/* Table */
-.modern-table { width: 100%; border-collapse: separate; border-spacing: 0 0.5rem; }
-.modern-table th { padding: 1rem; color: var(--text-secondary); font-weight: 500; font-size: 0.875rem; text-align: left; }
-.modern-table td { padding: 1rem; background: rgba(30, 41, 59, 0.5); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
-.modern-table td:first-child { border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; border-left: 1px solid rgba(255,255,255,0.05); }
-.modern-table td:last-child { border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; border-right: 1px solid rgba(255,255,255,0.05); }
-.modern-table tr:hover td { background: rgba(30, 41, 59, 0.8); cursor: pointer; transform: scale(1.005); transition: all 0.2s; }
+/* ── Mobile-Responsive Table (stacks as cards below 720 px) ────────────── */
+@media (max-width: 720px) {
+    .modern-table thead { display: none; }
+    .modern-table,
+    .modern-table tbody,
+    .modern-table tr,
+    .modern-table td { display: block; width: 100%; }
+    .modern-table tr {
+        background: rgba(30,41,59,0.5);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 0.75rem;
+        margin-bottom: 0.75rem;
+        padding: 0.5rem;
+    }
+    .modern-table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.4rem 0.75rem;
+        border: none;
+        border-radius: 0;
+    }
+    /* Each <td data-label="Score"> shows its column label via pseudo-element */
+    .modern-table td[data-label]::before {
+        content: attr(data-label);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+        margin-right: 0.5rem;
+    }
+    /* Reset first/last child border radius overrides from desktop */
+    .modern-table td:first-child,
+    .modern-table td:last-child {
+        border-radius: 0;
+        border: none;
+    }
+}
 
-/* Links */
+/* ── Links ──────────────────────────────────────────────────────────────── */
 a { color: inherit; text-decoration: none; }
-.back-link { 
-    display: inline-flex; align-items: center; gap: 0.5rem; 
-    color: var(--text-secondary); margin-bottom: 1.5rem; 
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
     transition: color 0.2s;
 }
 .back-link:hover { color: #fff; }
 
-/* Sortable Table Headers */
+/* ── Breadcrumb ─────────────────────────────────────────────────────────── */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    font-size: 0.875rem;
+}
+.breadcrumb a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.breadcrumb a:hover { color: var(--text-primary); }
+.breadcrumb .bc-sep { color: var(--text-secondary); opacity: 0.5; }
+.breadcrumb .bc-current { color: var(--text-primary); font-weight: 500; }
+
+/* ── Sortable Table Headers ─────────────────────────────────────────────── */
 .modern-table th.sortable {
     cursor: pointer;
     user-select: none;
     position: relative;
     padding-right: 1.5rem;
 }
-.modern-table th.sortable:hover {
-    color: var(--text-primary);
-}
-.modern-table th.sortable::after {
-    content: '⇅';
-    position: absolute;
-    right: 0.5rem;
-    opacity: 0.4;
-    font-size: 0.7rem;
-}
-.modern-table th.sortable.asc::after {
-    content: '↑';
-    opacity: 1;
-    color: var(--accent-optimal);
-}
-.modern-table th.sortable.desc::after {
-    content: '↓';
-    opacity: 1;
-    color: var(--accent-optimal);
-}
+.modern-table th.sortable:hover { color: var(--text-primary); }
+.modern-table th.sortable::after      { content: '⇅'; position: absolute; right: 0.5rem; opacity: 0.4; font-size: 0.7rem; }
+.modern-table th.sortable.asc::after  { content: '↑'; opacity: 1; color: var(--accent-optimal); }
+.modern-table th.sortable.desc::after { content: '↓'; opacity: 1; color: var(--accent-optimal); }
 
-/* Search Input */
+/* ── Search Input ───────────────────────────────────────────────────────── */
 .search-input {
-    background: rgba(30, 41, 59, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(30,41,59,0.7);
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 0.5rem;
     padding: 0.75rem 1rem;
     color: var(--text-primary);
     font-size: 1rem;
     width: 100%;
-    max-width: 400px;
+    max-width: 600px;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 .search-input:focus {
     border-color: var(--accent-info);
-    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+    box-shadow: 0 0 0 3px rgba(56,189,248,0.1);
 }
-.search-input::placeholder {
-    color: var(--text-secondary);
-}
+.search-input::placeholder { color: var(--text-secondary); }
 
-/* Filter Controls */
-.filter-bar {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-}
+/* ── Filter Controls ────────────────────────────────────────────────────── */
+.filter-bar { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
 .filter-btn {
-    background: rgba(30, 41, 59, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(30,41,59,0.7);
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 0.5rem;
     padding: 0.5rem 1rem;
     color: var(--text-secondary);
@@ -216,56 +318,98 @@ a { color: inherit; text-decoration: none; }
     cursor: pointer;
     transition: all 0.2s;
 }
-.filter-btn:hover {
-    background: rgba(30, 41, 59, 0.9);
-    color: var(--text-primary);
-}
+.filter-btn:hover { background: rgba(30,41,59,0.9); color: var(--text-primary); }
 .filter-btn.active {
-    background: rgba(74, 222, 128, 0.2);
-    border-color: rgba(74, 222, 128, 0.3);
+    background: rgba(74,222,128,0.2);
+    border-color: rgba(74,222,128,0.3);
     color: var(--accent-optimal);
 }
 
-/* Chart Tooltip */
+/* ── Chart Tooltip ──────────────────────────────────────────────────────── */
 .chart-tooltip {
     position: fixed;
-    background: rgba(15, 23, 42, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(15,23,42,0.95);
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 0.5rem;
     padding: 0.75rem;
     font-size: 0.75rem;
     color: var(--text-primary);
     pointer-events: none;
     z-index: 1000;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
     display: none;
 }
-.chart-tooltip.visible {
-    display: block;
+.chart-tooltip.visible { display: block; }
+
+/* ── Stock Card Hover ───────────────────────────────────────────────────── */
+.glass-card.stock-card { transition: transform 0.2s, box-shadow 0.2s; }
+.glass-card.stock-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+
+/* ── Utility ────────────────────────────────────────────────────────────── */
+.hidden         { display: none !important; }
+.text-positive  { color: var(--accent-optimal); }
+.text-negative  { color: var(--accent-poor); }
+.flex-between   { display: flex; justify-content: space-between; align-items: center; }
+.flex-center    { display: flex; justify-content: center; align-items: center; }
+.flex-wrap      { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.flex-col       { display: flex; flex-direction: column; }
+.text-center    { text-align: center; }
+.text-right     { text-align: right; }
+.m-0            { margin: 0; }
+.mb-0           { margin-bottom: 0 !important; }
+.mb-1           { margin-bottom: 0.5rem; }
+.mb-2           { margin-bottom: 1rem; }
+.mb-3           { margin-bottom: 1.5rem; }
+.mb-4           { margin-bottom: 2rem; }
+.mb-6           { margin-bottom: 3rem; }
+.mt-1           { margin-top: 0.5rem; }
+.mt-2           { margin-top: 1rem; }
+.mt-3           { margin-top: 1.5rem; }
+.mt-4           { margin-top: 2rem; }
+.mt-6           { margin-top: 3rem; }
+.gap-1          { gap: 0.5rem; }
+.gap-2          { gap: 1rem; }
+.gap-3          { gap: 1.5rem; }
+.gap-4          { gap: 2rem; }
+.font-bold      { font-weight: 700; }
+.font-600       { font-weight: 600; }
+.overflow-hidden { overflow: hidden; }
+.uppercase      { text-transform: uppercase; }
+.tracking-wide  { letter-spacing: 0.05em; }
+
+/* ── Stock Narrative Extras ─────────────────────────────────────────────── */
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+}
+.metric-card {
+    background: rgba(30,41,59,0.5);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.hero-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+@media (max-width: 768px) {
+    .hero-header { flex-direction: column; }
+    .metric-grid { grid-template-columns: repeat(2,1fr); }
 }
 
-/* Stock Card Hover Enhancement */
-.glass-card.stock-card {
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.glass-card.stock-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-}
-
-/* Hidden class for filtering */
-.hidden {
-    display: none !important;
-}
-/* Top Navigation Menu */
+/* ── Top Navigation Menu ────────────────────────────────────────────────── */
 .top-nav {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: rgba(15, 23, 42, 0.8);
+    background: rgba(15,23,42,0.8);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
     padding: 1rem 2rem;
     position: sticky;
     top: 0;
@@ -292,71 +436,301 @@ a { color: inherit; text-decoration: none; }
 }
 .nav-item:hover {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255,255,255,0.05);
 }
 .nav-item.active {
     color: var(--accent-optimal);
-    background: rgba(74, 222, 128, 0.1);
-    border: 1px solid rgba(74, 222, 128, 0.2);
+    background: rgba(74,222,128,0.1);
+    border: 1px solid rgba(74,222,128,0.2);
 }
 
-            
-/* Stock Narrative Page Specific Styles */
-.metric-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 0.75rem;
+/* ── Metrics Guide (collapsible help panel) ─────────────────────────────── */
+.metrics-guide {
+    margin-bottom: 1.5rem;
 }
-
-.metric-card {
-    background: rgba(30, 41, 59, 0.5);
-    padding: 0.75rem;
+.metrics-guide > summary {
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+    background: rgba(30,41,59,0.5);
+    border: 1px solid rgba(255,255,255,0.07);
     border-radius: 0.5rem;
-    border: 1px solid rgba(255,255,255,0.05);
-}
-
-.text-positive { color: var(--accent-optimal); }
-.text-negative { color: var(--accent-poor); }
-
-.breadcrumb {
+    list-style: none;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-bottom: 1.5rem;
+    transition: color 0.2s, background 0.2s;
+    user-select: none;
+}
+.metrics-guide > summary:hover { color: var(--text-primary); background: rgba(30,41,59,0.8); }
+.metrics-guide > summary::marker,
+.metrics-guide > summary::-webkit-details-marker { display: none; }
+.metrics-guide[open] > summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; color: var(--text-primary); }
+.metrics-guide-body {
+    background: rgba(30,41,59,0.4);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-top: none;
+    border-bottom-left-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px,1fr));
+    gap: 0.75rem 1.5rem;
+}
+.metric-def dt {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-info);
+    margin-bottom: 0.15rem;
+}
+.metric-def dd {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ── Empty State ────────────────────────────────────────────────────────── */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--text-secondary);
+}
+.empty-state .empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    opacity: 0.5;
+}
+.empty-state p { margin: 0 0 0.5rem; font-size: 0.95rem; }
+.empty-state a { color: var(--accent-info); }
+
+/* ── Regime Summary Bar ─────────────────────────────────────────────────── */
+/*
+ * Sticky strip that sits just below the top-nav (top:60px, z-index:900).
+ * Shows the overall macro verdict + one pill per basket.
+ * The JS in INTERACTIVE_JS sets --nav-height on :root so the offset is exact.
+ */
+.regime-bar {
+    background: rgba(15,23,42,0.92);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding: 0.6rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
     flex-wrap: wrap;
+    position: sticky;
+    top: var(--nav-height, 62px);
+    z-index: 900;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
-
-.breadcrumb a {
+.regime-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+.regime-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
     color: var(--text-secondary);
-    text-decoration: none;
+    white-space: nowrap;
 }
-
-.breadcrumb a:hover {
-    color: var(--text-primary);
+.regime-verdict {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
 }
-
-.breadcrumb span {
+.regime-insight {
+    font-size: 0.72rem;
     color: var(--text-secondary);
+    max-width: 360px;
+    line-height: 1.4;
+}
+.regime-counts {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    flex-shrink: 0;
+}
+.regime-pills {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.regime-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.2rem 0.55rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(30,41,59,0.6);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    cursor: default;
+}
+.regime-pill .pill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+@media (max-width: 768px) {
+    .regime-bar { top: 0; position: relative; }
+    .regime-insight { display: none; }
+    .regime-pills { display: none; }
 }
 
-.hero-header {
+/* ── Basket Cards ───────────────────────────────────────────────────────── */
+.basket-section-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    padding: 1rem 1.5rem;
+    background: var(--card-bg);
+    border: var(--card-border);
+    border-radius: 1rem;
+    user-select: none;
 }
+.basket-section-header:hover { background: rgba(30,41,59,0.85); }
+.basket-section-toggle {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    transition: transform 0.2s;
+}
+details.basket-section[open] .basket-section-toggle { transform: rotate(180deg); }
 
-@media (max-width: 768px) {
-    .grid-cols-2 {
-        grid-template-columns: 1fr !important;
-    }
-    .hero-header {
-        flex-direction: column;
-    }
-    .metric-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+.basket-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+@media (max-width: 960px) { .basket-grid { grid-template-columns: 1fr; } }
+
+.basket-card {
+    background: var(--card-bg);
+    border: var(--card-border);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    box-shadow: var(--glass-shadow);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.basket-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+/* Coloured top-edge accent — driven purely by class, no inline style needed */
+.basket-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 1rem 1rem 0 0;
+}
+.basket-card.signal-bullish { border-color: rgba(74,222,128,0.25); }
+.basket-card.signal-bullish::before { background: var(--accent-optimal); }
+.basket-card.signal-neutral { border-color: rgba(251,191,36,0.2); }
+.basket-card.signal-neutral::before { background: var(--accent-marginal); }
+.basket-card.signal-bearish { border-color: rgba(248,113,113,0.25); }
+.basket-card.signal-bearish::before { background: var(--accent-poor); }
+
+.basket-meta-row {
+    display: flex;
+    gap: 1.25rem;
+    margin: 0.6rem 0 0.75rem;
+    flex-wrap: wrap;
+}
+.basket-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+.basket-meta-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-secondary);
+}
+.basket-meta-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+}
+.basket-divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin: 0.5rem 0 0.6rem;
+}
+.basket-ticker-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.8rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: background 0.1s;
+    border-radius: 4px;
+}
+.basket-ticker-row:last-of-type { border-bottom: none; }
+.basket-ticker-row:hover { background: rgba(255,255,255,0.04); padding-left: 0.3rem; }
+.basket-ticker-symbol {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 0.82rem;
+    min-width: 56px;
+}
+.basket-ticker-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 0.85rem;
+    min-width: 28px;
+    text-align: right;
+}
+.basket-ticker-chg {
+    font-size: 0.75rem;
+    min-width: 52px;
+    text-align: right;
+}
+.basket-ticker-regime {
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+    min-width: 60px;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.basket-missing {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-top: 0.5rem;
+    line-height: 1.5;
+}
+.basket-no-data {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 1rem 0;
 }
 
         </style>
@@ -365,44 +739,37 @@ a { color: inherit; text-decoration: none; }
         
     <nav class="top-nav">
         <ul class="top-nav-list">
-            <li><a href="index.html" class="nav-item">Command Center</a></li><li><a href="sector_analysis.html" class="nav-item">Sector Analysis</a></li><li><a href="macro_drivers.html" class="nav-item">Macro Drivers</a></li><li><a href="market_news.html" class="nav-item">Market News</a></li><li><a href="ai_memo.html" class="nav-item">AI Strategy</a></li><li><a href="ai_macro_memo.html" class="nav-item">Macro AI</a></li>
+            <li><a href="index.html" class="nav-item">Command Center</a></li><li><a href="sector_analysis.html" class="nav-item">Sector Analysis</a></li><li><a href="macro_drivers.html" class="nav-item">Macro Drivers</a></li><li><a href="sentiment.html" class="nav-item">Sentiment</a></li><li><a href="market_news.html" class="nav-item">Market News</a></li><li><a href="ai_memo.html" class="nav-item">AI Strategy</a></li><li><a href="ai_macro_memo.html" class="nav-item">Macro AI</a></li>
         </ul>
     </nav>
     
         <div class="container">
-            <!-- Breadcrumb Navigation -->
-            <nav class="breadcrumb">
-                <a href="sector_analysis.html">Sector Overview</a>
-                <span>/</span>
-                <a href="sector_XLF.html">Financials</a>
-                <span>/</span>
-                <span style="color: var(--text-primary);">SCHW</span>
-            </nav>
+            <nav class="breadcrumb"><a href="index.html">Command Center</a><span class="bc-sep">/</span><a href="sector_XLF.html">Financials</a><span class="bc-sep">/</span><span class="bc-current">SCHW</span></nav>
 
             <!-- Hero Header -->
-            <header class="glass-card" style="margin-bottom: 2rem;">
+            <header class="glass-card mb-4">
                 <div class="hero-header">
                     <div>
-                        <h1 style="margin-bottom: 0.5rem;">The Charles Schwab Corporation</h1>
+                        <h1 class="mb-1">The Charles Schwab Corporation</h1>
                         <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                             <span class="text-xl font-mono">SCHW</span>
                             <span class="badge badge-good">Financial Services</span>
                             <span class="text-muted">Capital Markets</span>
                         </div>
                     </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 2rem; font-weight: bold;">$93.77</div>
-                        <span style="color: var(--accent-optimal); font-size: 1rem;">+1.53%</span>
+                    <div class="text-right">
+                        <div style="font-size: 2rem; font-weight: bold;">$97.27</div>
+                        <span style="color: var(--accent-optimal); font-size: 1rem;">+0.59%</span>
                     </div>
                 </div>
             </header>
 
             <!-- Two-Column Layout -->
-            <div class="grid-cols-2" style="display: grid; gap: 2rem; margin-bottom: 2rem;">
+            <div class="grid-cols-2 gap-4 mb-4">
                 <!-- Left Column: Company Story -->
                 <div>
                     
-    <section class="glass-card" style="margin-bottom: 1.5rem;">
+    <section class="glass-card mb-3">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
             <h2 style="margin: 0;">Company Overview</h2>
             <a href="https://www.schwab.com" target="_blank" class="text-sm" style="color: var(--accent-info);">Visit Website</a>
@@ -427,25 +794,25 @@ a { color: inherit; text-decoration: none; }
         <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem;">
             <div style="font-weight: 600;">Mr. Charles Robert Schwab</div>
             <div class="text-sm text-muted">Founder & Co-Chairman, Age 88</div>
-            <span class="text-xs text-muted">Compensation:</span> $3.6M
+            <span class="text-xs text-muted">Compensation:</span> $3.5M
         </div>
         
         <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem;">
             <div style="font-weight: 600;">Mr. Richard Andrew Wurster C.F.A., CMT</div>
             <div class="text-sm text-muted">CEO, President & Director, Age 51</div>
-            <span class="text-xs text-muted">Compensation:</span> $4.5M
+            <span class="text-xs text-muted">Compensation:</span> $6.1M
         </div>
         
         <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem;">
             <div style="font-weight: 600;">Mr. Michael Daniel Verdeschi</div>
             <div class="text-sm text-muted">MD & Chief Financial Officer, Age 56</div>
-            <span class="text-xs text-muted">Compensation:</span> $2.5M
+            <span class="text-xs text-muted">Compensation:</span> $3.8M
         </div>
         
         <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem;">
             <div style="font-weight: 600;">Mr. Jonathan M. Craig</div>
             <div class="text-sm text-muted">MD, Head of Investor Service & Head of Retail Investing, Age 53</div>
-            <span class="text-xs text-muted">Compensation:</span> $2.6M
+            <span class="text-xs text-muted">Compensation:</span> $2.8M
         </div>
         
         <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem;">
@@ -461,34 +828,34 @@ a { color: inherit; text-decoration: none; }
                 <!-- Right Column: Metrics & Data -->
                 <div>
                     
-    <section class="glass-card" style="margin-bottom: 1.5rem;">
+    <section class="glass-card mb-3">
         <h2>Key Metrics</h2>
         
-    <div style="margin-bottom: 1.5rem;">
+    <div class="mb-3">
         <h3 class="text-sm text-muted" style="margin-bottom: 0.75rem;">Valuation</h3>
         <div class="metric-grid">
             
         <div class="metric-card">
             <span class="text-xs text-muted">Market Cap</span>
-            <div class="text-lg font-bold ">$166.62B</div>
+            <div class="text-lg font-bold ">$170.44B</div>
         </div>
         
             
         <div class="metric-card">
             <span class="text-xs text-muted">P/E Ratio</span>
-            <div class="text-lg font-bold ">20.2</div>
+            <div class="text-lg font-bold ">20.9</div>
         </div>
         
             
         <div class="metric-card">
             <span class="text-xs text-muted">Forward P/E</span>
-            <div class="text-lg font-bold ">13.8</div>
+            <div class="text-lg font-bold ">14.1</div>
         </div>
         
             
         <div class="metric-card">
             <span class="text-xs text-muted">P/B Ratio</span>
-            <div class="text-lg font-bold ">3.9</div>
+            <div class="text-lg font-bold ">4.0</div>
         </div>
         
             
@@ -500,14 +867,14 @@ a { color: inherit; text-decoration: none; }
             
         <div class="metric-card">
             <span class="text-xs text-muted">EV</span>
-            <div class="text-lg font-bold ">$131.14B</div>
+            <div class="text-lg font-bold ">$137.28B</div>
         </div>
         
         </div>
     </div>
     
         
-    <div style="margin-bottom: 1.5rem;">
+    <div class="mb-3">
         <h3 class="text-sm text-muted" style="margin-bottom: 0.75rem;">Growth</h3>
         <div class="metric-grid">
             
@@ -532,7 +899,7 @@ a { color: inherit; text-decoration: none; }
     </div>
     
         
-    <div style="margin-bottom: 1.5rem;">
+    <div class="mb-3">
         <h3 class="text-sm text-muted" style="margin-bottom: 0.75rem;">Profitability</h3>
         <div class="metric-grid">
             
@@ -593,7 +960,7 @@ a { color: inherit; text-decoration: none; }
             
         <div class="metric-card">
             <span class="text-xs text-muted">Dividend Yield</span>
-            <div class="text-lg font-bold ">137.0%</div>
+            <div class="text-lg font-bold ">132.0%</div>
         </div>
         
             
@@ -605,7 +972,7 @@ a { color: inherit; text-decoration: none; }
             
         <div class="metric-card">
             <span class="text-xs text-muted">52W Low</span>
-            <div class="text-lg font-bold ">$65.88</div>
+            <div class="text-lg font-bold ">$72.80</div>
         </div>
         
         </div>
@@ -617,49 +984,49 @@ a { color: inherit; text-decoration: none; }
     <section class="glass-card">
         <h2>Analyst Sentiment</h2>
         
-        <div style="margin-bottom: 1.5rem;">
+        <div class="mb-3">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <span class="text-sm text-muted">Analyst Ratings (21 analysts)</span>
+                <span class="text-sm text-muted">Analyst Ratings (22 analysts)</span>
                 <span class="badge badge-optimal">Buy</span>
             </div>
             <div style="display: flex; height: 24px; border-radius: 4px; overflow: hidden;">
-                <div style="width: 85.7%; background: var(--accent-optimal);" title="Buy: 18"></div>
-                <div style="width: 9.5%; background: var(--accent-marginal);" title="Hold: 2"></div>
-                <div style="width: 4.8%; background: var(--accent-poor);" title="Sell: 1"></div>
+                <div style="width: 86.4%; background: var(--accent-optimal);" title="Buy: 19"></div>
+                <div style="width: 9.1%; background: var(--accent-marginal);" title="Hold: 2"></div>
+                <div style="width: 4.5%; background: var(--accent-poor);" title="Sell: 1"></div>
             </div>
             <div style="display: flex; justify-content: space-between; margin-top: 0.5rem;">
-                <span class="text-xs" style="color: var(--accent-optimal);">Buy 18</span>
+                <span class="text-xs" style="color: var(--accent-optimal);">Buy 19</span>
                 <span class="text-xs" style="color: var(--accent-marginal);">Hold 2</span>
                 <span class="text-xs" style="color: var(--accent-poor);">Sell 1</span>
             </div>
         </div>
         
         
-        <div style="margin-bottom: 1.5rem;">
-            <h4 class="text-sm text-muted" style="margin-bottom: 0.5rem;">Price Targets</h4>
+        <div class="mb-3">
+            <h4 class="text-sm text-muted mb-1">Price Targets</h4>
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span class="font-mono text-sm">$90</span>
                 <div style="flex: 1; margin: 0 1rem; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; position: relative;">
-                    <div style="position: absolute; left: 6%; width: 3px; height: 16px; background: var(--accent-info); top: -4px;" title="Current: $93.77"></div>
-                    <div style="position: absolute; left: 51%; width: 3px; height: 12px; background: var(--accent-optimal); top: -2px;" title="Mean: $119.58"></div>
+                    <div style="position: absolute; left: 13%; width: 3px; height: 16px; background: var(--accent-info); top: -4px;" title="Current: $97.27"></div>
+                    <div style="position: absolute; left: 48%; width: 3px; height: 12px; background: var(--accent-optimal); top: -2px;" title="Mean: $118.00"></div>
                 </div>
                 <span class="font-mono text-sm">$148</span>
             </div>
             <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 0.75rem;">
                 <div style="text-align: center;">
                     <span class="text-xs text-muted">Mean Target</span><br>
-                    <span class="font-bold" style="color: var(--accent-optimal);">$119.58</span>
+                    <span class="font-bold" style="color: var(--accent-optimal);">$118.00</span>
                 </div>
                 <div style="text-align: center;">
                     <span class="text-xs text-muted">Upside</span><br>
-                    <span class="font-bold" style="color: var(--accent-optimal);">+27.5%</span>
+                    <span class="font-bold" style="color: var(--accent-optimal);">+21.3%</span>
                 </div>
             </div>
         </div>
         
         
         <div>
-            <h4 class="text-sm text-muted" style="margin-bottom: 0.5rem;">Recent Analyst Actions</h4>
+            <h4 class="text-sm text-muted mb-1">Recent Analyst Actions</h4>
             <table class="modern-table" style="font-size: 0.8rem;">
                 <thead>
                     <tr><th>Date</th><th>Firm</th><th>Action</th><th>Rating</th></tr>
@@ -667,59 +1034,59 @@ a { color: inherit; text-decoration: none; }
                 <tbody>
                     
             <tr>
-                <td class="text-xs">2026-04-01</td>
-                <td class="text-sm">Truist Securities</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Buy</td>
-            </tr>
-            
-            <tr>
-                <td class="text-xs">2026-01-26</td>
-                <td class="text-sm">Barclays</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Overweight</td>
-            </tr>
-            
-            <tr>
-                <td class="text-xs">2026-01-22</td>
-                <td class="text-sm">Barclays</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Overweight</td>
-            </tr>
-            
-            <tr>
-                <td class="text-xs">2026-01-22</td>
-                <td class="text-sm">Truist Securities</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Buy</td>
-            </tr>
-            
-            <tr>
-                <td class="text-xs">2026-01-22</td>
-                <td class="text-sm">TD Cowen</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Buy</td>
-            </tr>
-            
-            <tr>
-                <td class="text-xs">2026-01-22</td>
+                <td class="text-xs">Apr 08, 2026</td>
                 <td class="text-sm">UBS</td>
                 <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
                 <td class="text-sm">Buy</td>
             </tr>
             
             <tr>
-                <td class="text-xs">2026-01-14</td>
-                <td class="text-sm">TD Cowen</td>
+                <td class="text-xs">Apr 08, 2026</td>
+                <td class="text-sm">Barclays</td>
+                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
+                <td class="text-sm">Overweight</td>
+            </tr>
+            
+            <tr>
+                <td class="text-xs">Apr 06, 2026</td>
+                <td class="text-sm">Jefferies</td>
                 <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
                 <td class="text-sm">Buy</td>
             </tr>
             
             <tr>
-                <td class="text-xs">2026-01-14</td>
-                <td class="text-sm">Piper Sandler</td>
+                <td class="text-xs">Apr 01, 2026</td>
+                <td class="text-sm">Truist Securities</td>
                 <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Neutral</td>
+                <td class="text-sm">Buy</td>
+            </tr>
+            
+            <tr>
+                <td class="text-xs">Jan 26, 2026</td>
+                <td class="text-sm">Barclays</td>
+                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
+                <td class="text-sm">Overweight</td>
+            </tr>
+            
+            <tr>
+                <td class="text-xs">Jan 22, 2026</td>
+                <td class="text-sm">Barclays</td>
+                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
+                <td class="text-sm">Overweight</td>
+            </tr>
+            
+            <tr>
+                <td class="text-xs">Jan 22, 2026</td>
+                <td class="text-sm">Truist Securities</td>
+                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
+                <td class="text-sm">Buy</td>
+            </tr>
+            
+            <tr>
+                <td class="text-xs">Jan 22, 2026</td>
+                <td class="text-sm">TD Cowen</td>
+                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
+                <td class="text-sm">Buy</td>
             </tr>
             
                 </tbody>
@@ -733,25 +1100,25 @@ a { color: inherit; text-decoration: none; }
 
             <!-- Catalysts Section (Full Width) -->
             
-    <section class="glass-card" style="margin-bottom: 2rem;">
+    <section class="glass-card mb-4">
         <h2>Upcoming Catalysts</h2>
         <div class="grid-cols-2" style="gap: 2rem;">
             
         <div>
-            <h3 class="text-sm text-muted" style="margin-bottom: 1rem;">Next Earnings</h3>
+            <h3 class="text-sm text-muted mb-2">Next Earnings</h3>
             <div class="glass-card" style="background: rgba(56, 189, 248, 0.1); border-color: rgba(56, 189, 248, 0.2);">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div style="font-size: 1.25rem; font-weight: bold;">2026-04-16</div>
-                    <span class="text-sm text-muted">10 days away</span>
+                    <div style="font-size: 1.25rem; font-weight: bold;">Apr 16, 2026</div>
+                    <span class="badge badge-optimal">6 days away</span>
                 </div>
                 <div style="margin-top: 1rem; display: flex; gap: 2rem;">
                     <div>
                         <span class="text-xs text-muted">EPS Estimate</span><br>
-                        <b>$1.36</b>
+                        <b>$1.38</b>
                     </div>
                     <div>
                         <span class="text-xs text-muted">Revenue Estimate</span><br>
-                        <b>$6.4B</b>
+                        <b>$6.5B</b>
                     </div>
                 </div>
             </div>
@@ -759,41 +1126,41 @@ a { color: inherit; text-decoration: none; }
         
             
         <div>
-            <h3 class="text-sm text-muted" style="margin-bottom: 1rem;">Recent News</h3>
+            <h3 class="text-sm text-muted mb-2">Recent News</h3>
             <div>
             <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <a href="https://beincrypto.com/charles-schwab-moves-into-crypto-trading/" target="_blank" style="color: var(--text-primary); text-decoration: none;">
-                    <div style="font-weight: 500; margin-bottom: 0.25rem;">Charles Schwab to Enter the Crypto Trading Space By June 2026</div>
+                <a href="https://finance.yahoo.com/markets/stocks/articles/charles-schwab-schw-3-reasons-205347288.html" target="_blank" style="color: var(--text-primary); text-decoration: none;">
+                    <div style="font-weight: 500; margin-bottom: 0.25rem;">Charles Schwab (SCHW): 3 Reasons We Love This Stock</div>
                 </a>
-                <div class="text-xs text-muted">BeInCrypto · 2026-04-04</div>
+                <div class="text-xs text-muted">StockStory · Apr 09, 2026</div>
             </div>
             
             <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <a href="https://decrypt.co/363336/charles-schwab-bitcoin-ethereum-spot-trading" target="_blank" style="color: var(--text-primary); text-decoration: none;">
-                    <div style="font-weight: 500; margin-bottom: 0.25rem;">Charles Schwab Is Gearing Up to Offer Bitcoin, Ethereum Spot Trading</div>
+                <a href="https://finance.yahoo.com/markets/stocks/articles/charles-schwab-corporation-schw-earnings-140007137.html" target="_blank" style="color: var(--text-primary); text-decoration: none;">
+                    <div style="font-weight: 500; margin-bottom: 0.25rem;">The Charles Schwab Corporation (SCHW) Earnings Expected to Grow: Should You Buy?</div>
                 </a>
-                <div class="text-xs text-muted">decrypt · 2026-04-03</div>
+                <div class="text-xs text-muted">Zacks · Apr 09, 2026</div>
             </div>
             
             <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <a href="https://finance.yahoo.com/markets/stocks/articles/2-p-500-stocks-long-191650938.html" target="_blank" style="color: var(--text-primary); text-decoration: none;">
-                    <div style="font-weight: 500; margin-bottom: 0.25rem;">2 S&P 500 Stocks for Long-Term Investors and 1 We Ignore</div>
+                <a href="https://www.fool.com/investing/2026/04/08/why-charles-schwab-stock-bumped-nearly-4-higher-to/" target="_blank" style="color: var(--text-primary); text-decoration: none;">
+                    <div style="font-weight: 500; margin-bottom: 0.25rem;">Why Charles Schwab Stock Bumped Nearly 4% Higher Today</div>
                 </a>
-                <div class="text-xs text-muted">StockStory · 2026-04-03</div>
+                <div class="text-xs text-muted">Motley Fool · Apr 08, 2026</div>
             </div>
             
             <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <a href="https://finance.yahoo.com/markets/stocks/articles/assessing-charles-schwab-schw-valuation-021216560.html" target="_blank" style="color: var(--text-primary); text-decoration: none;">
-                    <div style="font-weight: 500; margin-bottom: 0.25rem;">Assessing Charles Schwab’s (SCHW) Valuation After Launch Of The Schwab Teen...</div>
+                <a href="https://finance.yahoo.com/markets/stocks/articles/wealth-brokers-investment-banks-faced-201317741.html" target="_blank" style="color: var(--text-primary); text-decoration: none;">
+                    <div style="font-weight: 500; margin-bottom: 0.25rem;">Wealth Brokers, Investment Banks Faced Uneven First-Quarter Activity, UBS Says</div>
                 </a>
-                <div class="text-xs text-muted">Simply Wall St. · 2026-04-03</div>
+                <div class="text-xs text-muted">MT Newswires · Apr 08, 2026</div>
             </div>
             
             <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <a href="https://finance.yahoo.com/economy/policy/articles/retail-brokers-could-see-lower-182139379.html" target="_blank" style="color: var(--text-primary); text-decoration: none;">
-                    <div style="font-weight: 500; margin-bottom: 0.25rem;">Retail Brokers Could See Lower Engagement, Organic Growth Amid Fallout From...</div>
+                <a href="https://www.thestreet.com/crypto/markets/12-trillion-asset-manager-warns-this-small-change-can-reshape-portfolio" target="_blank" style="color: var(--text-primary); text-decoration: none;">
+                    <div style="font-weight: 500; margin-bottom: 0.25rem;">$12 trillion asset manager warns this 'small' change can reshape portfolio</div>
                 </a>
-                <div class="text-xs text-muted">MT Newswires · 2026-04-02</div>
+                <div class="text-xs text-muted">TheStreet · Apr 08, 2026</div>
             </div>
             </div>
         </div>
@@ -810,11 +1177,11 @@ a { color: inherit; text-decoration: none; }
             <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
                 <div>
                     <span class="text-xs text-muted">Current Price</span>
-                    <div style="font-size: 1.5rem; font-weight: bold;">$93.77</div>
+                    <div style="font-size: 1.5rem; font-weight: bold;">$97.27</div>
                 </div>
                 <div>
                     <span class="text-xs text-muted">Composite Score</span>
-                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent-good);">59</div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent-good);">52</div>
                 </div>
                 <div>
                     <span class="text-xs text-muted">Entry Score</span>
@@ -833,14 +1200,14 @@ a { color: inherit; text-decoration: none; }
     
 
             <!-- Footer -->
-            <footer style="margin-top: 3rem; text-align: center; color: var(--text-secondary);">
+            <footer class="mt-6 text-center text-muted">
                 <p>Macro Watch 2.1 · Stock Narrative Page</p>
-                <p class="text-xs">Fundamental data via yfinance · Last updated: 2026-04-05 11:00</p>
+                <p class="text-xs">Fundamental data via yfinance · Last updated: Apr 10, 2026 06:07</p>
             </footer>
         </div>
         
 <script>
-// Sortable Tables
+// ── Sortable Tables ────────────────────────────────────────────────────────
 function initSortableTables() {
     document.querySelectorAll('.modern-table').forEach(table => {
         const headers = table.querySelectorAll('th.sortable');
@@ -849,78 +1216,55 @@ function initSortableTables() {
                 const tbody = table.querySelector('tbody');
                 const rows = Array.from(tbody.querySelectorAll('tr'));
                 const isAsc = header.classList.contains('asc');
-
-                // Clear other headers
                 headers.forEach(h => h.classList.remove('asc', 'desc'));
                 header.classList.add(isAsc ? 'desc' : 'asc');
-
                 rows.sort((a, b) => {
-                    const aCell = a.cells[colIndex];
-                    const bCell = b.cells[colIndex];
-                    let aVal = aCell.textContent.trim();
-                    let bVal = bCell.textContent.trim();
-
-                    // Try numeric sort
+                    let aVal = a.cells[colIndex].textContent.trim();
+                    let bVal = b.cells[colIndex].textContent.trim();
                     const aNum = parseFloat(aVal.replace(/[^0-9.-]/g, ''));
                     const bNum = parseFloat(bVal.replace(/[^0-9.-]/g, ''));
-
-                    if (!isNaN(aNum) && !isNaN(bNum)) {
-                        return isAsc ? bNum - aNum : aNum - bNum;
-                    }
+                    if (!isNaN(aNum) && !isNaN(bNum)) return isAsc ? bNum - aNum : aNum - bNum;
                     return isAsc ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
                 });
-
                 rows.forEach(row => tbody.appendChild(row));
             });
         });
     });
 }
 
-// Search/Filter for Stock Cards and Table Rows
+// ── Search / Filter ────────────────────────────────────────────────────────
 function initSearch() {
     const searchInput = document.getElementById('stock-search');
     if (!searchInput) return;
-
-    searchInput.addEventListener('input', (e) => {
+    searchInput.addEventListener('input', e => {
         const query = e.target.value.toLowerCase();
-
-        // Support both card-based and table-based layouts
         const items = document.querySelectorAll('.stock-card, .modern-table tbody tr');
         items.forEach(item => {
             const ticker = item.dataset.ticker?.toLowerCase() || item.textContent.toLowerCase();
-            const matches = ticker.includes(query);
-            item.classList.toggle('hidden', !matches);
+            item.classList.toggle('hidden', !ticker.includes(query));
         });
-
         const visible = document.querySelectorAll('.stock-card:not(.hidden), .modern-table tbody tr:not(.hidden)').length;
         const countEl = document.getElementById('visible-count');
         if (countEl) countEl.textContent = visible;
+        // Empty-state feedback
+        const emptyState = document.getElementById('search-empty-state');
+        if (emptyState) emptyState.classList.toggle('hidden', visible > 0);
     });
 }
 
-// Filter Buttons
+// ── Filter Buttons ─────────────────────────────────────────────────────────
 function initFilterButtons() {
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const filter = btn.dataset.filter;
             const isActive = btn.classList.contains('active');
-
-            // Toggle active state
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             if (!isActive) btn.classList.add('active');
-
-            // Apply filter
             document.querySelectorAll('.stock-card').forEach(card => {
-                if (!filter || isActive) {
-                    card.classList.remove('hidden');
-                } else if (filter === 'top5') {
-                    card.classList.toggle('hidden', parseInt(card.dataset.rank) > 5);
-                } else if (filter === 'trade-ready') {
-                    card.classList.toggle('hidden', card.dataset.tradeReady !== 'true');
-                }
+                if (!filter || isActive)         { card.classList.remove('hidden'); }
+                else if (filter === 'top5')       { card.classList.toggle('hidden', parseInt(card.dataset.rank) > 5); }
+                else if (filter === 'trade-ready'){ card.classList.toggle('hidden', card.dataset.tradeReady !== 'true'); }
             });
-
-            // Update count
             const visible = document.querySelectorAll('.stock-card:not(.hidden)').length;
             const countEl = document.getElementById('visible-count');
             if (countEl) countEl.textContent = visible;
@@ -928,60 +1272,43 @@ function initFilterButtons() {
     });
 }
 
-// Chart Tooltip (for SVG charts)
+// ── SVG Chart Tooltips ─────────────────────────────────────────────────────
 function initChartTooltips() {
     const tooltip = document.createElement('div');
     tooltip.className = 'chart-tooltip';
     document.body.appendChild(tooltip);
-
     document.querySelectorAll('svg.interactive-chart').forEach(chart => {
-        chart.addEventListener('mousemove', (e) => {
+        chart.addEventListener('mousemove', e => {
             const rect = chart.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const data = chart.dataset.values ? JSON.parse(chart.dataset.values) : null;
-
             if (data && data.length > 0) {
                 const idx = Math.floor((x / rect.width) * data.length);
                 const point = data[Math.min(idx, data.length - 1)];
-
                 if (point) {
                     tooltip.innerHTML = `
                         <div><strong>${point.date || ''}</strong></div>
-                        <div>Price: $${point.price?.toFixed(2) || 'N/A'}</div>
+                        <div>Price: $${point.price?.toFixed(2) || '&mdash;'}</div>
                         ${point.ema20 ? `<div style="color:#f59e0b">EMA20: $${point.ema20.toFixed(2)}</div>` : ''}
                         ${point.ema50 ? `<div style="color:#8b5cf6">EMA50: $${point.ema50.toFixed(2)}</div>` : ''}
                     `;
                     tooltip.style.left = (e.clientX + 15) + 'px';
-                    tooltip.style.top = (e.clientY - 10) + 'px';
+                    tooltip.style.top  = (e.clientY - 10) + 'px';
                     tooltip.classList.add('visible');
                 }
             }
         });
-
-        chart.addEventListener('mouseleave', () => {
-            tooltip.classList.remove('visible');
-        });
+        chart.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
     });
 }
 
+// ── Watchlist ──────────────────────────────────────────────────────────────
 function initWatchlist() {
-    // Merge server-side pre-populated tickers with localStorage
     const serverList = window.__SERVER_WATCHLIST__ || [];
     let watchlist = JSON.parse(localStorage.getItem('ema_watchlist') || '[]');
     serverList.forEach(t => { if (!watchlist.includes(t)) watchlist.push(t); });
     localStorage.setItem('ema_watchlist', JSON.stringify(watchlist));
-
-    // Apply saved state to all star buttons on this page
-    document.querySelectorAll('.watchlist-btn').forEach(btn => {
-        const ticker = btn.dataset.ticker;
-        if (watchlist.includes(ticker)) {
-            btn.textContent = '★';
-            btn.style.color = '#fbbf24';
-        }
-    });
-
-    // Update candidates table star buttons too (if present)
-    document.querySelectorAll('.cand-watchlist-btn').forEach(btn => {
+    document.querySelectorAll('.watchlist-btn, .cand-watchlist-btn').forEach(btn => {
         if (watchlist.includes(btn.dataset.ticker)) {
             btn.textContent = '★';
             btn.style.color = '#fbbf24';
@@ -1003,7 +1330,6 @@ function toggleWatchlist(btn) {
         btn.style.color = 'rgba(255,255,255,0.2)';
     }
     localStorage.setItem('ema_watchlist', JSON.stringify(watchlist));
-    // Sync all buttons for same ticker on this page
     document.querySelectorAll(`.watchlist-btn[data-ticker="${ticker}"], .cand-watchlist-btn[data-ticker="${ticker}"]`).forEach(b => {
         b.textContent = btn.textContent;
         b.style.color = btn.style.color;
@@ -1020,8 +1346,8 @@ function exportWatchlist() {
     URL.revokeObjectURL(a.href);
 }
 
+// ── Advanced Filters ───────────────────────────────────────────────────────
 function initAdvancedFilters() {
-    // Populate sector dropdown from data-sector values in candidates table
     const sectorSel = document.getElementById('cand-sector-filter');
     if (sectorSel) {
         const sectors = new Set();
@@ -1036,8 +1362,8 @@ function initAdvancedFilters() {
 
     function applyCandFilter() {
         const minScore = parseInt(document.getElementById('cand-score-filter')?.value || '0');
-        const regime = document.getElementById('cand-regime-filter')?.value || '';
-        const sector = document.getElementById('cand-sector-filter')?.value || '';
+        const regime   = document.getElementById('cand-regime-filter')?.value || '';
+        const sector   = document.getElementById('cand-sector-filter')?.value || '';
         let visible = 0;
         document.querySelectorAll('#candidates-table tbody tr').forEach(row => {
             const show = parseFloat(row.dataset.entryScore || '0') >= minScore
@@ -1054,7 +1380,6 @@ function initAdvancedFilters() {
         document.getElementById(id)?.addEventListener('change', applyCandFilter);
     });
 
-    // Projections confidence filter
     document.getElementById('proj-conf-filter')?.addEventListener('change', function() {
         const val = this.value;
         let vis = 0;
@@ -1068,14 +1393,38 @@ function initAdvancedFilters() {
     });
 }
 
-// Initialize on DOM ready
+// ── Bootstrap (guarded — each feature only runs if its DOM anchor exists) ──
 document.addEventListener('DOMContentLoaded', () => {
-    initSortableTables();
-    initSearch();
-    initFilterButtons();
-    initChartTooltips();
-    initAdvancedFilters();
-    initWatchlist();
+    // Set --nav-height CSS variable so .regime-bar sticky offset is exact
+    const nav = document.querySelector('.top-nav');
+    if (nav) {
+        document.documentElement.style.setProperty('--nav-height', nav.offsetHeight + 'px');
+    }
+
+    if (document.querySelector('.modern-table th.sortable')) {
+        console.info('[EMA] initSortableTables');
+        initSortableTables();
+    }
+    if (document.getElementById('stock-search')) {
+        console.info('[EMA] initSearch');
+        initSearch();
+    }
+    if (document.querySelectorAll('.filter-btn').length) {
+        console.info('[EMA] initFilterButtons');
+        initFilterButtons();
+    }
+    if (document.querySelectorAll('svg.interactive-chart').length) {
+        console.info('[EMA] initChartTooltips');
+        initChartTooltips();
+    }
+    if (document.getElementById('cand-score-filter') || document.getElementById('proj-conf-filter')) {
+        console.info('[EMA] initAdvancedFilters');
+        initAdvancedFilters();
+    }
+    if (document.querySelectorAll('.watchlist-btn, .cand-watchlist-btn').length) {
+        console.info('[EMA] initWatchlist');
+        initWatchlist();
+    }
 });
 </script>
 

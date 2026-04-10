@@ -730,24 +730,27 @@ def generate_driver_chart_svg(prices: pd.Series, width=150, height=50) -> str:
     """
     if prices is None or len(prices) < 2:
         return ""
-        
+
+    # Drop NaN values before charting
+    prices = prices.dropna()
+    if len(prices) < 2:
+        return ""
+
     start_price = prices.iloc[0]
     end_price = prices.iloc[-1]
     color = COLORS['green'] if end_price >= start_price else COLORS['red']
-    
+
     # Normalize
     min_p = prices.min()
     max_p = prices.max()
     rng = max_p - min_p if max_p > min_p else 1.0
-    
+
     points = []
     for i, price in enumerate(prices):
         x = (i / (len(prices) - 1)) * width
         y = height - ((price - min_p) / rng) * height
         points.append(f"{x:.1f},{y:.1f}")
-        
-    polyline = f'<polyline points="{" ".join(points)}" fill="none" stroke="{color}" stroke-width="2" />'
-        
+
     return f"""
     <svg role="img" aria-label="Macro driver price trend" width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg">
         <title>Macro driver price trend</title>

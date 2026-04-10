@@ -197,7 +197,7 @@ def calculate_sector_metrics(
         pct_up = (up_count / stock_count * 100) if stock_count > 0 else 0
 
         # Trade ready count (from candidates with entry_score >= 60)
-        trade_ready = sum(1 for c in candidates if c.sector_etf == etf and c.entry_score >= 60)
+        trade_ready = sum(1 for c in candidates if c.sector_etf == etf and c.entry_score >= 50)
 
         # ETF returns
         etf_ret_1w, etf_ret_1m, etf_ret_3m = None, None, None
@@ -646,11 +646,11 @@ def generate_sector_html(config: Dict, ranked_sectors: Dict, closes: pd.DataFram
 
 
 _FACTOR_TOOLTIPS = {
-    "EMA": "EMA Proximity (0-25): Ideal = price within 0.5 ATR of EMA20, just above it. Penalised if >2.5 ATR away (overextended).",
-    "ADX": "ADX Stage (0-25): Ideal = ADX 20-40, rising. Confirms trend strength with room to run. Full 25 pts when ADX 25-30 and rising.",
-    "Vol": "Volume Conviction (0-20): Ideal = >2x average volume, rising weekly trend, more up-volume than down. All 3 sub-factors required for max.",
-    "Str": "Structure Integrity (0-20): Ideal = price > EMA20 > EMA50, EMA50 slope rising. Clean EMA stack is the prerequisite for any trend trade.",
-    "R:R": "Risk/Reward (0-10): Ideal = stop <5% away with reward >3R. Uses regime-aware stop (1.5-2x ATR below EMA20). R:R >4.0 = max points.",
+    "EMA": "EMA Proximity (0-20): Sweet spot = 1-2 ATR from EMA20 (pullback zone). Too close (<0.5 ATR) means no dip to buy; too far (>3 ATR) = overextended.",
+    "ADX": "ADX Value (0-30): Scores trend strength by ADX value only — direction is noise. ADX 25-30 = optimal (proven trend). ADX <15 = no trend.",
+    "Vol": "Volume (0-25, inverted): LOW volume = bullish (selling exhaustion). Quiet pullbacks outperform breakouts. Vol <0.5x = max score.",
+    "Str": "Structure (0-15): Price > EMA20 > EMA50 with rising EMA50 slope. Confirms the uptrend is structurally intact.",
+    "R:R": "Risk/Reward (0-10): Uses regime-aware stop (1.5-2.5x ATR below EMA20). R:R >4.0 = max points.",
 }
 
 
@@ -658,12 +658,13 @@ def _score_breakdown_html(breakdown: Optional[Dict]) -> str:
     """Compact 5-component breakdown bar showing score/max with educational tooltips."""
     if not breakdown:
         return ""
+    from src.config import SCORE_WEIGHTS as _SW
     components = [
-        ("EMA", breakdown.get('ema_proximity', 0), 25),
-        ("ADX", breakdown.get('adx_stage', 0),     25),
-        ("Vol", breakdown.get('volume_conviction', 0), 20),
-        ("Str", breakdown.get('structure', 0),     20),
-        ("R:R", breakdown.get('risk_reward', 0),   10),
+        ("EMA", breakdown.get('ema_proximity', 0), _SW['ema_proximity']),
+        ("ADX", breakdown.get('adx_stage', 0),     _SW['adx_stage']),
+        ("Vol", breakdown.get('volume_conviction', 0), _SW['volume_conviction']),
+        ("Str", breakdown.get('structure', 0),     _SW['structure']),
+        ("R:R", breakdown.get('risk_reward', 0),   _SW['risk_reward']),
     ]
     cells = ""
     for label, score, max_score in components:
@@ -769,11 +770,11 @@ def generate_global_leaderboard_html(candidates: List[TradeCandidateAnalysis]) -
     rows = ""
     for i, c in enumerate(scored):
         combined = round(c.composite_score * 0.5 + c.entry_score * 0.5, 1)
-        if combined >= 75:
+        if combined >= 65:
             combined_color = "var(--accent-optimal)"
-        elif combined >= 60:
+        elif combined >= 50:
             combined_color = "var(--accent-good)"
-        elif combined >= 45:
+        elif combined >= 35:
             combined_color = "var(--accent-marginal)"
         else:
             combined_color = "var(--accent-poor)"
@@ -781,8 +782,8 @@ def generate_global_leaderboard_html(candidates: List[TradeCandidateAnalysis]) -
         ready_star = '<span style="color:var(--accent-optimal);">★</span>' if c.is_trade_ready else '<span style="color:var(--text-secondary);">–</span>'
         rank_style = "color:var(--accent-optimal); font-weight:bold;" if i < 3 else "color:var(--text-secondary);"
         breakdown_html = _score_breakdown_html(c.score_breakdown)
-        entry_color = "var(--accent-optimal)" if c.entry_score >= 75 else \
-                      "var(--accent-good)" if c.entry_score >= 60 else \
+        entry_color = "var(--accent-optimal)" if c.entry_score >= 65 else \
+                      "var(--accent-good)" if c.entry_score >= 50 else \
                       "var(--accent-marginal)" if c.entry_score >= 45 else "var(--accent-poor)"
 
         rows += f"""
@@ -853,12 +854,12 @@ def generate_candidates_html(candidates: List[TradeCandidateAnalysis], data_dict
                 width=220, height=70, show_markers=False, show_grid=False
             )
 
-        # Entry score coloring
-        if c.entry_score >= 75:
+        # Entry score coloring (aligned with SCORE_RATING_THRESHOLDS)
+        if c.entry_score >= 65:
             entry_color = "var(--accent-optimal)"
-        elif c.entry_score >= 60:
+        elif c.entry_score >= 50:
             entry_color = "var(--accent-good)"
-        elif c.entry_score >= 45:
+        elif c.entry_score >= 35:
             entry_color = "var(--accent-marginal)"
         else:
             entry_color = "var(--accent-poor)"
@@ -1426,14 +1427,12 @@ def run_sector_analysis(output_dir="reports", focus_sector: Optional[str] = None
             # Using new framework's score as proxy for "Signal Strength"
             
             signal_str = "WEAK"
-            if res.total_score >= 80: signal_str = "STRONG"
-            elif res.total_score >= 60: signal_str = "MODERATE"
+            if res.total_score >= 65: signal_str = "STRONG"
+            elif res.total_score >= 50: signal_str = "MODERATE"
 
             # Derive trend-readiness from score + volatility regime.
-            # EntryScorer returns volatility regime (HIGH/NORMAL/LOW_VOLATILITY), not
-            # a trend regime — checking == "TRENDING" was always False.
             # Trade-ready = acceptable entry score AND not in extreme volatility.
-            is_ready = res.total_score >= 60 and res.regime != "HIGH_VOLATILITY"
+            is_ready = res.total_score >= 50 and res.regime != "HIGH_VOLATILITY"
 
             # Derive a trend-regime string for the projection confidence scorer,
             # which expects "TRENDING" / "CHOPPING" / "SIDEWAYS".

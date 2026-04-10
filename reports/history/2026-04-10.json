@@ -1,0 +1,511 @@
+{
+  "version": 2,
+  "date": "2026-04-10",
+  "stocks": {
+    "SBAC": {
+      "composite_score": 73.0,
+      "entry_score": 37.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLRE",
+      "rank_in_sector": 1,
+      "is_trade_ready": false
+    },
+    "MNST": {
+      "composite_score": 72.6,
+      "entry_score": 54.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLP",
+      "rank_in_sector": 1,
+      "is_trade_ready": false
+    },
+    "EA": {
+      "composite_score": 68.9,
+      "entry_score": 81.0,
+      "regime": "LOW_VOLATILITY",
+      "sector": "XLC",
+      "rank_in_sector": 1,
+      "is_trade_ready": true
+    },
+    "MU": {
+      "composite_score": 68.2,
+      "entry_score": 53.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLK",
+      "rank_in_sector": 1,
+      "is_trade_ready": false
+    },
+    "CVS": {
+      "composite_score": 68.1,
+      "entry_score": 48.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLV",
+      "rank_in_sector": 1,
+      "is_trade_ready": false
+    },
+    "INTC": {
+      "composite_score": 67.2,
+      "entry_score": 41.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLK",
+      "rank_in_sector": 2,
+      "is_trade_ready": false
+    },
+    "PEP": {
+      "composite_score": 66.5,
+      "entry_score": 57.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLP",
+      "rank_in_sector": 2,
+      "is_trade_ready": false
+    },
+    "NUE": {
+      "composite_score": 65.4,
+      "entry_score": 61.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLB",
+      "rank_in_sector": 1,
+      "is_trade_ready": false
+    },
+    "VLO": {
+      "composite_score": 65.2,
+      "entry_score": 54.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLE",
+      "rank_in_sector": 1,
+      "is_trade_ready": false
+    },
+    "EIX": {
+      "composite_score": 65.1,
+      "entry_score": 68.0,
+      "regime": "NORMAL_VOLATILITY",
+      "sector": "XLU",
+      "rank_in_sector": 1,
+      "is_trade_ready": true
+    },
+    "FOXA": {
+      "composite_score": 64.8,
+      "entry_score": 53.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLC",
+      "rank_in_sector": 2,
+      "is_trade_ready": false
+    },
+    "HAL": {
+      "composite_score": 64.4,
+      "entry_score": 53.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLE",
+      "rank_in_sector": 2,
+      "is_trade_ready": false
+    },
+    "ETR": {
+      "composite_score": 64.4,
+      "entry_score": 41.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLU",
+      "rank_in_sector": 2,
+      "is_trade_ready": false
+    },
+    "CAT": {
+      "composite_score": 64.1,
+      "entry_score": 47.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLI",
+      "rank_in_sector": 1,
+      "is_trade_ready": false
+    },
+    "ROST": {
+      "composite_score": 63.9,
+      "entry_score": 37.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLY",
+      "rank_in_sector": 1,
+      "is_trade_ready": false
+    },
+    "PH": {
+      "composite_score": 63.7,
+      "entry_score": 65.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLI",
+      "rank_in_sector": 2,
+      "is_trade_ready": false
+    },
+    "C": {
+      "composite_score": 63.4,
+      "entry_score": 71.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLF",
+      "rank_in_sector": 1,
+      "is_trade_ready": false
+    },
+    "F": {
+      "composite_score": 63.3,
+      "entry_score": 54.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLY",
+      "rank_in_sector": 2,
+      "is_trade_ready": false
+    },
+    "AMD": {
+      "composite_score": 62.8,
+      "entry_score": 53.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLK",
+      "rank_in_sector": 3,
+      "is_trade_ready": false
+    },
+    "USB": {
+      "composite_score": 62.8,
+      "entry_score": 65.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLF",
+      "rank_in_sector": 2,
+      "is_trade_ready": false
+    },
+    "JNJ": {
+      "composite_score": 62.8,
+      "entry_score": 56.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLV",
+      "rank_in_sector": 2,
+      "is_trade_ready": false
+    },
+    "WELL": {
+      "composite_score": 62.8,
+      "entry_score": 78.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLRE",
+      "rank_in_sector": 2,
+      "is_trade_ready": false
+    },
+    "EBAY": {
+      "composite_score": 62.4,
+      "entry_score": 53.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLY",
+      "rank_in_sector": 3,
+      "is_trade_ready": false
+    },
+    "ADM": {
+      "composite_score": 61.7,
+      "entry_score": 73.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLP",
+      "rank_in_sector": 3,
+      "is_trade_ready": false
+    },
+    "VTR": {
+      "composite_score": 61.6,
+      "entry_score": 68.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLRE",
+      "rank_in_sector": 3,
+      "is_trade_ready": false
+    },
+    "GS": {
+      "composite_score": 61.4,
+      "entry_score": 66.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLF",
+      "rank_in_sector": 3,
+      "is_trade_ready": false
+    },
+    "XOM": {
+      "composite_score": 61.4,
+      "entry_score": 52.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLE",
+      "rank_in_sector": 3,
+      "is_trade_ready": false
+    },
+    "MRK": {
+      "composite_score": 61.3,
+      "entry_score": 60.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLV",
+      "rank_in_sector": 3,
+      "is_trade_ready": false
+    },
+    "LRCX": {
+      "composite_score": 61.1,
+      "entry_score": 55.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLK",
+      "rank_in_sector": 4,
+      "is_trade_ready": false
+    },
+    "FDX": {
+      "composite_score": 60.8,
+      "entry_score": 49.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLI",
+      "rank_in_sector": 3,
+      "is_trade_ready": false
+    },
+    "DD": {
+      "composite_score": 60.7,
+      "entry_score": 65.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLB",
+      "rank_in_sector": 2,
+      "is_trade_ready": false
+    },
+    "WBD": {
+      "composite_score": 60.6,
+      "entry_score": 54.0,
+      "regime": "NORMAL_VOLATILITY",
+      "sector": "XLC",
+      "rank_in_sector": 3,
+      "is_trade_ready": true
+    },
+    "ADI": {
+      "composite_score": 60.1,
+      "entry_score": 72.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLK",
+      "rank_in_sector": 5,
+      "is_trade_ready": false
+    },
+    "CSX": {
+      "composite_score": 59.9,
+      "entry_score": 65.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLI",
+      "rank_in_sector": 4,
+      "is_trade_ready": false
+    },
+    "JCI": {
+      "composite_score": 59.9,
+      "entry_score": 76.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLI",
+      "rank_in_sector": 5,
+      "is_trade_ready": false
+    },
+    "MS": {
+      "composite_score": 59.7,
+      "entry_score": 60.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLF",
+      "rank_in_sector": 4,
+      "is_trade_ready": false
+    },
+    "KO": {
+      "composite_score": 59.4,
+      "entry_score": 81.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLP",
+      "rank_in_sector": 4,
+      "is_trade_ready": false
+    },
+    "AEP": {
+      "composite_score": 59.4,
+      "entry_score": 55.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLU",
+      "rank_in_sector": 3,
+      "is_trade_ready": false
+    },
+    "GM": {
+      "composite_score": 59.2,
+      "entry_score": 62.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLY",
+      "rank_in_sector": 4,
+      "is_trade_ready": false
+    },
+    "DLR": {
+      "composite_score": 59.1,
+      "entry_score": 75.0,
+      "regime": "NORMAL_VOLATILITY",
+      "sector": "XLRE",
+      "rank_in_sector": 4,
+      "is_trade_ready": true
+    },
+    "AMZN": {
+      "composite_score": 58.8,
+      "entry_score": 29.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLY",
+      "rank_in_sector": 5,
+      "is_trade_ready": false
+    },
+    "GILD": {
+      "composite_score": 58.4,
+      "entry_score": 64.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLV",
+      "rank_in_sector": 4,
+      "is_trade_ready": false
+    },
+    "DVN": {
+      "composite_score": 58.2,
+      "entry_score": 70.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLE",
+      "rank_in_sector": 4,
+      "is_trade_ready": false
+    },
+    "ALB": {
+      "composite_score": 58.1,
+      "entry_score": 51.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLB",
+      "rank_in_sector": 3,
+      "is_trade_ready": false
+    },
+    "FCX": {
+      "composite_score": 58.0,
+      "entry_score": 61.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLB",
+      "rank_in_sector": 4,
+      "is_trade_ready": false
+    },
+    "MO": {
+      "composite_score": 57.8,
+      "entry_score": 77.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLP",
+      "rank_in_sector": 5,
+      "is_trade_ready": false
+    },
+    "CME": {
+      "composite_score": 57.7,
+      "entry_score": 65.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLF",
+      "rank_in_sector": 5,
+      "is_trade_ready": false
+    },
+    "FE": {
+      "composite_score": 57.2,
+      "entry_score": 77.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLU",
+      "rank_in_sector": 4,
+      "is_trade_ready": false
+    },
+    "GOOGL": {
+      "composite_score": 56.4,
+      "entry_score": 60.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLC",
+      "rank_in_sector": 4,
+      "is_trade_ready": false
+    },
+    "NEM": {
+      "composite_score": 56.3,
+      "entry_score": 53.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLB",
+      "rank_in_sector": 5,
+      "is_trade_ready": false
+    },
+    "EQIX": {
+      "composite_score": 56.1,
+      "entry_score": 55.0,
+      "regime": "NORMAL_VOLATILITY",
+      "sector": "XLRE",
+      "rank_in_sector": 5,
+      "is_trade_ready": true
+    },
+    "REGN": {
+      "composite_score": 55.8,
+      "entry_score": 73.0,
+      "regime": "LOW_VOLATILITY",
+      "sector": "XLV",
+      "rank_in_sector": 5,
+      "is_trade_ready": true
+    },
+    "MPC": {
+      "composite_score": 55.3,
+      "entry_score": 73.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLE",
+      "rank_in_sector": 5,
+      "is_trade_ready": false
+    },
+    "GOOG": {
+      "composite_score": 53.6,
+      "entry_score": 60.0,
+      "regime": "HIGH_VOLATILITY",
+      "sector": "XLC",
+      "rank_in_sector": 5,
+      "is_trade_ready": false
+    },
+    "NEE": {
+      "composite_score": 52.1,
+      "entry_score": 65.0,
+      "regime": "NORMAL_VOLATILITY",
+      "sector": "XLU",
+      "rank_in_sector": 5,
+      "is_trade_ready": true
+    }
+  },
+  "projections": [
+    {
+      "ticker": "DLR",
+      "entry_price": 188.15,
+      "stop_price": 153.5282,
+      "target_1r": 222.7718,
+      "target_2r": 257.3935,
+      "target_3r": 292.0153,
+      "confidence_level": "HIGH"
+    },
+    {
+      "ticker": "EA",
+      "entry_price": 202.2,
+      "stop_price": 194.4403,
+      "target_1r": 209.9597,
+      "target_2r": 217.7193,
+      "target_3r": 225.479,
+      "confidence_level": "MEDIUM"
+    },
+    {
+      "ticker": "EIX",
+      "entry_price": 75.82,
+      "stop_price": 59.177,
+      "target_1r": 92.463,
+      "target_2r": 109.1059,
+      "target_3r": 125.7489,
+      "confidence_level": "MEDIUM"
+    },
+    {
+      "ticker": "REGN",
+      "entry_price": 767.85,
+      "stop_price": 672.4998,
+      "target_1r": 863.2001,
+      "target_2r": 958.5503,
+      "target_3r": 1053.9005,
+      "confidence_level": "MEDIUM"
+    },
+    {
+      "ticker": "NEE",
+      "entry_price": 94.48,
+      "stop_price": 79.7621,
+      "target_1r": 109.1979,
+      "target_2r": 123.9158,
+      "target_3r": 138.6337,
+      "confidence_level": "MEDIUM"
+    },
+    {
+      "ticker": "WBD",
+      "entry_price": 27.53,
+      "stop_price": 23.9186,
+      "target_1r": 31.1414,
+      "target_2r": 34.7527,
+      "target_3r": 38.3641,
+      "confidence_level": "MEDIUM"
+    },
+    {
+      "ticker": "EQIX",
+      "entry_price": 1031.5699,
+      "stop_price": 805.9363,
+      "target_1r": 1257.2035,
+      "target_2r": 1482.8372,
+      "target_3r": 1708.4708,
+      "confidence_level": "MEDIUM"
+    }
+  ]
+}

@@ -268,7 +268,8 @@ def _parse_analyst_ratings(ticker_obj: yf.Ticker) -> Optional[AnalystRatings]:
 
         # Get recommendation text from info
         info = ticker_obj.info
-        recommendation = info.get('recommendationKey', '').replace('_', ' ').title()
+        raw_rec = info.get('recommendationKey', '') or ''
+        recommendation = raw_rec.replace('_', ' ').title() if raw_rec.lower() not in ('', 'none') else ''
 
         total = strong_buy + buy + hold + sell + strong_sell
 

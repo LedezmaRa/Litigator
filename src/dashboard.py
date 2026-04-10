@@ -40,11 +40,11 @@ def generate_gauge_svg(score: float, size: int = 120):
     circumference = 2 * 3.14159 * radius
     offset = circumference - (score / 100) * circumference
     
-    # Color logic
+    # Color logic (aligned with SCORE_RATING_THRESHOLDS)
     color = "var(--accent-optimal)"
-    if score < 75: color = "var(--accent-good)"
-    if score < 60: color = "var(--accent-marginal)"
-    if score < 45: color = "var(--accent-poor)"
+    if score < 65: color = "var(--accent-good)"
+    if score < 50: color = "var(--accent-marginal)"
+    if score < 35: color = "var(--accent-poor)"
     
     return f"""
     <div class="score-ring-container" style="width:{size}px; height:{size}px">
@@ -61,9 +61,9 @@ def generate_gauge_svg(score: float, size: int = 120):
 def get_status_badge(val: float, type: str):
     """Helper to return badge HTML based on value and type."""
     if type == 'score':
-        if val >= 90: return '<span class="badge badge-optimal">Optimal</span>'
-        if val >= 75: return '<span class="badge badge-good">Good</span>'
-        if val >= 60: return '<span class="badge badge-marginal">Acceptable</span>'
+        if val >= 85: return '<span class="badge badge-optimal">Optimal</span>'
+        if val >= 65: return '<span class="badge badge-good">Good</span>'
+        if val >= 50: return '<span class="badge badge-marginal">Acceptable</span>'
         return '<span class="badge badge-poor">Poor</span>'
     return ""
 
@@ -79,7 +79,8 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
     stop_dist = scorer.regime_params.stop_distance_atr if scorer else 2.0
     stop_label = f"{stop_dist:.1f}x ATR"
     stop_price = result.details['ema20'] - (stop_dist * result.details['atr'])
-    target_price = result.details['price'] + (5.0 * result.details['atr'])
+    from .config import TARGET_ATR_MULTIPLIER as _TARGET_ATR_MULT
+    target_price = result.details['price'] + (_TARGET_ATR_MULT * result.details['atr'])
 
     # Week-over-week price delta
     prev_close = df['Close'].iloc[-2] if len(df) >= 2 else result.details['price']
@@ -518,7 +519,7 @@ def generate_dashboard(ticker: str, df: pd.DataFrame, result: ScoreResult, weekl
                             <span class="font-mono text-sm" style="color:var(--accent-poor)">${stop_price:.2f}</span>
                         </div>
                         <div style="display:flex; justify-content:space-between;">
-                            <span class="text-sm text-muted">Target (5.0x ATR)</span>
+                            <span class="text-sm text-muted">Target ({_TARGET_ATR_MULT:.1f}x ATR)</span>
                             <span class="font-mono text-sm" style="color:var(--accent-optimal)">${target_price:.2f}</span>
                         </div>
                     </div>
@@ -584,12 +585,13 @@ def generate_index(reports: list, output_dir: str = "reports", basket_context: d
         basket_cards_html = ""
 
     # --- MARKET BREADTH STATS ---
+    from .config import SCORE_RATING_THRESHOLDS as _SRT
     scores = [r['score'] for r in reports]
     avg_score = sum(scores) / total if total else 0
-    n_optimal = sum(1 for s in scores if s >= 90)
-    n_good = sum(1 for s in scores if 75 <= s < 90)
-    n_acceptable = sum(1 for s in scores if 60 <= s < 75)
-    n_poor = sum(1 for s in scores if s < 45)
+    n_optimal = sum(1 for s in scores if s >= _SRT['optimal'])
+    n_good = sum(1 for s in scores if _SRT['good'] <= s < _SRT['optimal'])
+    n_acceptable = sum(1 for s in scores if _SRT['acceptable'] <= s < _SRT['good'])
+    n_poor = sum(1 for s in scores if s < _SRT['marginal'])
     breadth_pct = ((n_optimal + n_good) / total * 100) if total else 0
 
     # Breadth color
@@ -659,9 +661,9 @@ def generate_index(reports: list, output_dir: str = "reports", basket_context: d
         score = r['score']
 
         score_color = "var(--text-primary)"
-        if score >= 90: score_color = "var(--accent-optimal)"
-        elif score >= 75: score_color = "var(--accent-good)"
-        elif score < 45: score_color = "var(--accent-poor)"
+        if score >= _SRT['optimal']: score_color = "var(--accent-optimal)"
+        elif score >= _SRT['good']: score_color = "var(--accent-good)"
+        elif score < _SRT['marginal']: score_color = "var(--accent-poor)"
 
         # WoW delta
         chg = r.get('price_change_pct', 0)
