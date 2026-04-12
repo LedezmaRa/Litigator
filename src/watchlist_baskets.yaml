@@ -13,6 +13,8 @@
 #
 # Notes:
 #   - NVDA intentionally appears in multiple baskets (cross-basket sensor)
+#   - GLD appears in energy_inflation AND defense_geopolitical (inflation vs. safe-haven divergence)
+#   - QQQ appears in risk_appetite AND ai_infrastructure (risk benchmark vs. quality filter)
 #   - Ticker keys must be valid yfinance symbols
 #   - Quote single-character tickers to avoid YAML ambiguity (e.g. "O", "T")
 # ─────────────────────────────────────────────────────────────────────────────
@@ -28,6 +30,8 @@ baskets:
       JNJ:  "Johnson & Johnson — defensive"
       PG:   "Procter & Gamble — defensive"
       GOOGL: "Alphabet — mega-cap growth"
+      QQQ:  "Nasdaq 100 ETF — broad growth/risk-on benchmark"
+      ARKK: "ARK Innovation ETF — speculative growth sentiment"
 
   financial_credit:
     name: "Financial & Credit"
@@ -38,6 +42,8 @@ baskets:
       BAC:  "Bank of America — consumer credit proxy"
       GS:   "Goldman Sachs — capital markets"
       BRK-B: "Berkshire Hathaway — broad financial proxy"
+      HYG:  "iShares High Yield Bond ETF — credit spread / stress gauge"
+      KRE:  "SPDR Regional Banking ETF — Main Street credit transmission"
 
   consumer_health:
     name: "Consumer Health"
@@ -49,6 +55,7 @@ baskets:
       DG:   "Dollar General — low-income consumer"
       WMT:  "Walmart — mass-market consumer"
       NFLX: "Netflix — discretionary streaming"
+      XRT:  "SPDR S&P Retail ETF — equal-weighted retail breadth signal"
 
   industrial_capex:
     name: "Industrial / Capex"
@@ -59,6 +66,8 @@ baskets:
       URI:  "United Rentals — equipment rental"
       DE:   "Deere — agriculture & construction"
       HON:  "Honeywell — industrial conglomerate"
+      PAVE: "Global X US Infrastructure ETF — domestic infrastructure spending breadth"
+      COPX: "Global X Copper Miners ETF — real industrial demand leading indicator"
 
   semiconductor_cycle:
     name: "Semiconductor Cycle"
@@ -70,6 +79,7 @@ baskets:
       LRCX: "Lam Research — etch & dep equipment"
       AVGO: "Broadcom — networking & custom AI silicon"
       TSM:  "TSMC — global foundry bellwether"
+      SMH:  "VanEck Semiconductor ETF — full-cycle breadth benchmark"
 
   housing_rates:
     name: "Housing / Rate Sensitivity"
@@ -80,6 +90,8 @@ baskets:
       LEN:  "Lennar — entry-level housing"
       NEE:  "NextEra Energy — rate-sensitive utility"
       HLT:  "Hilton Hotels — rate & travel proxy"
+      TLT:  "iShares 20yr Treasury ETF — purest rate expectations signal"
+      ITB:  "iShares US Home Construction ETF — full homebuilder complex breadth"
 
   energy_inflation:
     name: "Energy & Inflation"
@@ -90,6 +102,8 @@ baskets:
       HAL:  "Halliburton — oilfield services"
       FANG: "Diamondback Energy — Permian E&P"
       CVX:  "Chevron — integrated energy"
+      XLE:  "Energy Select Sector ETF — institutional energy positioning benchmark"
+      GLD:  "SPDR Gold ETF — inflation re-acceleration confirmation signal"
 
   ai_infrastructure:
     name: "AI Infrastructure"
@@ -101,6 +115,7 @@ baskets:
       VST:  "Vistra Energy — power demand"
       CEG:  "Constellation Energy — nuclear baseload"
       AVGO: "Broadcom — custom AI silicon & networking"
+      BOTZ: "Global X Robotics & AI ETF — deployment-layer AI hardware breadth"
 
   defense_geopolitical:
     name: "Defense / Geopolitical"
@@ -111,6 +126,8 @@ baskets:
       RTX:  "RTX Corp — defense electronics"
       NOC:  "Northrop Grumman — stealth & space"
       GD:   "General Dynamics — naval & land systems"
+      ITA:  "iShares Aerospace & Defense ETF — full sector institutional positioning"
+      GLD:  "SPDR Gold ETF — geopolitical risk premium / safe-haven bid"
 
   china_global_demand:
     name: "China / Global Demand"
@@ -121,3 +138,5 @@ baskets:
       UUUU: "Energy Fuels — uranium & rare earths"
       FSLR: "First Solar — solar manufacturing"
       ALB:  "Albemarle — lithium & EV materials"
+      FXI:  "iShares China Large-Cap ETF — direct Chinese economic recovery proxy"
+      KWEB: "KraneShares China Internet ETF — domestic Chinese consumer demand signal"
