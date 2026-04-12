@@ -13,16 +13,17 @@
     --card-bg: rgba(30, 41, 59, 0.7);
     --card-border: 1px solid rgba(255, 255, 255, 0.1);
     --text-primary: #e2e8f0;
-    --text-secondary: #94a3b8;
-    --accent-optimal: #4ade80; /* Green-400 */
-    --accent-good: #34d399;    /* Emerald-400 */
-    --accent-marginal: #fbbf24; /* Amber-400 */
-    --accent-poor: #f87171;    /* Red-400 */
-    --accent-info: #38bdf8;    /* Sky-400 */
+    --text-secondary: #a8b4c2;
+    --accent-optimal: #4ade80;
+    --accent-good: #34d399;
+    --accent-marginal: #fbbf24;
+    --accent-poor: #f87171;
+    --accent-info: #38bdf8;
     --font-main: 'Inter', system-ui, -apple-system, sans-serif;
-    --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --glass-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
 }
 
+/* ── Base ───────────────────────────────────────────────────────────────── */
 body {
     background-color: var(--bg-color);
     color: var(--text-primary);
@@ -30,9 +31,9 @@ body {
     margin: 0;
     padding: 0;
     line-height: 1.6;
-    background-image: 
-        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+    background-image:
+        radial-gradient(at 0%   0%, hsla(253,16%,7%,1) 0, transparent 50%),
+        radial-gradient(at 50%  0%, hsla(225,39%,30%,1) 0, transparent 50%),
         radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
     min-height: 100vh;
 }
@@ -43,7 +44,7 @@ body {
     padding: 2rem;
 }
 
-/* Glassmorphism Card */
+/* ── Glassmorphism Card ─────────────────────────────────────────────────── */
 .glass-card {
     background: var(--card-bg);
     backdrop-filter: blur(12px);
@@ -54,14 +55,14 @@ body {
     box-shadow: var(--glass-shadow);
 }
 
-/* Typography */
+/* ── Typography ─────────────────────────────────────────────────────────── */
 h1, h2, h3, h4 { margin-top: 0; color: #fff; font-weight: 600; }
-.text-muted { color: var(--text-secondary); }
-.text-sm { font-size: 0.875rem; }
-.text-xs { font-size: 0.75rem; }
-.font-mono { font-family: 'JetBrains Mono', monospace; }
+.text-muted   { color: var(--text-secondary); }
+.text-sm      { font-size: 0.875rem; }
+.text-xs      { font-size: 0.75rem; }
+.font-mono    { font-family: 'JetBrains Mono', monospace; }
 
-/* Status Badges */
+/* ── Status Badges ──────────────────────────────────────────────────────── */
 .badge {
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
@@ -70,13 +71,60 @@ h1, h2, h3, h4 { margin-top: 0; color: #fff; font-weight: 600; }
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
-.badge-optimal { background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
-.badge-good { background: rgba(52, 211, 153, 0.2); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
-.badge-marginal { background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
-.badge-poor { background: rgba(248, 113, 113, 0.2); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
-.badge-info { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+.badge-optimal    { background: rgba(74,222,128,0.2);  color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+.badge-good       { background: rgba(52,211,153,0.2);  color: #34d399; border: 1px solid rgba(52,211,153,0.3); }
+.badge-acceptable { background: rgba(251,191,36,0.15); color: #e2b84a; border: 1px solid rgba(251,191,36,0.4); }
+.badge-marginal   { background: rgba(251,191,36,0.2);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+.badge-poor       { background: rgba(248,113,113,0.2); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+.badge-info       { background: rgba(56,189,248,0.2);  color: #38bdf8; border: 1px solid rgba(56,189,248,0.3); }
 
-/* Score Gauge Ring */
+/* ── Score Hero ─────────────────────────────────────────────────────────── */
+/*
+ * Add class="score-hero" (or .score-hero-card) to the primary status card to
+ * give it a coloured glow matching the score tier.
+ * Set --hero-color inline on the element: style="--hero-color:var(--accent-optimal)"
+ *
+ * .score-hero-value  — large standalone number (use when NOT embedding a gauge ring)
+ * .score-hero-label  — small uppercase caption beneath the number
+ *
+ * NOTE: the existing .score-value class is used INSIDE .score-ring-container;
+ * we intentionally avoid overriding it here to prevent gauge ring conflicts.
+ */
+.score-hero {
+    border-color: var(--hero-color, rgba(74,222,128,0.25)) !important;
+    background: linear-gradient(
+        135deg,
+        rgba(30,41,59,0.85) 0%,
+        rgba(15,23,42,0.95) 100%
+    ) !important;
+    box-shadow: 0 0 0 1px var(--hero-color, rgba(74,222,128,0.2)),
+                0 8px 32px rgba(0,0,0,0.3);
+    position: relative;
+}
+/* Subtle coloured top-edge accent */
+.score-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--hero-color, var(--accent-optimal));
+    border-radius: 1rem 1rem 0 0;
+    opacity: 0.7;
+}
+.score-hero-value {
+    font-size: 4rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--hero-color, var(--accent-optimal));
+}
+.score-hero-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+}
+
+/* ── Score Gauge Ring ───────────────────────────────────────────────────── */
 .score-ring-container {
     position: relative;
     width: 120px;
@@ -92,26 +140,22 @@ h1, h2, h3, h4 { margin-top: 0; color: #fff; font-weight: 600; }
     z-index: 10;
 }
 .score-circle-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 8; }
-.score-circle-fg { 
-    fill: none; 
-    stroke-width: 8; 
-    stroke-linecap: round; 
-    transform: rotate(-90deg); 
+.score-circle-fg {
+    fill: none;
+    stroke-width: 8;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
     transform-origin: 50% 50%;
     transition: stroke-dashoffset 1s ease-out;
 }
 
-/* Grid Layouts */
-.grid-cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-.grid-cols-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-@media (max-width: 1024px) {
-    .grid-cols-3 { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 768px) {
-    .grid-cols-3, .grid-cols-2 { grid-template-columns: 1fr; }
-}
+/* ── Grid Layouts ───────────────────────────────────────────────────────── */
+.grid-cols-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+.grid-cols-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 1.5rem; }
+@media (max-width: 1024px) { .grid-cols-3 { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 768px)  { .grid-cols-3, .grid-cols-2 { grid-template-columns: 1fr; } }
 
-/* HUD Metrics */
+/* ── HUD Metrics ────────────────────────────────────────────────────────── */
 .metric-item {
     display: flex;
     justify-content: space-between;
@@ -127,88 +171,146 @@ h1, h2, h3, h4 { margin-top: 0; color: #fff; font-weight: 600; }
     border-radius: 3px;
     overflow: hidden;
 }
-.progress-bar-fg {
-    height: 100%;
-    border-radius: 3px;
+.progress-bar-fg { height: 100%; border-radius: 3px; }
+
+/* ── Data Table ─────────────────────────────────────────────────────────── */
+.modern-table { width: 100%; border-collapse: separate; border-spacing: 0 0.5rem; }
+.modern-table th {
+    padding: 1rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.875rem;
+    text-align: left;
+}
+.modern-table td {
+    padding: 1rem;
+    background: rgba(30,41,59,0.5);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.modern-table td:first-child {
+    border-top-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.modern-table td:last-child {
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+    border-right: 1px solid rgba(255,255,255,0.05);
+}
+.modern-table tr:hover td {
+    background: rgba(30,41,59,0.8);
+    cursor: pointer;
+    transform: scale(1.005);
+    transition: all 0.2s;
 }
 
-/* Table */
-.modern-table { width: 100%; border-collapse: separate; border-spacing: 0 0.5rem; }
-.modern-table th { padding: 1rem; color: var(--text-secondary); font-weight: 500; font-size: 0.875rem; text-align: left; }
-.modern-table td { padding: 1rem; background: rgba(30, 41, 59, 0.5); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
-.modern-table td:first-child { border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; border-left: 1px solid rgba(255,255,255,0.05); }
-.modern-table td:last-child { border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; border-right: 1px solid rgba(255,255,255,0.05); }
-.modern-table tr:hover td { background: rgba(30, 41, 59, 0.8); cursor: pointer; transform: scale(1.005); transition: all 0.2s; }
+/* ── Mobile-Responsive Table (stacks as cards below 720 px) ────────────── */
+@media (max-width: 720px) {
+    .modern-table thead { display: none; }
+    .modern-table,
+    .modern-table tbody,
+    .modern-table tr,
+    .modern-table td { display: block; width: 100%; }
+    .modern-table tr {
+        background: rgba(30,41,59,0.5);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 0.75rem;
+        margin-bottom: 0.75rem;
+        padding: 0.5rem;
+    }
+    .modern-table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.4rem 0.75rem;
+        border: none;
+        border-radius: 0;
+    }
+    /* Each <td data-label="Score"> shows its column label via pseudo-element */
+    .modern-table td[data-label]::before {
+        content: attr(data-label);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+        margin-right: 0.5rem;
+    }
+    /* Reset first/last child border radius overrides from desktop */
+    .modern-table td:first-child,
+    .modern-table td:last-child {
+        border-radius: 0;
+        border: none;
+    }
+}
 
-/* Links */
+/* ── Links ──────────────────────────────────────────────────────────────── */
 a { color: inherit; text-decoration: none; }
-.back-link { 
-    display: inline-flex; align-items: center; gap: 0.5rem; 
-    color: var(--text-secondary); margin-bottom: 1.5rem; 
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
     transition: color 0.2s;
 }
 .back-link:hover { color: #fff; }
 
-/* Sortable Table Headers */
+/* ── Breadcrumb ─────────────────────────────────────────────────────────── */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    font-size: 0.875rem;
+}
+.breadcrumb a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.breadcrumb a:hover { color: var(--text-primary); }
+.breadcrumb .bc-sep { color: var(--text-secondary); opacity: 0.5; }
+.breadcrumb .bc-current { color: var(--text-primary); font-weight: 500; }
+
+/* ── Sortable Table Headers ─────────────────────────────────────────────── */
 .modern-table th.sortable {
     cursor: pointer;
     user-select: none;
     position: relative;
     padding-right: 1.5rem;
 }
-.modern-table th.sortable:hover {
-    color: var(--text-primary);
-}
-.modern-table th.sortable::after {
-    content: '⇅';
-    position: absolute;
-    right: 0.5rem;
-    opacity: 0.4;
-    font-size: 0.7rem;
-}
-.modern-table th.sortable.asc::after {
-    content: '↑';
-    opacity: 1;
-    color: var(--accent-optimal);
-}
-.modern-table th.sortable.desc::after {
-    content: '↓';
-    opacity: 1;
-    color: var(--accent-optimal);
-}
+.modern-table th.sortable:hover { color: var(--text-primary); }
+.modern-table th.sortable::after      { content: '⇅'; position: absolute; right: 0.5rem; opacity: 0.4; font-size: 0.7rem; }
+.modern-table th.sortable.asc::after  { content: '↑'; opacity: 1; color: var(--accent-optimal); }
+.modern-table th.sortable.desc::after { content: '↓'; opacity: 1; color: var(--accent-optimal); }
 
-/* Search Input */
+/* ── Search Input ───────────────────────────────────────────────────────── */
 .search-input {
-    background: rgba(30, 41, 59, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(30,41,59,0.7);
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 0.5rem;
     padding: 0.75rem 1rem;
     color: var(--text-primary);
     font-size: 1rem;
     width: 100%;
-    max-width: 400px;
+    max-width: 600px;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 .search-input:focus {
     border-color: var(--accent-info);
-    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+    box-shadow: 0 0 0 3px rgba(56,189,248,0.1);
 }
-.search-input::placeholder {
-    color: var(--text-secondary);
-}
+.search-input::placeholder { color: var(--text-secondary); }
 
-/* Filter Controls */
-.filter-bar {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-}
+/* ── Filter Controls ────────────────────────────────────────────────────── */
+.filter-bar { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
 .filter-btn {
-    background: rgba(30, 41, 59, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(30,41,59,0.7);
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 0.5rem;
     padding: 0.5rem 1rem;
     color: var(--text-secondary);
@@ -216,56 +318,98 @@ a { color: inherit; text-decoration: none; }
     cursor: pointer;
     transition: all 0.2s;
 }
-.filter-btn:hover {
-    background: rgba(30, 41, 59, 0.9);
-    color: var(--text-primary);
-}
+.filter-btn:hover { background: rgba(30,41,59,0.9); color: var(--text-primary); }
 .filter-btn.active {
-    background: rgba(74, 222, 128, 0.2);
-    border-color: rgba(74, 222, 128, 0.3);
+    background: rgba(74,222,128,0.2);
+    border-color: rgba(74,222,128,0.3);
     color: var(--accent-optimal);
 }
 
-/* Chart Tooltip */
+/* ── Chart Tooltip ──────────────────────────────────────────────────────── */
 .chart-tooltip {
     position: fixed;
-    background: rgba(15, 23, 42, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(15,23,42,0.95);
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 0.5rem;
     padding: 0.75rem;
     font-size: 0.75rem;
     color: var(--text-primary);
     pointer-events: none;
     z-index: 1000;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
     display: none;
 }
-.chart-tooltip.visible {
-    display: block;
+.chart-tooltip.visible { display: block; }
+
+/* ── Stock Card Hover ───────────────────────────────────────────────────── */
+.glass-card.stock-card { transition: transform 0.2s, box-shadow 0.2s; }
+.glass-card.stock-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+
+/* ── Utility ────────────────────────────────────────────────────────────── */
+.hidden         { display: none !important; }
+.text-positive  { color: var(--accent-optimal); }
+.text-negative  { color: var(--accent-poor); }
+.flex-between   { display: flex; justify-content: space-between; align-items: center; }
+.flex-center    { display: flex; justify-content: center; align-items: center; }
+.flex-wrap      { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.flex-col       { display: flex; flex-direction: column; }
+.text-center    { text-align: center; }
+.text-right     { text-align: right; }
+.m-0            { margin: 0; }
+.mb-0           { margin-bottom: 0 !important; }
+.mb-1           { margin-bottom: 0.5rem; }
+.mb-2           { margin-bottom: 1rem; }
+.mb-3           { margin-bottom: 1.5rem; }
+.mb-4           { margin-bottom: 2rem; }
+.mb-6           { margin-bottom: 3rem; }
+.mt-1           { margin-top: 0.5rem; }
+.mt-2           { margin-top: 1rem; }
+.mt-3           { margin-top: 1.5rem; }
+.mt-4           { margin-top: 2rem; }
+.mt-6           { margin-top: 3rem; }
+.gap-1          { gap: 0.5rem; }
+.gap-2          { gap: 1rem; }
+.gap-3          { gap: 1.5rem; }
+.gap-4          { gap: 2rem; }
+.font-bold      { font-weight: 700; }
+.font-600       { font-weight: 600; }
+.overflow-hidden { overflow: hidden; }
+.uppercase      { text-transform: uppercase; }
+.tracking-wide  { letter-spacing: 0.05em; }
+
+/* ── Stock Narrative Extras ─────────────────────────────────────────────── */
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+}
+.metric-card {
+    background: rgba(30,41,59,0.5);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.hero-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+@media (max-width: 768px) {
+    .hero-header { flex-direction: column; }
+    .metric-grid { grid-template-columns: repeat(2,1fr); }
 }
 
-/* Stock Card Hover Enhancement */
-.glass-card.stock-card {
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.glass-card.stock-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-}
-
-/* Hidden class for filtering */
-.hidden {
-    display: none !important;
-}
-/* Top Navigation Menu */
+/* ── Top Navigation Menu ────────────────────────────────────────────────── */
 .top-nav {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: rgba(15, 23, 42, 0.8);
+    background: rgba(15,23,42,0.8);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
     padding: 1rem 2rem;
     position: sticky;
     top: 0;
@@ -292,12 +436,301 @@ a { color: inherit; text-decoration: none; }
 }
 .nav-item:hover {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255,255,255,0.05);
 }
 .nav-item.active {
     color: var(--accent-optimal);
-    background: rgba(74, 222, 128, 0.1);
-    border: 1px solid rgba(74, 222, 128, 0.2);
+    background: rgba(74,222,128,0.1);
+    border: 1px solid rgba(74,222,128,0.2);
+}
+
+/* ── Metrics Guide (collapsible help panel) ─────────────────────────────── */
+.metrics-guide {
+    margin-bottom: 1.5rem;
+}
+.metrics-guide > summary {
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+    background: rgba(30,41,59,0.5);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 0.5rem;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s, background 0.2s;
+    user-select: none;
+}
+.metrics-guide > summary:hover { color: var(--text-primary); background: rgba(30,41,59,0.8); }
+.metrics-guide > summary::marker,
+.metrics-guide > summary::-webkit-details-marker { display: none; }
+.metrics-guide[open] > summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; color: var(--text-primary); }
+.metrics-guide-body {
+    background: rgba(30,41,59,0.4);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-top: none;
+    border-bottom-left-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px,1fr));
+    gap: 0.75rem 1.5rem;
+}
+.metric-def dt {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-info);
+    margin-bottom: 0.15rem;
+}
+.metric-def dd {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ── Empty State ────────────────────────────────────────────────────────── */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--text-secondary);
+}
+.empty-state .empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    opacity: 0.5;
+}
+.empty-state p { margin: 0 0 0.5rem; font-size: 0.95rem; }
+.empty-state a { color: var(--accent-info); }
+
+/* ── Regime Summary Bar ─────────────────────────────────────────────────── */
+/*
+ * Sticky strip that sits just below the top-nav (top:60px, z-index:900).
+ * Shows the overall macro verdict + one pill per basket.
+ * The JS in INTERACTIVE_JS sets --nav-height on :root so the offset is exact.
+ */
+.regime-bar {
+    background: rgba(15,23,42,0.92);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding: 0.6rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    position: sticky;
+    top: var(--nav-height, 62px);
+    z-index: 900;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+.regime-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+.regime-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+.regime-verdict {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.regime-insight {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    max-width: 360px;
+    line-height: 1.4;
+}
+.regime-counts {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    flex-shrink: 0;
+}
+.regime-pills {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.regime-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.2rem 0.55rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(30,41,59,0.6);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    cursor: default;
+}
+.regime-pill .pill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+@media (max-width: 768px) {
+    .regime-bar { top: 0; position: relative; }
+    .regime-insight { display: none; }
+    .regime-pills { display: none; }
+}
+
+/* ── Basket Cards ───────────────────────────────────────────────────────── */
+.basket-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    padding: 1rem 1.5rem;
+    background: var(--card-bg);
+    border: var(--card-border);
+    border-radius: 1rem;
+    user-select: none;
+}
+.basket-section-header:hover { background: rgba(30,41,59,0.85); }
+.basket-section-toggle {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    transition: transform 0.2s;
+}
+details.basket-section[open] .basket-section-toggle { transform: rotate(180deg); }
+
+.basket-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+@media (max-width: 960px) { .basket-grid { grid-template-columns: 1fr; } }
+
+.basket-card {
+    background: var(--card-bg);
+    border: var(--card-border);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    box-shadow: var(--glass-shadow);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.basket-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+/* Coloured top-edge accent — driven purely by class, no inline style needed */
+.basket-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 1rem 1rem 0 0;
+}
+.basket-card.signal-bullish { border-color: rgba(74,222,128,0.25); }
+.basket-card.signal-bullish::before { background: var(--accent-optimal); }
+.basket-card.signal-neutral { border-color: rgba(251,191,36,0.2); }
+.basket-card.signal-neutral::before { background: var(--accent-marginal); }
+.basket-card.signal-bearish { border-color: rgba(248,113,113,0.25); }
+.basket-card.signal-bearish::before { background: var(--accent-poor); }
+
+.basket-meta-row {
+    display: flex;
+    gap: 1.25rem;
+    margin: 0.6rem 0 0.75rem;
+    flex-wrap: wrap;
+}
+.basket-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+.basket-meta-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-secondary);
+}
+.basket-meta-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+}
+.basket-divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin: 0.5rem 0 0.6rem;
+}
+.basket-ticker-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.8rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: background 0.1s;
+    border-radius: 4px;
+}
+.basket-ticker-row:last-of-type { border-bottom: none; }
+.basket-ticker-row:hover { background: rgba(255,255,255,0.04); padding-left: 0.3rem; }
+.basket-ticker-symbol {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 0.82rem;
+    min-width: 56px;
+}
+.basket-ticker-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 0.85rem;
+    min-width: 28px;
+    text-align: right;
+}
+.basket-ticker-chg {
+    font-size: 0.75rem;
+    min-width: 52px;
+    text-align: right;
+}
+.basket-ticker-regime {
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+    min-width: 60px;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.basket-missing {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-top: 0.5rem;
+    line-height: 1.5;
+}
+.basket-no-data {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 1rem 0;
 }
 
                 .memo-content {
@@ -339,7 +772,7 @@ a { color: inherit; text-decoration: none; }
             
     <nav class="top-nav">
         <ul class="top-nav-list">
-            <li><a href="index.html" class="nav-item">Command Center</a></li><li><a href="sector_analysis.html" class="nav-item">Sector Analysis</a></li><li><a href="macro_drivers.html" class="nav-item">Macro Drivers</a></li><li><a href="market_news.html" class="nav-item">Market News</a></li><li><a href="ai_memo.html" class="nav-item active">AI Strategy</a></li><li><a href="ai_macro_memo.html" class="nav-item">Macro AI</a></li>
+            <li><a href="index.html" class="nav-item">Command Center</a></li><li><a href="sector_analysis.html" class="nav-item">Sector Analysis</a></li><li><a href="macro_drivers.html" class="nav-item">Macro Drivers</a></li><li><a href="sentiment.html" class="nav-item">Sentiment</a></li><li><a href="market_news.html" class="nav-item">Market News</a></li><li><a href="ai_memo.html" class="nav-item  active">AI Strategy</a></li><li><a href="ai_macro_memo.html" class="nav-item">Macro AI</a></li>
         </ul>
     </nav>
     
@@ -348,63 +781,52 @@ a { color: inherit; text-decoration: none; }
                     <h1 style="background: linear-gradient(to right, #38bdf8, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 2.5rem;">
                         AI Investment Strategy Memo
                     </h1>
-                    <p class="text-muted" style="margin-bottom: 2rem;">Generated by "Joe" | Powered by Anthropic Claude Opus</p>
+                    <p class="text-muted" style="margin-bottom: 0.5rem;">Generated by "Joe" | Powered by Anthropic Claude</p>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 2rem;">
+                        📅 Report generated on April 11, 2026 at 09:33 PM
+                    </p>
                     <div style="max-width: 800px; margin: 0 auto; padding: 1rem; background: rgba(255,100,100,0.1); border-left: 4px solid var(--accent-poor); text-align: left; font-size: 0.85rem; color: var(--text-secondary);">
                         <strong>DISCLAIMER:</strong> This content, which contains security-related opinions and/or information, is provided for informational purposes only and should not be relied upon in any manner as professional advice, or an endorsement of any practices, products or services. There can be no guarantees or assurances that the views expressed here will be applicable for any particular facts or circumstances, and should not be relied upon in any manner. You should consult your own advisers as to legal, business, tax, and other related matters concerning any investment.
                     </div>
                 </header>
 
                 <div class="memo-content">
-                    <h1>WEEKLY EQUITY SELECTION MEMO</h1>
-<h2>Joe's Top 5 Picks — June 2025</h2>
+                    <h2>Executive Summary</h2>
+<p>The screening reveals a market in transition, with strong momentum plays emerging across defensive sectors and select technology names. The prevalence of high-volatility regimes suggests institutional repositioning ahead of potential policy shifts, while the concentration of winners in consumer staples, utilities, and materials signals a flight to quality with growth characteristics.</p>
 <hr />
-<h2>Executive Summary</h2>
-<p>The screening data tells a clear story: <strong>this is a market rewarding tangible assets and cash flow over growth narratives.</strong> The strongest setups are concentrated in Materials, Energy, and defensive Consumer Staples — sectors that benefit from persistent inflation, supply constraints, and capital discipline. Notably absent from the top of the screen are the mega-cap tech names that dominated 2023-2024, suggesting a rotation toward value and commodity exposure is well underway. I'm positioning for continued strength in hard assets while selectively adding defensive names with clean technical profiles.</p>
+<h3>1. Monster Beverage (MNST)</h3>
+<p><strong>The Setup</strong>: MNST shows the highest composite score (73.7) with strong ADX momentum at 33.5, indicating a sustained directional move. The relatively low ATR of 3.81 suggests controlled volatility despite the high-volatility regime classification, pointing to institutional accumulation rather than speculative trading.</p>
+<p><strong>The Catalyst</strong>: Monster sits at the intersection of two powerful secular trends: the premiumization of energy drinks and international expansion, particularly in Asia-Pacific markets. The company's partnership with Coca-Cola provides unmatched global distribution leverage, while their innovation pipeline (including alcohol-infused energy drinks) positions them ahead of regulatory shifts.</p>
+<p><strong>The Mechanism</strong>: The tight ATR combined with strong momentum signals smart money accumulation ahead of what's likely to be exceptional Q4 earnings. Energy drink consumption accelerates during economic uncertainty as consumers trade down from expensive coffee shop visits to affordable energy solutions. The steady trend classification with moderate signal strength suggests this isn't a momentum chase—it's a fundamental re-rating in progress.</p>
+<p><strong>Hidden Risks</strong>: Regulatory scrutiny on caffeine content and potential sugar taxes represent sector-wide headwinds. However, Monster's premium positioning and international diversification provide better insulation than competitors.</p>
 <hr />
-<h3>1. CF Industries (CF)</h3>
-<p><strong>The Setup</strong>: CF screened as the top candidate across all sectors with a composite score of 92.5 — the highest in the entire universe. The ADX reading of 31.7 confirms a strong, established trend, while the "Accelerating" trend designation tells us momentum is <em>increasing</em>, not exhausting. The 32% relative strength over three months indicates significant outperformance versus the broader market, yet the stock hasn't become parabolic.</p>
-<p><strong>The Catalyst</strong>: CF Industries is the largest nitrogen fertilizer producer in North America, and we're entering a structural bull market for agricultural inputs. Global grain inventories remain tight, U.S. farmers are flush with cash from elevated crop prices, and — critically — European fertilizer production remains impaired due to persistently high natural gas costs. CF's cost advantage (cheap U.S. natural gas as feedstock) has never been wider versus international competitors.</p>
-<p><strong>The Mechanism</strong>: Here's why the technical and fundamental pictures align so perfectly: The "Accelerating" trend with moderate signal strength suggests institutional accumulation is happening <em>methodically</em>, not frantically. Large asset managers are building positions because they see what I see — CF is essentially a natural gas spread trade with a 2-3% dividend yield as a bonus. The ADX at 31.7 (above 25 = strong trend, but below 40 = not overextended) indicates we're in the "sweet spot" of the trend where momentum is confirmed but not exhausted. The 8.88 ATR (about 7% of price) provides enough volatility for meaningful gains without the gut-wrenching swings that shake out weak hands.</p>
-<p><strong>Hidden Risks</strong>: The HIGH_VOLATILITY regime flag means position sizing matters — this isn't a "set it and forget it" name. Natural gas price spikes could temporarily compress margins, though CF has historically passed through input costs effectively. Watch for any signs of Chinese fertilizer export policy changes, which could flood global markets.</p>
+<h3>2. Electronic Arts (EA)</h3>
+<p><strong>The Setup</strong>: EA stands out with strong signal strength in a low-volatility regime—a rare combination suggesting high conviction institutional positioning. The ADX momentum of 27.3 with minimal ATR (3.21) indicates a controlled, sustainable uptrend rather than speculative fervor.</p>
+<p><strong>The Catalyst</strong>: The gaming industry is experiencing a structural shift toward live-service models and mobile gaming, where EA's FIFA Ultimate Team and Apex Legends generate recurring revenue streams. The company's sports franchises provide defensive moats, while their pivot to mobile gaming (particularly in soccer globally) opens massive TAM expansion.</p>
+<p><strong>The Mechanism</strong>: The low-volatility regime with strong signals suggests institutional investors are quietly accumulating ahead of what could be a breakout year for EA's mobile strategy. The steady trend indicates this isn't about quarterly earnings beats—it's about a multi-year revenue model transformation that the market is just beginning to price in.</p>
+<p><strong>Hidden Risks</strong>: Regulatory pressure on loot boxes and in-game purchases could impact Ultimate Team revenues. Competition from free-to-play mobile games remains intense.</p>
 <hr />
-<h3>2. ADM (Archer-Daniels-Midland)</h3>
-<p><strong>The Setup</strong>: ADM stands out immediately because it's the <em>only</em> candidate with a "STRONG" signal strength rating in the entire dataset. Combined with a "Steady" trend and moderate ADX of 25.5, this is the technical profile I look for in a core holding — consistent, reliable momentum without the volatility that forces you to trade around positions. The ATR of just 4.29 (6.5% of price) is remarkably low for this market environment, suggesting the stock has found a floor and is building a base.</p>
-<p><strong>The Catalyst</strong>: ADM is the picks-and-shovels play on global food security. As one of the "ABCD" grain trading giants, they profit from <em>volatility</em> in agricultural markets, not just direction. With geopolitical tensions disrupting traditional trade flows (Black Sea grain corridor uncertainty, export restrictions from various producing nations), ADM's global logistics network and origination capabilities become more valuable, not less.</p>
-<p><strong>The Mechanism</strong>: The STRONG signal strength combined with low ATR volatility (4.29) tells me something important: <em>smart money is accumulating quietly</em>. When you see a stock maintaining steady upward momentum with compressed volatility in a HIGH_VOLATILITY regime, it typically means institutional buyers are absorbing every dip without chasing price higher. They're patient because they have a thesis — and that thesis is likely the same one I have: ADM's earnings power is structurally higher in a world of food insecurity and supply chain fragmentation. The 25.5 ADX reading is right at the threshold of "trending" — we're catching this move early.</p>
-<p><strong>Hidden Risks</strong>: ADM had accounting issues surface in early 2024 that required restatements. While management has addressed these, any additional disclosure problems would be catastrophic for sentiment. The stock also has modest relative strength (0.30), meaning it hasn't dramatically outperformed — you're buying potential, not proven momentum.</p>
+<h3>3. Edison International (EIX)</h3>
+<p><strong>The Setup</strong>: EIX presents strong signal strength in a normal volatility regime—the Goldilocks setup. ADX momentum of 27.5 with controlled ATR of 3.52 suggests institutional conviction without speculative excess. This is textbook accumulation in a defensive sector.</p>
+<p><strong>The Catalyst</strong>: California's aggressive renewable energy mandates and grid modernization requirements position Edison as a primary beneficiary of the largest infrastructure buildout in state history. The company's regulated utility model provides predictable cash flows while their renewable transition investments offer growth optionality.</p>
+<p><strong>The Mechanism</strong>: Utilities are experiencing a fundamental re-rating as investors recognize their role in the AI/data center power demand surge. Edison's California footprint puts them at the epicenter of this trend. The normal volatility regime suggests this isn't a defensive rotation—it's growth recognition in a traditionally defensive sector.</p>
+<p><strong>Hidden Risks</strong>: California's regulatory environment remains challenging, and wildfire liability continues to overhang the sector. However, recent legislative changes have provided more clarity on cost recovery.</p>
 <hr />
-<h3>3. Devon Energy (DVN)</h3>
-<p><strong>The Setup</strong>: Devon offers the most attractive risk/reward profile in the energy sector. While Valero (VLO) ranked #1 with a higher composite score, Devon's combination of MODERATE signal strength, low ATR volatility (2.80, just 5.7% of price), and Steady trend creates a cleaner setup. The ADX at 25.5 confirms the trend is real but not overextended. At $49.04, this is also the most accessible price point among the energy names, allowing for easier position building.</p>
-<p><strong>The Catalyst</strong>: Devon is a pure-play U.S. shale producer with premier acreage in the Delaware Basin. The company pioneered the "fixed plus variable" dividend model that has become industry standard, meaning shareholders directly participate in commodity upside. With OPEC+ maintaining production discipline and U.S. shale growth moderating due to capital discipline, the supply/demand balance for crude remains constructive. Devon's breakeven costs are among the lowest in the industry.</p>
-<p><strong>The Mechanism</strong>: The low ATR (2.80) relative to the other energy names (VLO at 14.48, MPC at 14.61) is the key tell here. Devon's stock is exhibiting <em>less</em> volatility than its refining peers despite being a pure upstream producer — which should theoretically be <em>more</em> volatile given direct commodity exposure. This compression suggests the market has already priced in downside scenarios and the stock is coiling for a move higher. The MODERATE signal strength (versus WEAK for VLO and MPC) confirms buyers are more committed. When oil inevitably spikes on geopolitical risk or demand surprise, Devon will move faster than the refiners.</p>
-<p><strong>Hidden Risks</strong>: Devon is a commodity beta play — if oil collapses to $50/barrel, the thesis breaks regardless of technical setup. The 0.08 relative strength is the lowest among my picks, meaning the stock has been a laggard recently. I'm betting on mean reversion, but patience may be required.</p>
+<h3>4. CF Industries (CF)</h3>
+<p><strong>The Catalyst</strong>: Global food security concerns and the need to rebuild depleted soil nitrogen levels create a multi-year tailwind for nitrogen fertilizers. CF's low-cost North American natural gas advantage provides sustainable competitive moats against international competitors, while their clean ammonia initiatives position them for the emerging hydrogen economy.</p>
+<p><strong>The Setup</strong>: Strong ADX momentum of 38.5 indicates directional conviction, while the steady trend classification suggests this isn't commodity speculation but rather fundamental re-rating. The high volatility regime reflects the inherent cyclicality, but the moderate signal strength suggests we're in the early innings of an upcycle.</p>
+<p><strong>The Mechanism</strong>: Fertilizer demand is fundamentally inelastic—farmers must apply nitrogen regardless of price. CF's integration from natural gas to finished product provides margin stability that the market historically undervalues. The current setup suggests institutional recognition that this cycle has more legs than typical commodity booms.</p>
+<p><strong>Hidden Risks</strong>: Natural gas price volatility can compress margins quickly. Environmental regulations on nitrogen runoff could impact long-term demand growth.</p>
 <hr />
-<h3>4. Exelon (EXC)</h3>
-<p><strong>The Setup</strong>: Exelon is my defensive anchor in this portfolio. The MODERATE signal strength is notable — only three stocks in the entire screen achieved this rating or better. The ATR of just 2.00 (4.3% of price) is the second-lowest in the dataset, indicating exceptional price stability. The Steady trend with 22.7 ADX suggests quiet accumulation rather than aggressive buying, which is exactly what you want in a utility.</p>
-<p><strong>The Catalyst</strong>: Exelon is the largest regulated utility in the United States, serving customers across Illinois, Pennsylvania, Maryland, New Jersey, Delaware, and Washington D.C. The investment case is straightforward: data center power demand is exploding, and Exelon's service territories include major data center corridors (Northern Virginia is the largest data center market in the world). Unlike merchant power producers who must negotiate contracts, Exelon earns regulated returns on capital deployed to meet this demand — it's a toll road on the AI boom.</p>
-<p><strong>The Mechanism</strong>: The technical profile here is textbook "stealth accumulation." A 2.00 ATR in a HIGH_VOLATILITY regime is remarkable — it means Exelon is trading like a bond while the rest of the market gyrates. The MODERATE signal strength confirms that buyers are present and consistent. Why? Because sophisticated investors understand that regulated utilities with exposure to secular demand growth (data centers, EV charging infrastructure, grid hardening) deserve premium multiples. The 0.09 relative strength looks weak, but for a utility, matching the market while providing yield and stability is actually outperformance on a risk-adjusted basis.</p>
-<p><strong>Hidden Risks</strong>: Rising interest rates are the enemy of utilities — higher rates increase borrowing costs and make dividend yields less attractive relative to bonds. Regulatory risk in Illinois (their largest market) is ever-present. The 22.7 ADX is below the 25 threshold, meaning the trend isn't fully confirmed yet.</p>
-<hr />
-<h3>5. Intercontinental Exchange (ICE)</h3>
-<p><strong>The Setup</strong>: ICE offers something none of my other picks provide: exposure to financial market infrastructure with an "Accelerating" trend. The 20.5 ADX indicates the trend is nascent — we're early. The composite score of 65.1 is lower than my other selections, but the Accelerating designation combined with ICE's business model creates asymmetric upside. This is my "swing for the fences" pick within a disciplined framework.</p>
-<p><strong>The Catalyst</strong>: ICE owns the New York Stock Exchange, but that's almost a sideshow. The real value is in their fixed income data and analytics business (from the Black Knight acquisition) and their dominant position in energy derivatives trading. As interest rate volatility remains elevated and energy markets stay turbulent, ICE earns more fees. They're also the picks-and-shovels play on mortgage market recovery — when housing activity eventually rebounds, ICE's mortgage technology platform will see volume surge.</p>
-<p><strong>The Mechanism</strong>: The "Accelerating" trend with WEAK signal strength is actually the setup I want here. It tells me the move is just beginning and hasn't attracted momentum-chasing capital yet. ICE is a toll collector on financial market activity — they win regardless of whether markets go up or down, as long as there's <em>volatility and volume</em>. The HIGH_VOLATILITY regime across the entire market is therefore a tailwind for ICE's business model, even as it creates challenges for other companies. The 8.71 ATR (5.5% of price) provides reasonable volatility for gains without excessive risk. As more investors recognize that elevated volatility is structural (not transitory), ICE should re-rate higher.</p>
-<p><strong>Hidden Risks</strong>: The WEAK signal strength means conviction among buyers isn't strong yet — this could be a false start. ICE carries significant debt from the Black Knight acquisition, making them sensitive to credit spread widening. The 0.05 relative strength is essentially flat with the market, so there's no momentum tailwind currently.</p>
-<hr />
-<h2>Portfolio Construction Notes</h2>
-<p>These five names provide diversified exposure across Materials (CF), Consumer Staples (ADM), Energy (DVN), Utilities (EXC), and Financials (ICE). The common thread is <strong>tangible value and cash generation</strong> — none of these are priced for perfection or dependent on multiple expansion.</p>
-<p>Position sizing should reflect the signal strength ratings:
-- <strong>Full positions</strong>: ADM (STRONG signal)
-- <strong>Standard positions</strong>: CF, DVN, EXC (MODERATE signals)<br />
-- <strong>Starter positions</strong>: ICE (WEAK signal, but Accelerating trend warrants exposure)</p>
-<p>The HIGH_VOLATILITY regime across nearly all candidates means stops should be wider than normal — use the ATR readings as your guide. A stop at 2x ATR below entry gives these positions room to breathe while protecting against catastrophic loss.</p>
-<hr />
-<p><em>"In a market where everyone is chasing the next big thing, the biggest edge is simply owning good businesses at reasonable prices and letting compounding do the work."</em></p>
-<p>— Joe</p>
+<h3>5. Micron (MU)</h3>
+<p><strong>The Setup</strong>: Despite a "decelerating" trend classification, MU shows exceptional relative strength (2.89) and the highest ADX momentum (42.0) in our selection. The high ATR of 47.94 reflects the inherent volatility of memory cycles, but the moderate signal strength suggests we're approaching an inflection point.</p>
+<p><strong>The Catalyst</strong>: The AI revolution requires exponentially more high-bandwidth memory (HBM), where Micron holds technological leadership. Data center memory demand is entering a supercycle driven by AI training and inference, while the smartphone replacement cycle is finally showing signs of recovery.</p>
+<p><strong>The Mechanism</strong>: Memory is the ultimate leverage play on AI adoption. While the "decelerating" trend reflects recent cyclical weakness, the strong relative performance and momentum suggest institutional investors are positioning ahead of the next upcycle. Micron's HBM technology provides pricing power that didn't exist in previous cycles.</p>
+<p><strong>Hidden Risks</strong>: Memory remains cyclical and subject to inventory corrections. Geopolitical tensions with China could impact a significant revenue source. However, the AI-driven demand profile appears more sustainable than historical cycles.</p>
                 </div>
                 
                 <div style="max-width: 900px; margin: 3rem auto 0; padding: 1.5rem; background: rgba(30, 41, 59, 0.5); border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.05); font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6;">
-                    The commentary in this report reflects the personal opinions, viewpoints, and analyses of the author(s), and should not be regarded as official investment advice or relied upon in any manner as professional advice.<br><br>Any opinions expressed herein do not constitute or imply endorsement, sponsorship, or recommendation by the author or its affiliates. The author and its affiliates may invest in any technology company or asset discussed. The views reflected in the commentary are subject to change at any time without notice.<br><br>Nothing on this website or report constitutes investment advice, performance data or any recommendation that any particular security, portfolio of securities, transaction or investment strategy is suitable for any specific person. It also should not be construed as an offer soliciting the purchase or sale of any security mentioned. <br><br>Any mention of a particular security and related performance data is not a recommendation to buy or sell that security. Investments in securities involve the risk of loss. Past performance is no guarantee of future results.<br><br>Any charts provided here are for informational purposes only, and should also not be relied upon when making any investment decision. Any indices referenced for comparison are unmanaged and cannot be invested into directly. As always please remember investing involves risk and possible loss of principal capital; please seek advice from a licensed professional. Any projections, estimates, forecasts, targets, prospects and/or opinions expressed in these materials are subject to change without notice and may differ or be contrary to opinions expressed by others. Information in charts have been obtained from third-party sources and data. While taken from sources believed to be reliable, the author has not independently verified such information and makes no representations about the enduring accuracy of the information or its appropriateness for a given situation. All content speaks only as of the date indicated.
+                    The commentary in this report reflects the personal opinions, viewpoints, and analyses of the author(s), and should not be regarded as official investment advice or relied upon in any manner as professional advice.<br><br>Any opinions expressed herein do not constitute or imply endorsement, sponsorship, or recommendation by the author or its affiliates. The author and its affiliates may invest in any technology company or asset discussed. The views reflected in the commentary are subject to change at any time without notice.<br><br>Nothing on this website or report constitutes investment advice, performance data or any recommendation that any particular security, portfolio of securities, transaction or investment strategy is suitable for any specific person. It also should not be construed as an offer soliciting the purchase or sale of any security mentioned.<br><br>Any mention of a particular security and related performance data is not a recommendation to buy or sell that security. Investments in securities involve the risk of loss. Past performance is no guarantee of future results.<br><br>Any charts provided here are for informational purposes only, and should also not be relied upon when making any investment decision. Any indices referenced for comparison are unmanaged and cannot be invested into directly. As always please remember investing involves risk and possible loss of principal capital; please seek advice from a licensed professional. Any projections, estimates, forecasts, targets, prospects and/or opinions expressed in these materials are subject to change without notice and may differ or be contrary to opinions expressed by others. Information in charts have been obtained from third-party sources and data. While taken from sources believed to be reliable, the author has not independently verified such information and makes no representations about the enduring accuracy of the information or its appropriateness for a given situation. All content speaks only as of the date indicated.
                 </div>
             </div>
             
