@@ -15,6 +15,7 @@
 #   - NVDA intentionally appears in multiple baskets (cross-basket sensor)
 #   - GLD appears in energy_inflation AND defense_geopolitical (inflation vs. safe-haven divergence)
 #   - QQQ appears in risk_appetite AND ai_infrastructure (risk benchmark vs. quality filter)
+#   - TLT appears in housing_rates AND yield_curve_regime (consequences vs. mechanism)
 #   - Ticker keys must be valid yfinance symbols
 #   - Quote single-character tickers to avoid YAML ambiguity (e.g. "O", "T")
 # ─────────────────────────────────────────────────────────────────────────────
@@ -140,3 +141,74 @@ baskets:
       ALB:  "Albemarle — lithium & EV materials"
       FXI:  "iShares China Large-Cap ETF — direct Chinese economic recovery proxy"
       KWEB: "KraneShares China Internet ETF — domestic Chinese consumer demand signal"
+
+  yield_curve_regime:
+    name: "Yield Curve & Rates"
+    macro_question: "Is the Fed tightening, easing, or frozen — and what is the bond market pricing in?"
+    description: "Rate mechanism read — front end, curve shape, dollar, and inflation expectations"
+    tickers:
+      SHY:  "iShares 1-3yr Treasury ETF — short-end / Fed policy anchor"
+      TLT:  "iShares 20yr Treasury ETF — long-end duration & rate cut pricing"
+      UUP:  "Invesco US Dollar Bullish ETF — dollar strength as capital flow signal"
+      TIP:  "iShares TIPS ETF — inflation-adjusted bond demand"
+      RINF: "ProShares Inflation Expectations ETF — breakeven inflation spread"
+      LQD:  "iShares IG Corporate Bond ETF — investment grade credit conditions"
+
+  labor_market:
+    name: "Labor Market"
+    macro_question: "Is the labor market cooling enough for the Fed to cut — or is wage inflation keeping rates elevated?"
+    description: "Employment cycle and wage pressure — the Fed's primary dual-mandate input"
+    tickers:
+      PAYX: "Paychex — payroll processor, real-time US job count proxy"
+      ADP:  "Automatic Data Processing — largest US payroll processor"
+      MAN:  "ManpowerGroup — temp/contract staffing, leading employment indicator"
+      RHI:  "Robert Half International — professional staffing bellwether"
+      KFRC: "Kforce — technology & finance staffing demand"
+
+  healthcare_biotech:
+    name: "Healthcare & Biotech"
+    macro_question: "Is risk capital flowing into life sciences — and is AI being productively deployed in healthcare?"
+    description: "Biotech innovation cycle, FDA risk appetite, and AI drug discovery buildout"
+    tickers:
+      XBI:  "SPDR S&P Biotech ETF — equal-weighted small-cap biotech breadth"
+      IBB:  "iShares Biotechnology ETF — large-cap biotech benchmark"
+      ISRG: "Intuitive Surgical — robotic surgery / AI-in-healthcare capex"
+      MRNA: "Moderna — mRNA platform biotech risk sentiment"
+      RXRX: "Recursion Pharmaceuticals — AI drug discovery pure play"
+      UNH:  "UnitedHealth Group — healthcare system capacity & spending"
+
+  transportation_supply_chain:
+    name: "Transportation & Supply Chain"
+    macro_question: "Is physical goods movement accelerating or decelerating — and are supply chains normalizing?"
+    description: "Freight throughput and logistics — Dow Theory confirmation of industrial activity"
+    tickers:
+      IYT:  "iShares Transportation Average ETF — full sector breadth benchmark"
+      FDX:  "FedEx — domestic parcel & freight volume"
+      UPS:  "United Parcel Service — package volume bellwether"
+      JBHT: "J.B. Hunt Transport — intermodal freight leading indicator"
+      XPO:  "XPO — LTL freight rates and volume"
+      ZIM:  "ZIM Integrated Shipping — ocean container spot rates"
+
+  europe_developed_markets:
+    name: "Europe & Developed Markets"
+    macro_question: "Is the non-US developed world recovering — and is capital rotating away from US equities?"
+    description: "Developed market capital flow signal — Eurozone, Japan, and critical AI supply chain nodes"
+    tickers:
+      EFA:  "iShares MSCI EAFE ETF — developed ex-US benchmark for capital rotation"
+      EWG:  "iShares MSCI Germany ETF — European industrial economy proxy"
+      EWJ:  "iShares MSCI Japan ETF — Asian developed market recovery"
+      VGK:  "Vanguard FTSE Europe ETF — broad European equity"
+      ASML: "ASML Holding — EUV lithography monopoly, critical to every AI chip"
+      SAP:  "SAP SE — European enterprise software & AI deployment bellwether"
+
+  liquidity_credit_stress:
+    name: "Liquidity & Credit Stress"
+    macro_question: "Are credit markets beginning to crack beneath the surface — how close to systemic stress?"
+    description: "Early-warning stress instruments — leveraged loans, IG spreads, and financial conditions"
+    tickers:
+      BKLN: "Invesco Senior Loan ETF — floating-rate leveraged loans (cracks here first)"
+      LQD:  "iShares IG Corporate Bond ETF — investment grade spread monitor"
+      VCIT: "Vanguard Intermediate Corp Bond ETF — mid-maturity credit health"
+      AGG:  "iShares Core US Aggregate Bond ETF — total bond market conditions"
+      FLOT: "iShares Floating Rate Bond ETF — front-end credit stress in floating instruments"
+      HYG:  "iShares High Yield Bond ETF — high yield spread as systemic stress gauge"
