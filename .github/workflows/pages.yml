@@ -52,8 +52,7 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          python src/main.py --sectors
-          python src/main.py --news
+          python src/main.py
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

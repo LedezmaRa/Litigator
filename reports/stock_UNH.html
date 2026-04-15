@@ -4,10 +4,9 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>UNH | UnitedHealth Group Incorporated | Stock Analysis</title>
+        <title>UNH Analysis | Command Center</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
         <style>
-            
 :root {
     --bg-color: #0f172a;
     --card-bg: rgba(30, 41, 59, 0.7);
@@ -732,8 +731,7 @@ details.basket-section[open] .basket-section-toggle { transform: rotate(180deg);
     text-align: center;
     padding: 1rem 0;
 }
-
-        </style>
+</style>
     </head>
     <body>
         
@@ -744,466 +742,282 @@ details.basket-section[open] .basket-section-toggle { transform: rotate(180deg);
     </nav>
     
         <div class="container">
-            <nav class="breadcrumb"><a href="index.html">Command Center</a><span class="bc-sep">/</span><a href="sector_XLV.html">Health Care</a><span class="bc-sep">/</span><span class="bc-current">UNH</span></nav>
+            <nav class="breadcrumb"><a href="index.html">Command Center</a><span class="bc-sep">/</span><span class="bc-current">UNH</span></nav>
 
-            <!-- Hero Header -->
-            <header class="glass-card mb-4">
-                <div class="hero-header">
+            <div class="grid-cols-3 mb-4">
+                <!-- Main Status Card (hero treatment: coloured border + glow) -->
+                <div class="glass-card score-hero" style="display:flex; align-items:center; gap: 2rem; --hero-color:var(--accent-marginal);">
+                    
+    <div class="score-ring-container" style="width:100px; height:100px">
+        <svg role="img" aria-labelledby="gauge-title-100" width="100" height="100">
+            <title id="gauge-title-100">Score gauge: 50 out of 100</title>
+            <circle class="score-circle-bg" cx="50" cy="50" r="46"></circle>
+            <circle class="score-circle-fg" cx="50" cy="50" r="46"
+                    stroke="var(--accent-good)" stroke-dasharray="289.02628" stroke-dashoffset="144.51314"></circle>
+        </svg>
+        <div class="score-value">50</div>
+    </div>
+    
                     <div>
-                        <h1 class="mb-1">UnitedHealth Group Incorporated</h1>
-                        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-                            <span class="text-xl font-mono">UNH</span>
-                            <span class="badge badge-good">Healthcare</span>
-                            <span class="text-muted">Healthcare Plans</span>
+                        <h1 style="font-size:3rem; line-height:1; margin-bottom:0.5rem;">UNH</h1>
+                        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                            <span class="text-xl font-bold">$313.28</span>
+                            <span class="font-mono text-sm" style="color:var(--accent-optimal)">&#9650; +2.9%</span>
+                            <span class="badge badge-marginal">Acceptable</span>
+                        </div>
+                        <span class="text-sm text-muted">Weekly &middot; Low Volatility</span>
+                    </div>
+                </div>
+
+                <!-- Score Breakdown -->
+                <div class="glass-card">
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1rem;">Score Breakdown</h3>
+                    
+        <div class="metric-item">
+            <span class="text-sm font-medium">Ema Proximity</span>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div class="progress-bar-bg"><div class="progress-bar-fg" style="width:75.0%; background:var(--accent-optimal);"></div></div>
+                <span class="text-sm font-mono text-muted">15.0/20</span>
+            </div>
+        </div>
+        
+        <div class="metric-item">
+            <span class="text-sm font-medium">Adx Stage</span>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div class="progress-bar-bg"><div class="progress-bar-fg" style="width:40.0%; background:var(--accent-marginal);"></div></div>
+                <span class="text-sm font-mono text-muted">12.0/30</span>
+            </div>
+        </div>
+        
+        <div class="metric-item">
+            <span class="text-sm font-medium">Volume Conviction</span>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div class="progress-bar-bg"><div class="progress-bar-fg" style="width:80.0%; background:var(--accent-optimal);"></div></div>
+                <span class="text-sm font-mono text-muted">20.0/25</span>
+            </div>
+        </div>
+        
+        <div class="metric-item">
+            <span class="text-sm font-medium">Structure</span>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div class="progress-bar-bg"><div class="progress-bar-fg" style="width:0.0%; background:var(--accent-poor);"></div></div>
+                <span class="text-sm font-mono text-muted">0.0/15</span>
+            </div>
+        </div>
+        
+        <div class="metric-item">
+            <span class="text-sm font-medium">Risk Reward</span>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div class="progress-bar-bg"><div class="progress-bar-fg" style="width:30.0%; background:var(--accent-poor);"></div></div>
+                <span class="text-sm font-mono text-muted">3.0/10</span>
+            </div>
+        </div>
+        
+                </div>
+
+                <!-- Risk & Targets (regime-aware) -->
+                <div class="glass-card">
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1rem;">Risk Management</h3>
+                    <div class="grid-cols-2" style="gap:1rem;">
+                        <div>
+                            <span class="text-xs text-muted block">ATR (14)</span>
+                            <span class="font-mono text-sm">$23.29</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-muted block">EMA20 Support</span>
+                            <span class="font-mono text-sm" style="color:var(--accent-info)">$300.75</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-muted block">EMA50 Trend</span>
+                            <span class="font-mono text-sm" style="color:#8b5cf6">$332.66</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-muted block">ADX</span>
+                            <span class="font-mono text-sm">15.7</span>
                         </div>
                     </div>
-                    <div class="text-right">
-                        <div style="font-size: 2rem; font-weight: bold;">$304.33</div>
-                        <span style="color: var(--accent-poor); font-size: 1rem;">-0.84%</span>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Two-Column Layout -->
-            <div class="grid-cols-2 gap-4 mb-4">
-                <!-- Left Column: Company Story -->
-                <div>
-                    
-    <section class="glass-card mb-3">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-            <h2 style="margin: 0;">Company Overview</h2>
-            <a href="https://www.unitedhealthgroup.com" target="_blank" class="text-sm" style="color: var(--accent-info);">Visit Website</a>
-        </div>
-        <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem;">UnitedHealth Group Incorporated operates as a health care company in the United States and internationally. It operates through four segments: Optum Health, Optum Insight, Optum Rx; and UnitedHealthcare. The Optum Health segment provides care delivery, care management, wellness and consumer engagement, and health financial services with patients, consumers, care delivery systems, providers, employers, payers, and public-sector entities. The Optum Insight segment offers software and information products, advisory consulting arrangements, and managed services outsourcing contracts to hospital...</p>
-        <div style="display: flex; gap: 2rem;">
-            <div>
-                <span class="text-xs text-muted">Employees</span><br>
-                <b>390K</b>
-            </div>
-            <div>
-                <span class="text-xs text-muted">Industry</span><br>
-                <b>Healthcare Plans</b>
-            </div>
-        </div>
-    </section>
-    
-                    
-    <section class="glass-card">
-        <h2>Leadership</h2>
-        
-        <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem;">
-            <div style="font-weight: 600;">Mr. Stephen J. Hemsley</div>
-            <div class="text-sm text-muted">CEO & Non-Independent Non-Executive Chairman, Age 72</div>
-            <span class="text-xs text-muted">Compensation:</span> $285K
-        </div>
-        
-        <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem;">
-            <div style="font-weight: 600;">Mr. Christopher R. Zaetta</div>
-            <div class="text-sm text-muted">Executive VP, Chief Legal Officer & Corporate Secretary, Age 53</div>
-            <span class="text-xs text-muted">Compensation:</span> $1.9M
-        </div>
-        
-        <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem;">
-            <div style="font-weight: 600;">Ms. Erin L.  McSweeney</div>
-            <div class="text-sm text-muted">Executive VP & Chief People Officer, Age 60</div>
-            <span class="text-xs text-muted">Compensation:</span> $1.8M
-        </div>
-        
-        <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem;">
-            <div style="font-weight: 600;">Ms. Heather Rachelle Cianfrocco</div>
-            <div class="text-sm text-muted">EVP of Governance, Compliance & Information Security, Age 51</div>
-            <span class="text-xs text-muted">Compensation:</span> $3.4M
-        </div>
-        
-        <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem;">
-            <div style="font-weight: 600;">Mr. Wayne Scott DeVeydt</div>
-            <div class="text-sm text-muted">Chief Financial Officer, Age 55</div>
-            
-        </div>
-        
-    </section>
-    
-                </div>
-
-                <!-- Right Column: Metrics & Data -->
-                <div>
-                    
-    <section class="glass-card mb-3">
-        <h2>Key Metrics</h2>
-        
-    <div class="mb-3">
-        <h3 class="text-sm text-muted" style="margin-bottom: 0.75rem;">Valuation</h3>
-        <div class="metric-grid">
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Market Cap</span>
-            <div class="text-lg font-bold ">$276.23B</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">P/E Ratio</span>
-            <div class="text-lg font-bold ">23.0</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Forward P/E</span>
-            <div class="text-lg font-bold ">15.1</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">P/B Ratio</span>
-            <div class="text-lg font-bold ">2.9</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">PEG Ratio</span>
-            <div class="text-lg font-bold ">N/A</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">EV</span>
-            <div class="text-lg font-bold ">$338.70B</div>
-        </div>
-        
-        </div>
-    </div>
-    
-        
-    <div class="mb-3">
-        <h3 class="text-sm text-muted" style="margin-bottom: 0.75rem;">Growth</h3>
-        <div class="metric-grid">
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Revenue</span>
-            <div class="text-lg font-bold ">$447.6B</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Revenue Growth</span>
-            <div class="text-lg font-bold text-positive">12.3%</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Earnings Growth</span>
-            <div class="text-lg font-bold text-negative">-99.9%</div>
-        </div>
-        
-        </div>
-    </div>
-    
-        
-    <div class="mb-3">
-        <h3 class="text-sm text-muted" style="margin-bottom: 0.75rem;">Profitability</h3>
-        <div class="metric-grid">
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Gross Margin</span>
-            <div class="text-lg font-bold ">18.5%</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Operating Margin</span>
-            <div class="text-lg font-bold ">0.3%</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Net Margin</span>
-            <div class="text-lg font-bold ">2.7%</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">ROE</span>
-            <div class="text-lg font-bold ">12.5%</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">ROA</span>
-            <div class="text-lg font-bold ">3.9%</div>
-        </div>
-        
-        </div>
-    </div>
-    
-        
-    <div>
-        <h3 class="text-sm text-muted" style="margin-bottom: 0.75rem;">Risk & Other</h3>
-        <div class="metric-grid">
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Beta</span>
-            <div class="text-lg font-bold ">0.41</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Debt/Equity</span>
-            <div class="text-lg font-bold ">81.6</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Current Ratio</span>
-            <div class="text-lg font-bold ">0.79</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">Dividend Yield</span>
-            <div class="text-lg font-bold ">290.0%</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">52W High</span>
-            <div class="text-lg font-bold ">$595.63</div>
-        </div>
-        
-            
-        <div class="metric-card">
-            <span class="text-xs text-muted">52W Low</span>
-            <div class="text-lg font-bold ">$234.60</div>
-        </div>
-        
-        </div>
-    </div>
-    
-    </section>
-    
-                    
-    <section class="glass-card">
-        <h2>Analyst Sentiment</h2>
-        
-        <div class="mb-3">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <span class="text-sm text-muted">Analyst Ratings (29 analysts)</span>
-                <span class="badge badge-optimal">Buy</span>
-            </div>
-            <div style="display: flex; height: 24px; border-radius: 4px; overflow: hidden;">
-                <div style="width: 79.3%; background: var(--accent-optimal);" title="Buy: 23"></div>
-                <div style="width: 17.2%; background: var(--accent-marginal);" title="Hold: 5"></div>
-                <div style="width: 3.4%; background: var(--accent-poor);" title="Sell: 1"></div>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-top: 0.5rem;">
-                <span class="text-xs" style="color: var(--accent-optimal);">Buy 23</span>
-                <span class="text-xs" style="color: var(--accent-marginal);">Hold 5</span>
-                <span class="text-xs" style="color: var(--accent-poor);">Sell 1</span>
-            </div>
-        </div>
-        
-        
-        <div class="mb-3">
-            <h4 class="text-sm text-muted mb-1">Price Targets</h4>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span class="font-mono text-sm">$291</span>
-                <div style="flex: 1; margin: 0 1rem; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; position: relative;">
-                    <div style="position: absolute; left: 9%; width: 3px; height: 16px; background: var(--accent-info); top: -4px;" title="Current: $304.33"></div>
-                    <div style="position: absolute; left: 47%; width: 3px; height: 12px; background: var(--accent-optimal); top: -2px;" title="Mean: $360.96"></div>
-                </div>
-                <span class="font-mono text-sm">$440</span>
-            </div>
-            <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 0.75rem;">
-                <div style="text-align: center;">
-                    <span class="text-xs text-muted">Mean Target</span><br>
-                    <span class="font-bold" style="color: var(--accent-optimal);">$360.96</span>
-                </div>
-                <div style="text-align: center;">
-                    <span class="text-xs text-muted">Upside</span><br>
-                    <span class="font-bold" style="color: var(--accent-optimal);">+18.6%</span>
-                </div>
-            </div>
-        </div>
-        
-        
-        <div>
-            <h4 class="text-sm text-muted mb-1">Recent Analyst Actions</h4>
-            <table class="modern-table" style="font-size: 0.8rem;">
-                <thead>
-                    <tr><th>Date</th><th>Firm</th><th>Action</th><th>Rating</th></tr>
-                </thead>
-                <tbody>
-                    
-            <tr>
-                <td class="text-xs">Apr 07, 2026</td>
-                <td class="text-sm">Bernstein</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Outperform</td>
-            </tr>
-            
-            <tr>
-                <td class="text-xs">Apr 01, 2026</td>
-                <td class="text-sm">Raymond James</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Outperform</td>
-            </tr>
-            
-            <tr>
-                <td class="text-xs">Feb 05, 2026</td>
-                <td class="text-sm">Mizuho</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Outperform</td>
-            </tr>
-            
-            <tr>
-                <td class="text-xs">Feb 02, 2026</td>
-                <td class="text-sm">Truist Securities</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Buy</td>
-            </tr>
-            
-            <tr>
-                <td class="text-xs">Feb 02, 2026</td>
-                <td class="text-sm">JP Morgan</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Overweight</td>
-            </tr>
-            
-            <tr>
-                <td class="text-xs">Jan 30, 2026</td>
-                <td class="text-sm">Barclays</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Overweight</td>
-            </tr>
-            
-            <tr>
-                <td class="text-xs">Jan 30, 2026</td>
-                <td class="text-sm">Wells Fargo</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Overweight</td>
-            </tr>
-            
-            <tr>
-                <td class="text-xs">Jan 28, 2026</td>
-                <td class="text-sm">Jefferies</td>
-                <td><span class="badge badge-marginal" style="font-size: 0.65rem;">Reiterate</span></td>
-                <td class="text-sm">Buy</td>
-            </tr>
-            
-                </tbody>
-            </table>
-        </div>
-        
-    </section>
-    
-                </div>
-            </div>
-
-            <!-- Catalysts Section (Full Width) -->
-            
-    <section class="glass-card mb-4">
-        <h2>Upcoming Catalysts</h2>
-        <div class="grid-cols-2" style="gap: 2rem;">
-            
-        <div>
-            <h3 class="text-sm text-muted mb-2">Next Earnings</h3>
-            <div class="glass-card" style="background: rgba(56, 189, 248, 0.1); border-color: rgba(56, 189, 248, 0.2);">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div style="font-size: 1.25rem; font-weight: bold;">Apr 21, 2026</div>
-                    <span class="text-sm text-muted">9 days away</span>
-                </div>
-                <div style="margin-top: 1rem; display: flex; gap: 2rem;">
-                    <div>
-                        <span class="text-xs text-muted">EPS Estimate</span><br>
-                        <b>$6.68</b>
-                    </div>
-                    <div>
-                        <span class="text-xs text-muted">Revenue Estimate</span><br>
-                        <b>$109.8B</b>
+                    <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.1);">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                            <span class="text-sm text-muted">Stop (1.5x ATR)</span>
+                            <span class="font-mono text-sm" style="color:var(--accent-poor)">$265.80</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span class="text-sm text-muted">Target (4.0x ATR)</span>
+                            <span class="font-mono text-sm" style="color:var(--accent-optimal)">$406.46</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-            
-        <div>
-            <h3 class="text-sm text-muted mb-2">Recent News</h3>
-            <div>
-            <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <a href="https://finance.yahoo.com/sectors/healthcare/articles/unitedhealth-expands-doula-ai-tools-080543545.html" target="_blank" style="color: var(--text-primary); text-decoration: none;">
-                    <div style="font-weight: 500; margin-bottom: 0.25rem;">UnitedHealth Expands Doula And AI Tools As Valuation Gap Persists</div>
-                </a>
-                <div class="text-xs text-muted">Simply Wall St. · Apr 11, 2026</div>
-            </div>
-            
-            <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <a href="https://finance.yahoo.com/sectors/healthcare/articles/unitedhealth-jumps-10-2-48-183227011.html" target="_blank" style="color: var(--text-primary); text-decoration: none;">
-                    <div style="font-weight: 500; margin-bottom: 0.25rem;">UnitedHealth Jumps 10% As 2.48% Medicare Rate Increase Lifts Outlook</div>
-                </a>
-                <div class="text-xs text-muted">GuruFocus.com · Apr 10, 2026</div>
-            </div>
-            
-            <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <a href="https://247wallst.com/investing/2026/04/10/2-hedge%e2%80%91fund-favorites-that-just-got-too-cheap-to-ignore/" target="_blank" style="color: var(--text-primary); text-decoration: none;">
-                    <div style="font-weight: 500; margin-bottom: 0.25rem;">2 Hedge‑Fund Favorites That Just Got Too Cheap to Ignore</div>
-                </a>
-                <div class="text-xs text-muted">24/7 Wall St. · Apr 10, 2026</div>
-            </div>
-            
-            <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <a href="https://www.investors.com/news/stock-market-rally-iran-ceasefire-amazon-ai-names/?src=A00220&yptr=yahoo" target="_blank" style="color: var(--text-primary); text-decoration: none;">
-                    <div style="font-weight: 500; margin-bottom: 0.25rem;">Stock Market Rally Revs Higher On Iran Ceasefire; Amazon, AI Names In Focus:...</div>
-                </a>
-                <div class="text-xs text-muted">Investor's Business Daily · Apr 10, 2026</div>
-            </div>
-            
-            <div style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <a href="https://finance.yahoo.com/sectors/healthcare/articles/unitedhealth-ease-margin-pressure-cms-151000973.html" target="_blank" style="color: var(--text-primary); text-decoration: none;">
-                    <div style="font-weight: 500; margin-bottom: 0.25rem;">Can UnitedHealth Ease Margin Pressure on CMS Tailwinds?</div>
-                </a>
-                <div class="text-xs text-muted">Zacks · Apr 10, 2026</div>
-            </div>
-            </div>
-        </div>
-        
-        </div>
-    </section>
-    
 
-            <!-- Technical Context Section -->
             
-    <section class="glass-card">
-        <h2>Technical Context</h2>
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:0.05em; margin:0;">Short Interest &amp; Squeeze Potential</h3>
+                <span class="badge badge-good">Low Squeeze Risk</span>
+            </div>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:1rem;">
                 <div>
-                    <span class="text-xs text-muted">Current Price</span>
-                    <div style="font-size: 1.5rem; font-weight: bold;">$304.33</div>
+                    <span class="text-xs text-muted block">Float Short</span>
+                    <span class="font-mono" style="font-size:1.3rem; font-weight:700;">1.9%</span>
                 </div>
                 <div>
-                    <span class="text-xs text-muted">Composite Score</span>
-                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent-poor);">15</div>
+                    <span class="text-xs text-muted block">Days to Cover</span>
+                    <span class="font-mono" style="font-size:1.3rem; font-weight:700;">2.0</span>
                 </div>
                 <div>
-                    <span class="text-xs text-muted">Entry Score</span>
-                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--text-secondary);">N/A</div>
+                    <span class="text-xs text-muted block">MoM Short Change</span>
+                    <span class="font-mono text-sm" style="color:var(--accent-poor); font-weight:600;">&#9650; +19.6%</span>
                 </div>
                 <div>
-                    <span class="text-xs text-muted">Trend</span>
-                    <div style="margin-top: 0.25rem;"><span class="badge badge-poor">Reversing</span></div>
+                    <span class="text-xs text-muted block">Squeeze Score</span>
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-top:4px;">
+                        <div class="progress-bar-bg" style="width:80px;"><div class="progress-bar-fg" style="width:14%; background:var(--accent-optimal);"></div></div>
+                        <span class="font-mono text-xs text-muted">14/100</span>
+                    </div>
                 </div>
             </div>
-            <a href="sector_XLV.html" class="filter-btn" style="text-decoration: none;">
-                View Full Chart in Sector Dashboard
-            </a>
+            <p class="text-xs text-muted" style="margin:0; padding-top:0.75rem; border-top:1px solid rgba(255,255,255,0.05);">Low short interest. A rally in this name is unlikely to have a squeeze component — fundamentals or sector rotation are the more probable drivers.</p>
         </div>
-    </section>
     
+            
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Relative Strength Rating</h3>
+                    <p class="text-xs text-muted" style="margin:0;">RS Rating compares how a stock has performed relative to the overall market over the past 12 months, with recent performance weighted more heavily. William O'Neil's research showed that the best-performing stocks had RS Ratings above 80 before their biggest price advances. A high RS Rating means the stock is already showing institutional accumulation — it is a market leader.</p>
+                </div>
+                <span class="badge badge-poor">Laggard</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:2rem; flex-wrap:wrap; margin-bottom:.75rem;">
+                <div style="text-align:center;">
+                    <span class="text-xs text-muted block">RS Rating</span>
+                    <span class="font-mono" style="font-size:2rem; font-weight:700; color:var(--accent-poor);">25</span>
+                    <span class="text-xs text-muted block">out of 99</span>
+                </div>
+                <div style="flex:1; min-width:180px;">
+                    <div class="progress-bar-bg" style="width:100%; margin-bottom:.5rem;"><div class="progress-bar-fg" style="width:25%; background:var(--accent-poor);"></div></div>
+                    <p class="text-xs text-muted" style="margin:0;">At 25, UNH is underperforming the market. Entering a laggard while leaders exist elsewhere is a structural mistake — capital has better deployment options.</p>
+                </div>
+            </div>
+        </div>
+            
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Earnings Calendar &amp; Binary Risk</h3>
+                    <p class="text-xs text-muted" style="margin:0;">Earnings events are binary — the stock will gap significantly up or down regardless of your technical analysis. Knowing when the next report is lets you size your position appropriately and avoid accidental exposure to a catalyst you haven't evaluated.</p>
+                </div>
+                <span class="badge badge-poor">Earnings Imminent</span>
+            </div>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:.75rem;">
+                <div><span class="text-xs text-muted block">Next Earnings</span><span class="font-mono text-sm">Apr 21, 2026</span></div>
+                <div><span class="text-xs text-muted block">Days Away</span><span class="font-mono text-sm" style="color:var(--accent-poor); font-weight:600;">6</span></div>
+                <div><span class="text-xs text-muted block">Implied Move (options)</span><span class="font-mono text-sm">N/A</span></div>
+                <div><span class="text-xs text-muted block">Avg EPS Surprise (4Q)</span><span class="font-mono text-sm">N/A</span></div>
+            </div>
+            <p class="text-xs text-muted" style="margin:0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">⚠️ Earnings in 6 days. Implied move data unavailable. This is a high-risk period. Consider waiting for the event to pass or sizing down to 50% of normal. </p>
+        </div>
 
-            <!-- Footer -->
-            <footer class="mt-6 text-center text-muted">
-                <p>Macro Watch 2.1 · Stock Narrative Page</p>
-                <p class="text-xs">Fundamental data via yfinance · Last updated: Apr 11, 2026 21:32</p>
-            </footer>
+            <!-- Two-column intelligence grid -->
+            <div class="grid-cols-2 mb-3">
+                <div>
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0;">Options &amp; Volatility Context</h3>
+                <span class="badge badge-info">N/A IV</span>
+            </div>
+            <p class="text-xs text-muted" style="margin:0 0 1rem 0;">The options market prices in the expected range of price movement. IV Rank (IVR) shows where current volatility sits relative to its 52-week range — 0 is the calmest it's been, 100 is the most fearful. The Put/Call Ratio measures whether traders are buying more protective puts (bearish) or speculative calls (bullish).</p>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:.75rem;">
+                <div>
+                    <span class="text-xs text-muted block">IV Rank (52W)</span>
+                    <div style="display:flex; align-items:center; gap:.75rem; margin-top:4px;">
+                        <div class="progress-bar-bg" style="width:80px;"><div class="progress-bar-fg" style="width:0%; background:var(--accent-optimal);"></div></div>
+                        <span class="font-mono text-sm">N/A/100</span>
+                    </div>
+                    <span class="text-xs text-muted">FAIR</span>
+                </div>
+                <div><span class="text-xs text-muted block">IV / HV Ratio</span><span class="font-mono text-sm">N/A</span></div>
+                <div><span class="text-xs text-muted block">Put/Call Ratio</span><span class="font-mono text-sm">N/A — Neutral</span></div>
+                <div><span class="text-xs text-muted block">Options Implied Move</span><span class="font-mono text-sm">±N/A</span></div>
+            </div>
+            <p class="text-xs text-muted" style="margin:0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">Options data for UNH could not be retrieved. Verify ticker symbol and check market hours. (Options chain returned empty data)</p>
+        </div></div>
+                <div>
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0;">Factor Profile</h3>
+                <span class="badge badge-info">Speculative / No Clear Factor Edge</span>
+            </div>
+            <p class="text-xs text-muted" style="margin:0 0 1rem 0;">Factor investing is the science of understanding WHY a stock is moving. Momentum tells you if institutions are already chasing it (trend confirmation). Quality tells you if the underlying business deserves the price (fundamental anchor). Value tells you if you are overpaying relative to earnings and cash flow (margin of safety). The strongest entries combine strong momentum (confirmation) with decent quality (sustainability) — paying a fair price for a high-quality business that is already trending.</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-bottom:.75rem;">
+                <div><span class="text-xs text-muted block">Momentum</span><div class="progress-bar-bg" style="width:100%;"><div class="progress-bar-fg" style="width:0%; background:var(--accent-poor);"></div></div><span class="text-xs text-muted">Negative Momentum</span></div>
+                <div><span class="text-xs text-muted block">Quality</span><div class="progress-bar-bg" style="width:100%;"><div class="progress-bar-fg" style="width:0%; background:var(--accent-poor);"></div></div><span class="text-xs text-muted">Low Quality</span></div>
+                <div><span class="text-xs text-muted block">Value</span><div class="progress-bar-bg" style="width:100%;"><div class="progress-bar-fg" style="width:0%; background:var(--accent-poor);"></div></div><span class="text-xs text-muted">Expensive</span></div>
+            </div>
+            <p class="text-xs text-muted" style="margin:0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">UNH (UNH) factor profile: Speculative / No Clear Factor Edge | Alignment: CONFLICTED. Momentum: Negative Momentum (0/100) — 12M-1M return -36.4%, 3M return -11.4%. Quality: Low Quality (0/100) — ROE N/A, Gross Margin N/A. Value: Expensive (0/100) — Fwd P/E N/A, P/FCF N/A. No factor is dominant. This name lacks both trend confirmation and clear fundamental support. Avoid unless a specific catalyst is identified.</p>
+        </div></div>
+            </div>
+            <div class="grid-cols-2 mb-3">
+                <div>
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Insider Transactions (Form 4)</h3>
+                    <p class="text-xs text-muted" style="margin:0;">Form 4 filings are public disclosures that corporate insiders (executives, directors, and >10% shareholders) must submit within 2 business days of buying or selling their company's stock. Open-market purchases — where insiders spend their own money at market price — are the most bullish signal because insiders have no incentive to buy unless they believe the stock is undervalued. Research shows companies with cluster buying (3+ insiders in 30 days) outperform the market by 6-8% over the following 6 months.</p>
+                </div>
+                <span class="badge badge-marginal">NEUTRAL</span>
+            </div>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:.75rem;">
+                <div><span class="text-xs text-muted block">Open-Market Buys (90d)</span><span class="font-mono" style="font-size:1.3rem; font-weight:700; color:var(--accent-optimal);">0</span></div>
+                <div><span class="text-xs text-muted block">Open-Market Sells (90d)</span><span class="font-mono" style="font-size:1.3rem; font-weight:700; color:var(--accent-poor);">0</span></div>
+                <div><span class="text-xs text-muted block">Unique Buyers</span><span class="font-mono text-sm">0</span></div>
+                <div><span class="text-xs text-muted block">Cluster Signal</span><span class="font-mono text-sm" style="color:var(--text-secondary);">—</span></div>
+            </div>
+            <p class="text-xs text-muted">No recent transactions on record.</p>
+            <p class="text-xs text-muted" style="margin:.75rem 0 0 0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">No significant insider buying or selling activity detected in the past 90 days. This is the most common reading — absence of signal, not a negative indicator.</p>
+        </div></div>
+                <div>
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Institutional Flow / Dark Pool Proxy</h3>
+                    <p class="text-xs text-muted" style="margin:0;">Dark pools are private trading venues where institutional investors execute large orders without tipping off the public market. They handle ~35-40% of all US equity volume. When a fund wants to accumulate a position over days or weeks, they leave a signature in the public data: high-volume sessions where the price range is unusually narrow — the institution is absorbing all available supply without letting price run. We track three proxy signals: (1) Quiet accumulation days (high vol + narrow range), (2) Block volume concentration (top-decile sessions), and (3) Volume-direction correlation (is sustained volume driving price up or down?).</p>
+                </div>
+                <span class="badge badge-optimal">ACCUMULATION (MODERATE)</span>
+            </div>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:.75rem;">
+                <div><span class="text-xs text-muted block">Quiet Absorption Days</span><span class="font-mono" style="font-size:1.3rem; font-weight:700; color:var(--accent-good);">0</span></div>
+                <div><span class="text-xs text-muted block">Vol–Price Correlation</span><span class="font-mono text-sm">+0.75</span></div>
+                <div><span class="text-xs text-muted block">Block Volume %</span><span class="font-mono text-sm">32.8%</span></div>
+            </div>
+            <div class="metric-item"><span class="text-xs">Mar 20, 2026 — $275.59</span><span class="badge badge-info text-xs">High Activity</span></div><div class="metric-item"><span class="text-xs">Apr 07, 2026 — $307.73</span><span class="badge badge-info text-xs">High Activity</span></div><div class="metric-item"><span class="text-xs">Mar 27, 2026 — $259.02</span><span class="badge badge-info text-xs">High Activity</span></div>
+            <p class="text-xs text-muted" style="margin:.75rem 0 0 0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">🔵 Moderate accumulation signal — 0 high-volume, narrow-range session(s) detected. Some evidence of institutional buying, but not yet a definitive pattern. Watch for this to develop further over the next 1-2 weeks.</p>
+        </div></div>
+            </div>
+            
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Volume Profile &amp; Price Levels</h3>
+                    <p class="text-xs text-muted" style="margin:0;">Volume Profile shows how much volume traded at each price level over a given period. The Point of Control (POC) is the price where the most volume traded — this is where institutions have the most money concentrated, and price tends to return to this level repeatedly. The Value Area is the price range containing 70% of all volume — similar to one standard deviation — and acts as a fair-value zone. Entering near the POC or Value Area Low gives you a high-probability location with institutional backing.</p>
+                </div>
+                <span class="badge badge-info" style="color:var(--accent-optimal);">In Value Area</span>
+            </div>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:.75rem;">
+                <div><span class="text-xs text-muted block">Point of Control (POC)</span><span class="font-mono text-sm" style="color:var(--accent-info);">$283.47</span></div>
+                <div><span class="text-xs text-muted block">Distance to POC</span><span class="font-mono text-sm">+10.4%</span></div>
+                <div><span class="text-xs text-muted block">Value Area High</span><span class="font-mono text-sm" style="color:var(--accent-optimal);">$326.51</span></div>
+                <div><span class="text-xs text-muted block">Value Area Low</span><span class="font-mono text-sm" style="color:var(--accent-poor);">$261.95</span></div>
+                <div><span class="text-xs text-muted block">Period VWAP</span><span class="font-mono text-sm">$307.82</span></div>
+            </div>
+            <p class="text-xs text-muted" style="margin:0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">Price at $313.10 is trading within the Value Area ($261.95 – $326.51) — the institutional 'fair value' zone. POC support at $283.47 is the high-volume magnetic level; expect rotations between VAL and VAH until a breakout resolves direction. Period VWAP $307.82; AVWAP from 52-week low $306.38.</p>
+        </div>
+
+            <!-- Chart Area -->
+            <div class="glass-card" style="padding:1rem;">
+                <div>                        <script type="text/javascript">window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.3.1.min.js" integrity="sha256-4rD3fugVb/nVJYUv5Ky3v+fYXoouHaBSP20WIJuEiWg=" crossorigin="anonymous"></script>                <div id="daad9eda-5001-4758-a383-7dc36dfa239a" class="plotly-graph-div" style="height:800px; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("daad9eda-5001-4758-a383-7dc36dfa239a")) {                    Plotly.newPlot(                        "daad9eda-5001-4758-a383-7dc36dfa239a",                        [{"close":{"dtype":"f8","bdata":"AAAAAHD7fUAAAADA6KJ9QAAAACB+dn1AAAAAwFSufkAAAACgXmN\u002fQAAAAIBDZ35AAAAAIDejfUAAAAAAiVt9QAAAAOAEvn1AAAAAQHnffEAAAABADJl+QAAAAGAyUn1AAAAAoPa7fkAAAACgvPuAQAAAAMB\u002fHYFAAAAAQCi4gUAAAACgNcmAQAAAACC3WoFAAAAAQD6PgUAAAADAALuBQAAAAEBg7oFAAAAAQLDagUAAAADgGkaBQAAAAECnioFAAAAA4NDSgUAAAADArgeCQAAAAKAvLIFAAAAAADYFgUAAAABgXRyBQAAAAMDAkIJAAAAAAMTagUAAAAAARdCBQAAAAKB0ZYJAAAAAwOeRgEAAAABAA2J\u002fQAAAAECBRX5AAAAA4EjefkAAAADA7Ax\u002fQAAAAOAUhH9AAAAAoLjafkAAAADAnR2AQAAAAKDvaoBAAAAAIFLmf0AAAADgxq9\u002fQAAAAGArO3xAAAAAAH+\u002ffEAAAACAdt59QAAAAGCfk31AAAAAgM5qf0AAAACgM15\u002fQAAAAGBo6n9AAAAAgDw4gkAAAABAf5p7QAAAAKCKcnlAAAAAQDxPeEAAAABANyN3QAAAAGB4vnFAAAAAoGz3cUAAAAAAFVpyQAAAAKB3bnJAAAAAQOcOc0AAAACAo1tyQAAAAMBE7HJAAAAAQH7jckAAAAAgwZ1yQAAAAMCYTXFAAAAAwK00cUAAAAAggRxtQAAAAKC6t25AAAAAAFicckAAAACgyNFyQAAAAOAt+HJAAAAA4K9Oc0AAAABga5R1QAAAAGB+nHRAAAAAgFMydUAAAABAjDB2QAAAAMCn1nVAAAAAIMb3dUAAAADg0VR2QAAAAKCVCnVAAAAAQPf4c0AAAACg59NzQAAAAGAZtnNAAAAAgKZQdEAAAAAAoWJ0QAAAAEAAD3VAAAAAoE5OdEAAAACAUpR0QAAAAODg3HRAAAAAIDlVdUAAAABgdod0QAAAAOAvGHZAAAAA4HbLcUAAAADgQChxQAAAAADaLnJAAAAAoDT8cUAAAAAgHzByQAAAAABSxHFAAAAAIJ9+cUAAAACgcDlxQAAAAOBRMHBAAAAAAClUcUAAAACgRwVzQAAAAOB6lHNA"},"high":{"dtype":"f8","bdata":"EoirRfBZfkDKiX8YP+F9QHQUedGKwX1AcKC59x+6fkCIkZ5\u002fb5l\u002fQH0J1DCkfH9Amm96k\u002ftPfkAy5SbugXV+QHFJ+TDDCH5Am7LO+sCAfUD4AnNzM5t+QARkuByqk35Au7GM87jqfkByIjcOGHiBQHfvvzXeZYFA041k0U7FgUBNRgYYAqGBQHujjZY+hoFAf9LJbqCUgUApp5BEidKBQPc2GidvQ4JAScvfN0krgkBDloWJEP2BQIziRqEpsIFA6DTMRZ45gkB8Y0TEdiKCQFdEhZJWWYJABlL+iNF2gUCtsZhSvjGBQEDMPReMr4JAIJErhecDg0CRaJf\u002fmjWCQJuQmQZpnYJAxkmMlu7GgkBvs4bB1B2BQJGd91K7k39Al5GBtLYPf0Crqqcn5z9\u002fQGq7Y9BkNIBAYkV66vmQgEBdAVV1Ci6AQHbSwNHqs4BAhZYbm2nDgECbYcRzD5KAQBk4MxBpO39AWDiEYDDVfECyV0onQEJ+QDecHTQtIn5A3QSLe0OMf0CLERnnusl\u002fQNdC6jrexIBAce1zQ9htgkA1b0z8WxqCQGwUUDcBkXtA9WGE7NDHeUBZ8A2ebOd4QBklL9VziXdAYYIh3sm7c0BhF2gfIJRyQCyb\u002fto2D3NA4xA5Iulgc0DhRM2D2wpzQHkPvd1EAXNAsO+NTJX9c0CsUEjsbuRyQIRCCFrQnHJAWv+EKSjqcUAEfqLIbHJxQFQyvuXg\u002fm5AIBa5Duv+ckBUrljTg15zQMoTmXI3+nJA92AoSqZ2c0A3W2BnAC52QOAjkMXhh3VAInf0xqfWdUBbsm7Pjqt2QALMWvwwLXdA0pxRAvJvdkBjy8lgqNt2QDa9\u002fxCTeHdAkBUltgX9dECOitex+SN1QJCqSRnYMnRAS9D8fSCmdEChKAU1OAh1QIpKlkyFQHVADUaAJshkdUDr7W16RpV0QC1UMIgpGnVAyOvkzzzedUD5QH5kG0B1QLqKqYC\u002fMXZAMza3RNkAdkAVBCRojgJyQN0JB1gjM3JAEKc8F10\u002fckDY3Ilet09yQBtYBJ6CUHJAcH\u002fipsjVcUAAAAAA1w9yQAAAAAAAjHFAAAAA4KNwcUAAAAAghY9zQAAAAIDr+XNA"},"low":{"dtype":"f8","bdata":"DigYN6JxekCZ3ZDNrcJ8QDZ6HbPtinxAiPrfh5lvfUBqIrdG8Fl+QEoOW8dOXX5AWqT\u002f1LlQfECAFR1iZld9QPauwtnj+nxAfmyRS9uafECyIeq6OOB8QLPbr181HH1AdDRxKqo0fUAe4DnP4N5+QCQoJGxzm4BAMWpDEkjggEBtyo6k57uAQEba2AHS2oBATbBBnWskgUByI1EZoYmBQDPeDCzttoFAmoVbqi5IgUAWMIHa9RyBQHTneTFTEIFAnmlpnqZygUDT33Sc+niBQB1ZnCrQXoBAuv5rcwTigECJjNhyHOeAQC0AlS\u002fMtoBAt\u002f0vfsLBgUBSWZaNcmOBQEWW44c48IFAnALEhJxngEDrHzkeXMt+QPKNTGrSzHxAseYzAcU0fkAJbqSAt01+QEc9mAfZ1n5AwUXAM+BufkAo9K\u002feIgp\u002fQKl9pso8KYBAMlvKUfyWf0ALXG2zeqZ\u002fQIAl3KGMinpAlwDFhdM9e0BRlZxkayh8QInEe7wdwHxAnQExUfeJfUBoELIMpBF\u002fQBSOCB8Han9Ax+CLEXecfkDY3ZPSaS17QJuE2qSGC3lAXUZGXUPld0BApyKGiQJ3QMlVJle+QW5ANZpL10S6cUC7N7a8NZNxQK0DH1q04HFAjFxglYpFckBOzVxOGlVyQAaQHWlKF3JAI7yL4dvAckDFxKWFNyhyQHhIUsjCMHFAS9361SsIcUAvne9lJblsQN381IfNAm1AQ6cGjejebkBnG6ObHBpyQBqQgb2aAnJAS+XTNXyXckBBo1\u002fUxDVzQOgwWk3Ub3RAV1Tr3Ed9dEBZGVir2Qh1QNNLrqVFt3VAfXqzEcecdUCKFfnUF8l1QJYJPDGQxHRA3WxH3Hhac0CpbToA8YlzQOpH6BqawnJAvutF1wmRc0D4L2fGuuJzQGwzEqxDsHNAtrDMDQ8hdEDtC43qsvJzQHNHYbiTT3RA2BfltWS0dEBI1XjHd1h0QEueyjuzP3RAlhGCVcpjcUCt\u002fQC6xYNwQNDpi5R\u002fu3BA+hJd\u002fI21cUC1IdJoQNtwQJwwiwHdjXFAkO63pIkicUAAAAAAADBxQAAAAEAK\u002f29AAAAAYLgKcEAAAAAAAFRxQAAAAGC47nJA"},"name":"Price","open":{"dtype":"f8","bdata":"8ZyPdslxekAMhfCoIMh9QLIPy2FsqH1A1BLFovN2fUDS5DrZsKJ+QG490YFeY39Amm96k\u002ftPfkALgbAeOZB9QE15e5pIYH1AJcFmbFZlfUDFlUsxRV99QBUq0eNwcn5AG4ICvVhkfUApS25SdX9\u002fQGkQBeYz6oBAVnYc2aj+gEDf2wq43HyBQEIiP2uW5IBAUGVd5MpdgUAbqiPJd6qBQG+Eo1HYzIFAEsGCcXP5gUA\u002fjPvV6t+BQA7L0RlJYYFA+4Y9WWOXgUBlqtMDN8CBQB5bXR3dD4JAYCg1\u002fmosgUAvY9cbQRKBQJT1qjwJFoFA+pG5kiqZgkD+YjymO8WBQChoY0wOBIJAdjKObMiCgkB8U\u002fk6RqSAQNWWA25mWn9Af1WdLERPfkB+BPUPya1+QKkUldPsDH9Aaq+ehjcxgEBOPhvaMR1\u002fQMhPzmB9V4BAHJF53iNngEBPjkNNPPB\u002fQEFpbX4B7X5A00pxmjI\u002ffEBUFAuEWrZ8QFJdF5Ley31AQmcx1D2ifUAeEL51Q09\u002fQHTwt0QQj39Abuw59R41f0AJ19kedRWCQJqOplbOVntA049MUdCDeUA2P+pYyUJ4QB6JwkrRKHdAaS\u002f3SpaGckCeFOhYlDRyQHYN5DvpbHJAHiDI88mKckDlNub3pwZzQAmFP6ZGe3JA+efZrIvqckCVs6yx39pyQHh+KbQzd3JAnLGHlshscUAB\u002fCLd6lpxQL3J9Ws8K21Al+VJ2iEVb0Ahm2laDSxzQN8DfV6N4nJADauZObvfckCRpQhzY5JzQNBCGXjUgHVAP0lNGp2adECozBvtvzB1QNphMgmjPXZAgFX3wnDadUBhtpReXhZ2QNDZ4Q+XZHZANr0AMEPkdEDQfyj5abZzQDH9+t0IwHNAFiHUTgP+c0BYKH5IfSd0QFZkjL7GP3RAWgP7d8AldUBsfjpriwZ0QIkRbRpmhXRAoINmx8vNdEDX4thBlCx1QODepSv9TXRAk6V9L4PzdUAe9ghOBL1xQMF318CPAHFAxZDOO7Y7ckCqfoYkL+VxQE5Afyr+3nFAqG39VzF9cUAAAAAgrr9xQAAAAIA9cnFAAAAAQOFCcEAAAACAFF5xQAAAAAAA9HJA"},"x":["2024-04-15T00:00:00.000000000","2024-04-22T00:00:00.000000000","2024-04-29T00:00:00.000000000","2024-05-06T00:00:00.000000000","2024-05-13T00:00:00.000000000","2024-05-20T00:00:00.000000000","2024-05-27T00:00:00.000000000","2024-06-03T00:00:00.000000000","2024-06-10T00:00:00.000000000","2024-06-17T00:00:00.000000000","2024-06-24T00:00:00.000000000","2024-07-01T00:00:00.000000000","2024-07-08T00:00:00.000000000","2024-07-15T00:00:00.000000000","2024-07-22T00:00:00.000000000","2024-07-29T00:00:00.000000000","2024-08-05T00:00:00.000000000","2024-08-12T00:00:00.000000000","2024-08-19T00:00:00.000000000","2024-08-26T00:00:00.000000000","2024-09-02T00:00:00.000000000","2024-09-09T00:00:00.000000000","2024-09-16T00:00:00.000000000","2024-09-23T00:00:00.000000000","2024-09-30T00:00:00.000000000","2024-10-07T00:00:00.000000000","2024-10-14T00:00:00.000000000","2024-10-21T00:00:00.000000000","2024-10-28T00:00:00.000000000","2024-11-04T00:00:00.000000000","2024-11-11T00:00:00.000000000","2024-11-18T00:00:00.000000000","2024-11-25T00:00:00.000000000","2024-12-02T00:00:00.000000000","2024-12-09T00:00:00.000000000","2024-12-16T00:00:00.000000000","2024-12-23T00:00:00.000000000","2024-12-30T00:00:00.000000000","2025-01-06T00:00:00.000000000","2025-01-13T00:00:00.000000000","2025-01-20T00:00:00.000000000","2025-01-27T00:00:00.000000000","2025-02-03T00:00:00.000000000","2025-02-10T00:00:00.000000000","2025-02-17T00:00:00.000000000","2025-02-24T00:00:00.000000000","2025-03-03T00:00:00.000000000","2025-03-10T00:00:00.000000000","2025-03-17T00:00:00.000000000","2025-03-24T00:00:00.000000000","2025-03-31T00:00:00.000000000","2025-04-07T00:00:00.000000000","2025-04-14T00:00:00.000000000","2025-04-21T00:00:00.000000000","2025-04-28T00:00:00.000000000","2025-05-05T00:00:00.000000000","2025-05-12T00:00:00.000000000","2025-05-19T00:00:00.000000000","2025-05-26T00:00:00.000000000","2025-06-02T00:00:00.000000000","2025-06-09T00:00:00.000000000","2025-06-16T00:00:00.000000000","2025-06-23T00:00:00.000000000","2025-06-30T00:00:00.000000000","2025-07-07T00:00:00.000000000","2025-07-14T00:00:00.000000000","2025-07-21T00:00:00.000000000","2025-07-28T00:00:00.000000000","2025-08-04T00:00:00.000000000","2025-08-11T00:00:00.000000000","2025-08-18T00:00:00.000000000","2025-08-25T00:00:00.000000000","2025-09-01T00:00:00.000000000","2025-09-08T00:00:00.000000000","2025-09-15T00:00:00.000000000","2025-09-22T00:00:00.000000000","2025-09-29T00:00:00.000000000","2025-10-06T00:00:00.000000000","2025-10-13T00:00:00.000000000","2025-10-20T00:00:00.000000000","2025-10-27T00:00:00.000000000","2025-11-03T00:00:00.000000000","2025-11-10T00:00:00.000000000","2025-11-17T00:00:00.000000000","2025-11-24T00:00:00.000000000","2025-12-01T00:00:00.000000000","2025-12-08T00:00:00.000000000","2025-12-15T00:00:00.000000000","2025-12-22T00:00:00.000000000","2025-12-29T00:00:00.000000000","2026-01-05T00:00:00.000000000","2026-01-12T00:00:00.000000000","2026-01-19T00:00:00.000000000","2026-01-26T00:00:00.000000000","2026-02-02T00:00:00.000000000","2026-02-09T00:00:00.000000000","2026-02-16T00:00:00.000000000","2026-02-23T00:00:00.000000000","2026-03-02T00:00:00.000000000","2026-03-09T00:00:00.000000000","2026-03-16T00:00:00.000000000","2026-03-23T00:00:00.000000000","2026-03-30T00:00:00.000000000","2026-04-06T00:00:00.000000000","2026-04-13T00:00:00.000000000"],"type":"candlestick","xaxis":"x","yaxis":"y"},{"line":{"color":"#f59e0b","width":1.5},"name":"EMA_20","x":["2024-04-15T00:00:00.000000000","2024-04-22T00:00:00.000000000","2024-04-29T00:00:00.000000000","2024-05-06T00:00:00.000000000","2024-05-13T00:00:00.000000000","2024-05-20T00:00:00.000000000","2024-05-27T00:00:00.000000000","2024-06-03T00:00:00.000000000","2024-06-10T00:00:00.000000000","2024-06-17T00:00:00.000000000","2024-06-24T00:00:00.000000000","2024-07-01T00:00:00.000000000","2024-07-08T00:00:00.000000000","2024-07-15T00:00:00.000000000","2024-07-22T00:00:00.000000000","2024-07-29T00:00:00.000000000","2024-08-05T00:00:00.000000000","2024-08-12T00:00:00.000000000","2024-08-19T00:00:00.000000000","2024-08-26T00:00:00.000000000","2024-09-02T00:00:00.000000000","2024-09-09T00:00:00.000000000","2024-09-16T00:00:00.000000000","2024-09-23T00:00:00.000000000","2024-09-30T00:00:00.000000000","2024-10-07T00:00:00.000000000","2024-10-14T00:00:00.000000000","2024-10-21T00:00:00.000000000","2024-10-28T00:00:00.000000000","2024-11-04T00:00:00.000000000","2024-11-11T00:00:00.000000000","2024-11-18T00:00:00.000000000","2024-11-25T00:00:00.000000000","2024-12-02T00:00:00.000000000","2024-12-09T00:00:00.000000000","2024-12-16T00:00:00.000000000","2024-12-23T00:00:00.000000000","2024-12-30T00:00:00.000000000","2025-01-06T00:00:00.000000000","2025-01-13T00:00:00.000000000","2025-01-20T00:00:00.000000000","2025-01-27T00:00:00.000000000","2025-02-03T00:00:00.000000000","2025-02-10T00:00:00.000000000","2025-02-17T00:00:00.000000000","2025-02-24T00:00:00.000000000","2025-03-03T00:00:00.000000000","2025-03-10T00:00:00.000000000","2025-03-17T00:00:00.000000000","2025-03-24T00:00:00.000000000","2025-03-31T00:00:00.000000000","2025-04-07T00:00:00.000000000","2025-04-14T00:00:00.000000000","2025-04-21T00:00:00.000000000","2025-04-28T00:00:00.000000000","2025-05-05T00:00:00.000000000","2025-05-12T00:00:00.000000000","2025-05-19T00:00:00.000000000","2025-05-26T00:00:00.000000000","2025-06-02T00:00:00.000000000","2025-06-09T00:00:00.000000000","2025-06-16T00:00:00.000000000","2025-06-23T00:00:00.000000000","2025-06-30T00:00:00.000000000","2025-07-07T00:00:00.000000000","2025-07-14T00:00:00.000000000","2025-07-21T00:00:00.000000000","2025-07-28T00:00:00.000000000","2025-08-04T00:00:00.000000000","2025-08-11T00:00:00.000000000","2025-08-18T00:00:00.000000000","2025-08-25T00:00:00.000000000","2025-09-01T00:00:00.000000000","2025-09-08T00:00:00.000000000","2025-09-15T00:00:00.000000000","2025-09-22T00:00:00.000000000","2025-09-29T00:00:00.000000000","2025-10-06T00:00:00.000000000","2025-10-13T00:00:00.000000000","2025-10-20T00:00:00.000000000","2025-10-27T00:00:00.000000000","2025-11-03T00:00:00.000000000","2025-11-10T00:00:00.000000000","2025-11-17T00:00:00.000000000","2025-11-24T00:00:00.000000000","2025-12-01T00:00:00.000000000","2025-12-08T00:00:00.000000000","2025-12-15T00:00:00.000000000","2025-12-22T00:00:00.000000000","2025-12-29T00:00:00.000000000","2026-01-05T00:00:00.000000000","2026-01-12T00:00:00.000000000","2026-01-19T00:00:00.000000000","2026-01-26T00:00:00.000000000","2026-02-02T00:00:00.000000000","2026-02-09T00:00:00.000000000","2026-02-16T00:00:00.000000000","2026-02-23T00:00:00.000000000","2026-03-02T00:00:00.000000000","2026-03-09T00:00:00.000000000","2026-03-16T00:00:00.000000000","2026-03-23T00:00:00.000000000","2026-03-30T00:00:00.000000000","2026-04-06T00:00:00.000000000","2026-04-13T00:00:00.000000000"],"y":{"dtype":"f8","bdata":"AAAAAHD7fUAYhmGYAfN9QM0XD9Yl531AldgZHR76fUCrMQvIhRx+QFJFUwqkI35Ae2\u002fR52gXfkDF3tVXhAV+QO\u002fh2Se1\u002fn1AzOT1HVrjfUDpSNIIqPR9QByLUB0v5X1Ae2Wqo6P5fUCIyYHv9Fp+QAFhsthvuX5AuJStq2Asf0COhjuV22Z\u002fQAcMQtZ7t39ATLzU2jcFgECaecB26S6AQDZ6AxCHWYBAJZPepjV+gECPYMlKP5GAQFGUzgwAqYBAt+e6FF3FgEBEuZCGD+SAQNx25ALu6oBAZiKqxW7tgEC+BiAF5\u002fGAQD5PcnhpGYFAmsG8ndMrgUCkTQzkfDuBQNFqnaDdV4FAH\u002f+yKQNFgUBBwpUciR6BQNk19d8s7oBAlOegKrLJgEAY9qls6aqAQMBkgc67lIBAlTa+VJp4gEAyJW\u002f972+AQMCn6gx2b4BAKLDsep9jgEBhn3SeUFaAQD9TXW8mIIBAo5YW7uPqf0BKiJrj8bh\u002fQBKsQuOghH9AKTq2UyuCf0Cr9ypnvn5\u002fQF5yS1r\u002fiH9AvbNGhEgAgECTmipjUpV\u002fQKp\u002fY0S5\u002f35AmvmWK6FcfkA2+qCzfqx9QPQGqquiiXxAxKSNquaHe0CNM0PXG6h6QMl350uS33lA85AaoGk5eUBKzEhsAZJ4QO4+WvpQCHhA5HVFk+eKd0AkCUuIyxJ3QILXgAcchnZAFEniDHMEdkCxZnefhk51QEt1R7CCvXRARLMDAZeJdEBirlgctF90QEz\u002fgJB2PXRAgkiZ+bgmdEBF7FkDjUl0QMXV7zxzUXRAppD97d1mdECis3egdJJ0QD0QnexUsXRAEydR5WvQdEBn5udqafV0QPBuuaBt93RAnDODlzHfdEC+8UXVvMV0QGOFDgfeq3RAuzuTEi6jdEDOZpFBCJ10QOvWFezip3RApM7W5FqfdEAaBG3nTZ50QCTfMYVDpHRAy0N29R21dEBKegnbxLB0QMm3Uc\u002f\u002f0nRAC9fDhyOJdEAi5x7NxDZ0QFDdlblABXRAwimsGKHTc0Bz0F4ZratzQIA2MeZCfXNAHiUUBKFMc0C6ah4fChpzQM0vxsME03JATO6aT46uckC\u002fIMm40LZyQGROCx7ty3JA"},"type":"scatter","xaxis":"x","yaxis":"y"},{"line":{"color":"#3b82f6","width":1.5},"name":"EMA_50","x":["2024-04-15T00:00:00.000000000","2024-04-22T00:00:00.000000000","2024-04-29T00:00:00.000000000","2024-05-06T00:00:00.000000000","2024-05-13T00:00:00.000000000","2024-05-20T00:00:00.000000000","2024-05-27T00:00:00.000000000","2024-06-03T00:00:00.000000000","2024-06-10T00:00:00.000000000","2024-06-17T00:00:00.000000000","2024-06-24T00:00:00.000000000","2024-07-01T00:00:00.000000000","2024-07-08T00:00:00.000000000","2024-07-15T00:00:00.000000000","2024-07-22T00:00:00.000000000","2024-07-29T00:00:00.000000000","2024-08-05T00:00:00.000000000","2024-08-12T00:00:00.000000000","2024-08-19T00:00:00.000000000","2024-08-26T00:00:00.000000000","2024-09-02T00:00:00.000000000","2024-09-09T00:00:00.000000000","2024-09-16T00:00:00.000000000","2024-09-23T00:00:00.000000000","2024-09-30T00:00:00.000000000","2024-10-07T00:00:00.000000000","2024-10-14T00:00:00.000000000","2024-10-21T00:00:00.000000000","2024-10-28T00:00:00.000000000","2024-11-04T00:00:00.000000000","2024-11-11T00:00:00.000000000","2024-11-18T00:00:00.000000000","2024-11-25T00:00:00.000000000","2024-12-02T00:00:00.000000000","2024-12-09T00:00:00.000000000","2024-12-16T00:00:00.000000000","2024-12-23T00:00:00.000000000","2024-12-30T00:00:00.000000000","2025-01-06T00:00:00.000000000","2025-01-13T00:00:00.000000000","2025-01-20T00:00:00.000000000","2025-01-27T00:00:00.000000000","2025-02-03T00:00:00.000000000","2025-02-10T00:00:00.000000000","2025-02-17T00:00:00.000000000","2025-02-24T00:00:00.000000000","2025-03-03T00:00:00.000000000","2025-03-10T00:00:00.000000000","2025-03-17T00:00:00.000000000","2025-03-24T00:00:00.000000000","2025-03-31T00:00:00.000000000","2025-04-07T00:00:00.000000000","2025-04-14T00:00:00.000000000","2025-04-21T00:00:00.000000000","2025-04-28T00:00:00.000000000","2025-05-05T00:00:00.000000000","2025-05-12T00:00:00.000000000","2025-05-19T00:00:00.000000000","2025-05-26T00:00:00.000000000","2025-06-02T00:00:00.000000000","2025-06-09T00:00:00.000000000","2025-06-16T00:00:00.000000000","2025-06-23T00:00:00.000000000","2025-06-30T00:00:00.000000000","2025-07-07T00:00:00.000000000","2025-07-14T00:00:00.000000000","2025-07-21T00:00:00.000000000","2025-07-28T00:00:00.000000000","2025-08-04T00:00:00.000000000","2025-08-11T00:00:00.000000000","2025-08-18T00:00:00.000000000","2025-08-25T00:00:00.000000000","2025-09-01T00:00:00.000000000","2025-09-08T00:00:00.000000000","2025-09-15T00:00:00.000000000","2025-09-22T00:00:00.000000000","2025-09-29T00:00:00.000000000","2025-10-06T00:00:00.000000000","2025-10-13T00:00:00.000000000","2025-10-20T00:00:00.000000000","2025-10-27T00:00:00.000000000","2025-11-03T00:00:00.000000000","2025-11-10T00:00:00.000000000","2025-11-17T00:00:00.000000000","2025-11-24T00:00:00.000000000","2025-12-01T00:00:00.000000000","2025-12-08T00:00:00.000000000","2025-12-15T00:00:00.000000000","2025-12-22T00:00:00.000000000","2025-12-29T00:00:00.000000000","2026-01-05T00:00:00.000000000","2026-01-12T00:00:00.000000000","2026-01-19T00:00:00.000000000","2026-01-26T00:00:00.000000000","2026-02-02T00:00:00.000000000","2026-02-09T00:00:00.000000000","2026-02-16T00:00:00.000000000","2026-02-23T00:00:00.000000000","2026-03-02T00:00:00.000000000","2026-03-09T00:00:00.000000000","2026-03-16T00:00:00.000000000","2026-03-23T00:00:00.000000000","2026-03-30T00:00:00.000000000","2026-04-06T00:00:00.000000000","2026-04-13T00:00:00.000000000"],"y":{"dtype":"f8","bdata":"AAAAAHD7fUC\u002fvr4+9\u002fd9QNZIvG\u002fj8n1AjdelNj36fUA88jquZgh+QAMvxQYfDH5ASUuV2gEIfkB+cI9ePgF+QKsCvHyb\u002fn1AQLLD41jzfUDAKN9k2Pl9QDExn1VF831AwaxSIST7fUBQ+9t3JyN+QME8tf8+TH5AnHYDS9t\u002ffkDhXQ3Ds55+QOcORBjAx35Aol48A0\u002fzfkC1I11ElyB\u002fQCf61mkgUH9AexNWC0F8f0C4ErJY\u002f5p\u002fQJOoPFrpvX9AAayewh3lf0BlFikIdweAQIkayLjxEoBAojy743EcgEAKA9IfeyaAQPEHCxe6PoBA2T6wouJOgEAc9kmX\u002f12AQORakohecoBAY2ZVIZtzgEBfYqeA+WuAQBXwvl4QX4BATIfLvqdVgEBO0gmxh02AQM6IIlQPSIBAYnRnwns\u002fgEC0UU\u002fCJz6AQKNxiFLpP4BAwP5pzeY8gEDrHKy18DiAQCN2vgDKI4BA69qT3Q8SgEC6NrYnqAaAQNQTT4x29H9AhovdlRDvf0CB+fJFYul\u002fQJDHPo1s6X9A3l\u002fVPnALgEBV1myo1+l\u002fQHVVLLztqH9A0AaZAiNff0AYkx8jeQx\u002fQOUe54nnhn5AoA7eo84IfkBycu4ahpN9QGnhraejI31AM3kQF2++fEC0tfHeKlZ8QHaQPWCp93tAUxInjISce0DsYf2bNkJ7QH\u002fHSH9E3npAf5LrmkN9ekA5BZKudQV6QKCg4a9qmnlAvQMVwjdUeUDAKw8R3hJ5QF5\u002f+uaV1XhA3fc7bhmeeED9xWEimn94QLxArgaUWHhAAAxI4\u002fU4eEDOUV5ajSR4QMuAPEBrDXhAw4CZ3334d0CTWHCyCOh3QMD6dXBFy3dACQ8mBeikd0CuSt6wl353QAKJy8acWHdA5MT6uS46d0ASpKWoph13QPPtZ4H\u002fCHdAe8FKMpntdkCzh\u002fzaBNZ2QISl96M1wnZADKSiduWzdkA+PpdNE552QH3rLCvTmHZAyWlsWp1odkBOEE8F5TN2QJb7UDyKC3ZAY5wbIsjidUBkuUxoqL11QM9h9CLDlXVA2z9eqrJsdUCHajfrh0J1QL7KweWeD3VANCy10ibqdECwYf4WI9d0QJASn917ynRA"},"type":"scatter","xaxis":"x","yaxis":"y"},{"line":{"color":"#cbd5e1","width":1.5},"name":"ADX","x":["2024-04-15T00:00:00.000000000","2024-04-22T00:00:00.000000000","2024-04-29T00:00:00.000000000","2024-05-06T00:00:00.000000000","2024-05-13T00:00:00.000000000","2024-05-20T00:00:00.000000000","2024-05-27T00:00:00.000000000","2024-06-03T00:00:00.000000000","2024-06-10T00:00:00.000000000","2024-06-17T00:00:00.000000000","2024-06-24T00:00:00.000000000","2024-07-01T00:00:00.000000000","2024-07-08T00:00:00.000000000","2024-07-15T00:00:00.000000000","2024-07-22T00:00:00.000000000","2024-07-29T00:00:00.000000000","2024-08-05T00:00:00.000000000","2024-08-12T00:00:00.000000000","2024-08-19T00:00:00.000000000","2024-08-26T00:00:00.000000000","2024-09-02T00:00:00.000000000","2024-09-09T00:00:00.000000000","2024-09-16T00:00:00.000000000","2024-09-23T00:00:00.000000000","2024-09-30T00:00:00.000000000","2024-10-07T00:00:00.000000000","2024-10-14T00:00:00.000000000","2024-10-21T00:00:00.000000000","2024-10-28T00:00:00.000000000","2024-11-04T00:00:00.000000000","2024-11-11T00:00:00.000000000","2024-11-18T00:00:00.000000000","2024-11-25T00:00:00.000000000","2024-12-02T00:00:00.000000000","2024-12-09T00:00:00.000000000","2024-12-16T00:00:00.000000000","2024-12-23T00:00:00.000000000","2024-12-30T00:00:00.000000000","2025-01-06T00:00:00.000000000","2025-01-13T00:00:00.000000000","2025-01-20T00:00:00.000000000","2025-01-27T00:00:00.000000000","2025-02-03T00:00:00.000000000","2025-02-10T00:00:00.000000000","2025-02-17T00:00:00.000000000","2025-02-24T00:00:00.000000000","2025-03-03T00:00:00.000000000","2025-03-10T00:00:00.000000000","2025-03-17T00:00:00.000000000","2025-03-24T00:00:00.000000000","2025-03-31T00:00:00.000000000","2025-04-07T00:00:00.000000000","2025-04-14T00:00:00.000000000","2025-04-21T00:00:00.000000000","2025-04-28T00:00:00.000000000","2025-05-05T00:00:00.000000000","2025-05-12T00:00:00.000000000","2025-05-19T00:00:00.000000000","2025-05-26T00:00:00.000000000","2025-06-02T00:00:00.000000000","2025-06-09T00:00:00.000000000","2025-06-16T00:00:00.000000000","2025-06-23T00:00:00.000000000","2025-06-30T00:00:00.000000000","2025-07-07T00:00:00.000000000","2025-07-14T00:00:00.000000000","2025-07-21T00:00:00.000000000","2025-07-28T00:00:00.000000000","2025-08-04T00:00:00.000000000","2025-08-11T00:00:00.000000000","2025-08-18T00:00:00.000000000","2025-08-25T00:00:00.000000000","2025-09-01T00:00:00.000000000","2025-09-08T00:00:00.000000000","2025-09-15T00:00:00.000000000","2025-09-22T00:00:00.000000000","2025-09-29T00:00:00.000000000","2025-10-06T00:00:00.000000000","2025-10-13T00:00:00.000000000","2025-10-20T00:00:00.000000000","2025-10-27T00:00:00.000000000","2025-11-03T00:00:00.000000000","2025-11-10T00:00:00.000000000","2025-11-17T00:00:00.000000000","2025-11-24T00:00:00.000000000","2025-12-01T00:00:00.000000000","2025-12-08T00:00:00.000000000","2025-12-15T00:00:00.000000000","2025-12-22T00:00:00.000000000","2025-12-29T00:00:00.000000000","2026-01-05T00:00:00.000000000","2026-01-12T00:00:00.000000000","2026-01-19T00:00:00.000000000","2026-01-26T00:00:00.000000000","2026-02-02T00:00:00.000000000","2026-02-09T00:00:00.000000000","2026-02-16T00:00:00.000000000","2026-02-23T00:00:00.000000000","2026-03-02T00:00:00.000000000","2026-03-09T00:00:00.000000000","2026-03-16T00:00:00.000000000","2026-03-23T00:00:00.000000000","2026-03-30T00:00:00.000000000","2026-04-06T00:00:00.000000000","2026-04-13T00:00:00.000000000"],"y":{"dtype":"f8","bdata":"AAAAAAAA+H8AAAAAAAD4fwAAAAAAAFlAxSQRGWpiWEC2NVkaKBZYQCmzQIlYz1dAokX2hT5vVkC6VsYAaRJVQEi0cyXo9FNApfQF2MYOU0CTUINNmbdRQMvcwAPveFBAXwSqY43oTkBR1uRgrqNOQPsGwLm6Y05AooGQKs1QTkA42kh8xwdOQJ51TxH5w01AtM5mHXeMTUC2cZilYHhNQM4BmPatl01A\u002fMwD+mwFTUDSDPrItD9MQKsuhurPdUtA2M8nMkgSS0BdnKt03LVKQJOi5F07C0lADpaZfxN\u002fR0AAL+aeNw9GQLT3AbcJvUVANcv2QMWYRUDTQfVNNBdFQAdxXMX800RA+4VjMnJhQ0AJp+Ntrn9CQK+sP4qAGkJAyWgnyYy8QUC+vRsKK1RBQPDYf4VIjUBAoJjCWKczP0AJuEAzhW89QM+Vt8iRiDtAmMi3Tb\u002fROUB3ZRMARTo4QKFSAN0YCzlA\u002f3clKgLNOUCuSpjZx485QOIyFSHtVjlAIF3klcpAOEAuMwyJJBo3QKzg4R1y1DVAQGb\u002fHIMENkBC2jrYgY40QPp\u002f3+1zxTNAvC1+76JtM0B6LezBlWUzQCsLn\u002frwKzVAdLRp+NfRNkD4ovpVsmA4QDIy7WYcljlAKEM5lI2LOkAx5f+rdm87QM2bVE27UjxAJDDYOkmRPEC4xxU13Pg8QAY6AML6oD1A4qqE4elIPkCRqAvOOJc\u002fQBHK1lTTZkBAsy65ZTncP0AfI0YiGMw+QDe3ClMq2D1AWYXxjDyxPEB0sHf0TPg6QFePBjDcXjlAVjzuQMgGOECL7BXLYCg3QEWvt+rAkzZArDg9sz75NUDiNERd6Z01QKKzeTrSnjRAQ7DDEi1rM0Aom+twYTYyQM4tckfJhzFAOJ1bZbuaMEAhlbkSff0uQKojJnFP6ixAKy6EyC4vK0D6r\u002f5rvU0pQKmljFxcVShA5p\u002f\u002fHWKBKED2y1rauQkoQKC7u3Zu4yhAIYbqHXimKEDWmPsnemApQA3pCFzowylACTp9bc0MKkATV8hLtk0rQJpPLu9HdixA2AqfLHMILkD++AwlpwovQNUoYgqDrjBAk7bSQnjCMUD5TfhamNUwQB2Qf5mSVC9A"},"type":"scatter","xaxis":"x2","yaxis":"y2"},{"marker":{"color":["#22c55e","#ef4444","#ef4444","#22c55e","#22c55e","#ef4444","#ef4444","#ef4444","#22c55e","#ef4444","#22c55e","#ef4444","#22c55e","#22c55e","#22c55e","#22c55e","#ef4444","#22c55e","#22c55e","#22c55e","#22c55e","#ef4444","#ef4444","#22c55e","#22c55e","#22c55e","#ef4444","#ef4444","#22c55e","#22c55e","#ef4444","#22c55e","#22c55e","#ef4444","#ef4444","#ef4444","#22c55e","#22c55e","#22c55e","#ef4444","#22c55e","#22c55e","#ef4444","#ef4444","#ef4444","#22c55e","#22c55e","#ef4444","#22c55e","#22c55e","#22c55e","#22c55e","#ef4444","#ef4444","#ef4444","#ef4444","#ef4444","#ef4444","#22c55e","#22c55e","#22c55e","#ef4444","#22c55e","#ef4444","#ef4444","#ef4444","#ef4444","#ef4444","#22c55e","#22c55e","#ef4444","#22c55e","#22c55e","#22c55e","#ef4444","#22c55e","#22c55e","#ef4444","#22c55e","#22c55e","#ef4444","#ef4444","#22c55e","#ef4444","#22c55e","#22c55e","#22c55e","#ef4444","#22c55e","#22c55e","#22c55e","#ef4444","#22c55e","#ef4444","#ef4444","#22c55e","#ef4444","#22c55e","#ef4444","#22c55e","#ef4444","#ef4444","#22c55e","#22c55e","#22c55e"]},"name":"Volume","x":["2024-04-15T00:00:00.000000000","2024-04-22T00:00:00.000000000","2024-04-29T00:00:00.000000000","2024-05-06T00:00:00.000000000","2024-05-13T00:00:00.000000000","2024-05-20T00:00:00.000000000","2024-05-27T00:00:00.000000000","2024-06-03T00:00:00.000000000","2024-06-10T00:00:00.000000000","2024-06-17T00:00:00.000000000","2024-06-24T00:00:00.000000000","2024-07-01T00:00:00.000000000","2024-07-08T00:00:00.000000000","2024-07-15T00:00:00.000000000","2024-07-22T00:00:00.000000000","2024-07-29T00:00:00.000000000","2024-08-05T00:00:00.000000000","2024-08-12T00:00:00.000000000","2024-08-19T00:00:00.000000000","2024-08-26T00:00:00.000000000","2024-09-02T00:00:00.000000000","2024-09-09T00:00:00.000000000","2024-09-16T00:00:00.000000000","2024-09-23T00:00:00.000000000","2024-09-30T00:00:00.000000000","2024-10-07T00:00:00.000000000","2024-10-14T00:00:00.000000000","2024-10-21T00:00:00.000000000","2024-10-28T00:00:00.000000000","2024-11-04T00:00:00.000000000","2024-11-11T00:00:00.000000000","2024-11-18T00:00:00.000000000","2024-11-25T00:00:00.000000000","2024-12-02T00:00:00.000000000","2024-12-09T00:00:00.000000000","2024-12-16T00:00:00.000000000","2024-12-23T00:00:00.000000000","2024-12-30T00:00:00.000000000","2025-01-06T00:00:00.000000000","2025-01-13T00:00:00.000000000","2025-01-20T00:00:00.000000000","2025-01-27T00:00:00.000000000","2025-02-03T00:00:00.000000000","2025-02-10T00:00:00.000000000","2025-02-17T00:00:00.000000000","2025-02-24T00:00:00.000000000","2025-03-03T00:00:00.000000000","2025-03-10T00:00:00.000000000","2025-03-17T00:00:00.000000000","2025-03-24T00:00:00.000000000","2025-03-31T00:00:00.000000000","2025-04-07T00:00:00.000000000","2025-04-14T00:00:00.000000000","2025-04-21T00:00:00.000000000","2025-04-28T00:00:00.000000000","2025-05-05T00:00:00.000000000","2025-05-12T00:00:00.000000000","2025-05-19T00:00:00.000000000","2025-05-26T00:00:00.000000000","2025-06-02T00:00:00.000000000","2025-06-09T00:00:00.000000000","2025-06-16T00:00:00.000000000","2025-06-23T00:00:00.000000000","2025-06-30T00:00:00.000000000","2025-07-07T00:00:00.000000000","2025-07-14T00:00:00.000000000","2025-07-21T00:00:00.000000000","2025-07-28T00:00:00.000000000","2025-08-04T00:00:00.000000000","2025-08-11T00:00:00.000000000","2025-08-18T00:00:00.000000000","2025-08-25T00:00:00.000000000","2025-09-01T00:00:00.000000000","2025-09-08T00:00:00.000000000","2025-09-15T00:00:00.000000000","2025-09-22T00:00:00.000000000","2025-09-29T00:00:00.000000000","2025-10-06T00:00:00.000000000","2025-10-13T00:00:00.000000000","2025-10-20T00:00:00.000000000","2025-10-27T00:00:00.000000000","2025-11-03T00:00:00.000000000","2025-11-10T00:00:00.000000000","2025-11-17T00:00:00.000000000","2025-11-24T00:00:00.000000000","2025-12-01T00:00:00.000000000","2025-12-08T00:00:00.000000000","2025-12-15T00:00:00.000000000","2025-12-22T00:00:00.000000000","2025-12-29T00:00:00.000000000","2026-01-05T00:00:00.000000000","2026-01-12T00:00:00.000000000","2026-01-19T00:00:00.000000000","2026-01-26T00:00:00.000000000","2026-02-02T00:00:00.000000000","2026-02-09T00:00:00.000000000","2026-02-16T00:00:00.000000000","2026-02-23T00:00:00.000000000","2026-03-02T00:00:00.000000000","2026-03-09T00:00:00.000000000","2026-03-16T00:00:00.000000000","2026-03-23T00:00:00.000000000","2026-03-30T00:00:00.000000000","2026-04-06T00:00:00.000000000","2026-04-13T00:00:00.000000000"],"y":{"dtype":"i4","bdata":"RIJ4AvzUIwEIx9oAoHDVAKBH4AAQisQAFEFUAQjN2QDgBDMBiHwOAbyVMwK0HM8AVGQAAbBuPgLcZu4A5DU6AXQUEgF0MsIAhEaoAKCflwCEnqoA6CXsAJTvBwEsMNUA3DzcAFwdqQCU77YB0PDPAJzhswD0OEABLPLvAGBq7gBQ8bgAxEu3AdjWcQLEXRID8OTFAMiFAQF0LRIBnLTaAVjuDQG0lAYBuKQfAQjO9gCA2DYC2IbgAQyehgGAVywBCIigAfyg6QDIVJsB4LrGAvQ3gQK46eICLGfEAjBfZALIXxYSuF2JC9CjGQREuiAE+F8NBBxLOwNElhMDjLIdA1wAIwMw7vEDQH2YBPR56Ajoe4MEsPokCOxsXwZMsXwDZPOHAmwX5Ab4dGcDlEezAoyXsQLMNboCHODyAaBE5wEcFnoDdCLaAhTclAI0IlwC0NB7AdzaQQLMLtYBLIQMAiQfKgEkFDABLIkHAtjM\u002fgEoHvkBXA51B1yfRwNIL8cCYNF3AYws4ALkKBkCDEZMArAyjQOA4ncCLNm3AVzW9wL\u002fDgAB"},"type":"bar","xaxis":"x3","yaxis":"y3"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"rgb(17,17,17)","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#f2f5fa"},"error_y":{"color":"#f2f5fa"},"marker":{"line":{"color":"rgb(17,17,17)","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#A2B1C6","gridcolor":"#506784","linecolor":"#506784","minorgridcolor":"#506784","startlinecolor":"#A2B1C6"},"baxis":{"endlinecolor":"#A2B1C6","gridcolor":"#506784","linecolor":"#506784","minorgridcolor":"#506784","startlinecolor":"#A2B1C6"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"line":{"color":"#283442"}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"marker":{"line":{"color":"#283442"}},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#506784"},"line":{"color":"rgb(17,17,17)"}},"header":{"fill":{"color":"#2a3f5f"},"line":{"color":"rgb(17,17,17)"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#f2f5fa","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#f2f5fa"},"geo":{"bgcolor":"rgb(17,17,17)","lakecolor":"rgb(17,17,17)","landcolor":"rgb(17,17,17)","showlakes":true,"showland":true,"subunitcolor":"#506784"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"dark"},"paper_bgcolor":"rgb(17,17,17)","plot_bgcolor":"rgb(17,17,17)","polar":{"angularaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"bgcolor":"rgb(17,17,17)","radialaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"},"yaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"},"zaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"}},"shapedefaults":{"line":{"color":"#f2f5fa"}},"sliderdefaults":{"bgcolor":"#C8D4E3","bordercolor":"rgb(17,17,17)","borderwidth":1,"tickwidth":0},"ternary":{"aaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"baxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"bgcolor":"rgb(17,17,17)","caxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""}},"title":{"x":0.05},"updatemenudefaults":{"bgcolor":"#506784","borderwidth":0},"xaxis":{"automargin":true,"gridcolor":"#283442","linecolor":"#506784","ticks":"","title":{"standoff":15},"zerolinecolor":"#283442","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#283442","linecolor":"#506784","ticks":"","title":{"standoff":15},"zerolinecolor":"#283442","zerolinewidth":2}}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"matches":"x3","showticklabels":false,"rangeslider":{"visible":false},"showgrid":true,"gridcolor":"rgba(255,255,255,0.05)"},"yaxis":{"anchor":"x","domain":[0.436,1.0],"showgrid":true,"gridcolor":"rgba(255,255,255,0.05)"},"xaxis2":{"anchor":"y2","domain":[0.0,1.0],"matches":"x3","showticklabels":false,"rangeslider":{"visible":false},"showgrid":true,"gridcolor":"rgba(255,255,255,0.05)"},"yaxis2":{"anchor":"x2","domain":[0.218,0.406],"showgrid":true,"gridcolor":"rgba(255,255,255,0.05)"},"xaxis3":{"anchor":"y3","domain":[0.0,1.0],"rangeslider":{"visible":false},"showgrid":true,"gridcolor":"rgba(255,255,255,0.05)"},"yaxis3":{"anchor":"x3","domain":[0.0,0.188],"showgrid":true,"gridcolor":"rgba(255,255,255,0.05)"},"shapes":[{"line":{"color":"rgba(255,255,255,0.3)","dash":"dash"},"type":"line","x0":0,"x1":1,"xref":"x2 domain","y0":25,"y1":25,"yref":"y2"}],"margin":{"l":10,"r":10,"t":10,"b":10},"font":{"family":"Inter, sans-serif","color":"#94a3b8"},"paper_bgcolor":"rgba(0,0,0,0)","plot_bgcolor":"rgba(0,0,0,0)","height":800,"showlegend":false},                        {"displayModeBar": false, "responsive": true}                    )                };            </script>        </div>
+            </div>
         </div>
         
 <script>

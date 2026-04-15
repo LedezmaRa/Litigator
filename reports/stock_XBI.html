@@ -1,0 +1,1247 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>XBI Analysis | Command Center</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+        <style>
+:root {
+    --bg-color: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --card-border: 1px solid rgba(255, 255, 255, 0.1);
+    --text-primary: #e2e8f0;
+    --text-secondary: #a8b4c2;
+    --accent-optimal: #4ade80;
+    --accent-good: #34d399;
+    --accent-marginal: #fbbf24;
+    --accent-poor: #f87171;
+    --accent-info: #38bdf8;
+    --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+    --glass-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────── */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    background-image:
+        radial-gradient(at 0%   0%, hsla(253,16%,7%,1) 0, transparent 50%),
+        radial-gradient(at 50%  0%, hsla(225,39%,30%,1) 0, transparent 50%),
+        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* ── Glassmorphism Card ─────────────────────────────────────────────────── */
+.glass-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: var(--card-border);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--glass-shadow);
+}
+
+/* ── Typography ─────────────────────────────────────────────────────────── */
+h1, h2, h3, h4 { margin-top: 0; color: #fff; font-weight: 600; }
+.text-muted   { color: var(--text-secondary); }
+.text-sm      { font-size: 0.875rem; }
+.text-xs      { font-size: 0.75rem; }
+.font-mono    { font-family: 'JetBrains Mono', monospace; }
+
+/* ── Status Badges ──────────────────────────────────────────────────────── */
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.badge-optimal    { background: rgba(74,222,128,0.2);  color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+.badge-good       { background: rgba(52,211,153,0.2);  color: #34d399; border: 1px solid rgba(52,211,153,0.3); }
+.badge-acceptable { background: rgba(251,191,36,0.15); color: #e2b84a; border: 1px solid rgba(251,191,36,0.4); }
+.badge-marginal   { background: rgba(251,191,36,0.2);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+.badge-poor       { background: rgba(248,113,113,0.2); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+.badge-info       { background: rgba(56,189,248,0.2);  color: #38bdf8; border: 1px solid rgba(56,189,248,0.3); }
+
+/* ── Score Hero ─────────────────────────────────────────────────────────── */
+/*
+ * Add class="score-hero" (or .score-hero-card) to the primary status card to
+ * give it a coloured glow matching the score tier.
+ * Set --hero-color inline on the element: style="--hero-color:var(--accent-optimal)"
+ *
+ * .score-hero-value  — large standalone number (use when NOT embedding a gauge ring)
+ * .score-hero-label  — small uppercase caption beneath the number
+ *
+ * NOTE: the existing .score-value class is used INSIDE .score-ring-container;
+ * we intentionally avoid overriding it here to prevent gauge ring conflicts.
+ */
+.score-hero {
+    border-color: var(--hero-color, rgba(74,222,128,0.25)) !important;
+    background: linear-gradient(
+        135deg,
+        rgba(30,41,59,0.85) 0%,
+        rgba(15,23,42,0.95) 100%
+    ) !important;
+    box-shadow: 0 0 0 1px var(--hero-color, rgba(74,222,128,0.2)),
+                0 8px 32px rgba(0,0,0,0.3);
+    position: relative;
+}
+/* Subtle coloured top-edge accent */
+.score-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--hero-color, var(--accent-optimal));
+    border-radius: 1rem 1rem 0 0;
+    opacity: 0.7;
+}
+.score-hero-value {
+    font-size: 4rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--hero-color, var(--accent-optimal));
+}
+.score-hero-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+}
+
+/* ── Score Gauge Ring ───────────────────────────────────────────────────── */
+.score-ring-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.score-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #fff;
+    z-index: 10;
+}
+.score-circle-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 8; }
+.score-circle-fg {
+    fill: none;
+    stroke-width: 8;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    transition: stroke-dashoffset 1s ease-out;
+}
+
+/* ── Grid Layouts ───────────────────────────────────────────────────────── */
+.grid-cols-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+.grid-cols-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 1.5rem; }
+@media (max-width: 1024px) { .grid-cols-3 { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 768px)  { .grid-cols-3, .grid-cols-2 { grid-template-columns: 1fr; } }
+
+/* ── HUD Metrics ────────────────────────────────────────────────────────── */
+.metric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.metric-item:last-child { border-bottom: none; }
+.progress-bar-bg {
+    width: 100px;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+.progress-bar-fg { height: 100%; border-radius: 3px; }
+
+/* ── Data Table ─────────────────────────────────────────────────────────── */
+.modern-table { width: 100%; border-collapse: separate; border-spacing: 0 0.5rem; }
+.modern-table th {
+    padding: 1rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.875rem;
+    text-align: left;
+}
+.modern-table td {
+    padding: 1rem;
+    background: rgba(30,41,59,0.5);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.modern-table td:first-child {
+    border-top-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.modern-table td:last-child {
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+    border-right: 1px solid rgba(255,255,255,0.05);
+}
+.modern-table tr:hover td {
+    background: rgba(30,41,59,0.8);
+    cursor: pointer;
+    transform: scale(1.005);
+    transition: all 0.2s;
+}
+
+/* ── Mobile-Responsive Table (stacks as cards below 720 px) ────────────── */
+@media (max-width: 720px) {
+    .modern-table thead { display: none; }
+    .modern-table,
+    .modern-table tbody,
+    .modern-table tr,
+    .modern-table td { display: block; width: 100%; }
+    .modern-table tr {
+        background: rgba(30,41,59,0.5);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 0.75rem;
+        margin-bottom: 0.75rem;
+        padding: 0.5rem;
+    }
+    .modern-table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.4rem 0.75rem;
+        border: none;
+        border-radius: 0;
+    }
+    /* Each <td data-label="Score"> shows its column label via pseudo-element */
+    .modern-table td[data-label]::before {
+        content: attr(data-label);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+        margin-right: 0.5rem;
+    }
+    /* Reset first/last child border radius overrides from desktop */
+    .modern-table td:first-child,
+    .modern-table td:last-child {
+        border-radius: 0;
+        border: none;
+    }
+}
+
+/* ── Links ──────────────────────────────────────────────────────────────── */
+a { color: inherit; text-decoration: none; }
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    transition: color 0.2s;
+}
+.back-link:hover { color: #fff; }
+
+/* ── Breadcrumb ─────────────────────────────────────────────────────────── */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    font-size: 0.875rem;
+}
+.breadcrumb a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.breadcrumb a:hover { color: var(--text-primary); }
+.breadcrumb .bc-sep { color: var(--text-secondary); opacity: 0.5; }
+.breadcrumb .bc-current { color: var(--text-primary); font-weight: 500; }
+
+/* ── Sortable Table Headers ─────────────────────────────────────────────── */
+.modern-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-right: 1.5rem;
+}
+.modern-table th.sortable:hover { color: var(--text-primary); }
+.modern-table th.sortable::after      { content: '⇅'; position: absolute; right: 0.5rem; opacity: 0.4; font-size: 0.7rem; }
+.modern-table th.sortable.asc::after  { content: '↑'; opacity: 1; color: var(--accent-optimal); }
+.modern-table th.sortable.desc::after { content: '↓'; opacity: 1; color: var(--accent-optimal); }
+
+/* ── Search Input ───────────────────────────────────────────────────────── */
+.search-input {
+    background: rgba(30,41,59,0.7);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+    width: 100%;
+    max-width: 600px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-input:focus {
+    border-color: var(--accent-info);
+    box-shadow: 0 0 0 3px rgba(56,189,248,0.1);
+}
+.search-input::placeholder { color: var(--text-secondary); }
+
+/* ── Filter Controls ────────────────────────────────────────────────────── */
+.filter-bar { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.filter-btn {
+    background: rgba(30,41,59,0.7);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.filter-btn:hover { background: rgba(30,41,59,0.9); color: var(--text-primary); }
+.filter-btn.active {
+    background: rgba(74,222,128,0.2);
+    border-color: rgba(74,222,128,0.3);
+    color: var(--accent-optimal);
+}
+
+/* ── Chart Tooltip ──────────────────────────────────────────────────────── */
+.chart-tooltip {
+    position: fixed;
+    background: rgba(15,23,42,0.95);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    display: none;
+}
+.chart-tooltip.visible { display: block; }
+
+/* ── Stock Card Hover ───────────────────────────────────────────────────── */
+.glass-card.stock-card { transition: transform 0.2s, box-shadow 0.2s; }
+.glass-card.stock-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+
+/* ── Utility ────────────────────────────────────────────────────────────── */
+.hidden         { display: none !important; }
+.text-positive  { color: var(--accent-optimal); }
+.text-negative  { color: var(--accent-poor); }
+.flex-between   { display: flex; justify-content: space-between; align-items: center; }
+.flex-center    { display: flex; justify-content: center; align-items: center; }
+.flex-wrap      { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.flex-col       { display: flex; flex-direction: column; }
+.text-center    { text-align: center; }
+.text-right     { text-align: right; }
+.m-0            { margin: 0; }
+.mb-0           { margin-bottom: 0 !important; }
+.mb-1           { margin-bottom: 0.5rem; }
+.mb-2           { margin-bottom: 1rem; }
+.mb-3           { margin-bottom: 1.5rem; }
+.mb-4           { margin-bottom: 2rem; }
+.mb-6           { margin-bottom: 3rem; }
+.mt-1           { margin-top: 0.5rem; }
+.mt-2           { margin-top: 1rem; }
+.mt-3           { margin-top: 1.5rem; }
+.mt-4           { margin-top: 2rem; }
+.mt-6           { margin-top: 3rem; }
+.gap-1          { gap: 0.5rem; }
+.gap-2          { gap: 1rem; }
+.gap-3          { gap: 1.5rem; }
+.gap-4          { gap: 2rem; }
+.font-bold      { font-weight: 700; }
+.font-600       { font-weight: 600; }
+.overflow-hidden { overflow: hidden; }
+.uppercase      { text-transform: uppercase; }
+.tracking-wide  { letter-spacing: 0.05em; }
+
+/* ── Stock Narrative Extras ─────────────────────────────────────────────── */
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+}
+.metric-card {
+    background: rgba(30,41,59,0.5);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.hero-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+@media (max-width: 768px) {
+    .hero-header { flex-direction: column; }
+    .metric-grid { grid-template-columns: repeat(2,1fr); }
+}
+
+/* ── Top Navigation Menu ────────────────────────────────────────────────── */
+.top-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(15,23,42,0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    margin-bottom: 2rem;
+}
+.top-nav-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.nav-item {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+.nav-item:hover {
+    color: var(--text-primary);
+    background: rgba(255,255,255,0.05);
+}
+.nav-item.active {
+    color: var(--accent-optimal);
+    background: rgba(74,222,128,0.1);
+    border: 1px solid rgba(74,222,128,0.2);
+}
+
+/* ── Metrics Guide (collapsible help panel) ─────────────────────────────── */
+.metrics-guide {
+    margin-bottom: 1.5rem;
+}
+.metrics-guide > summary {
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+    background: rgba(30,41,59,0.5);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 0.5rem;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s, background 0.2s;
+    user-select: none;
+}
+.metrics-guide > summary:hover { color: var(--text-primary); background: rgba(30,41,59,0.8); }
+.metrics-guide > summary::marker,
+.metrics-guide > summary::-webkit-details-marker { display: none; }
+.metrics-guide[open] > summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; color: var(--text-primary); }
+.metrics-guide-body {
+    background: rgba(30,41,59,0.4);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-top: none;
+    border-bottom-left-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px,1fr));
+    gap: 0.75rem 1.5rem;
+}
+.metric-def dt {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-info);
+    margin-bottom: 0.15rem;
+}
+.metric-def dd {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ── Empty State ────────────────────────────────────────────────────────── */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--text-secondary);
+}
+.empty-state .empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    opacity: 0.5;
+}
+.empty-state p { margin: 0 0 0.5rem; font-size: 0.95rem; }
+.empty-state a { color: var(--accent-info); }
+
+/* ── Regime Summary Bar ─────────────────────────────────────────────────── */
+/*
+ * Sticky strip that sits just below the top-nav (top:60px, z-index:900).
+ * Shows the overall macro verdict + one pill per basket.
+ * The JS in INTERACTIVE_JS sets --nav-height on :root so the offset is exact.
+ */
+.regime-bar {
+    background: rgba(15,23,42,0.92);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding: 0.6rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    position: sticky;
+    top: var(--nav-height, 62px);
+    z-index: 900;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+.regime-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+.regime-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+.regime-verdict {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.regime-insight {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    max-width: 360px;
+    line-height: 1.4;
+}
+.regime-counts {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    flex-shrink: 0;
+}
+.regime-pills {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.regime-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.2rem 0.55rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(30,41,59,0.6);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    cursor: default;
+}
+.regime-pill .pill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+@media (max-width: 768px) {
+    .regime-bar { top: 0; position: relative; }
+    .regime-insight { display: none; }
+    .regime-pills { display: none; }
+}
+
+/* ── Basket Cards ───────────────────────────────────────────────────────── */
+.basket-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    padding: 1rem 1.5rem;
+    background: var(--card-bg);
+    border: var(--card-border);
+    border-radius: 1rem;
+    user-select: none;
+}
+.basket-section-header:hover { background: rgba(30,41,59,0.85); }
+.basket-section-toggle {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    transition: transform 0.2s;
+}
+details.basket-section[open] .basket-section-toggle { transform: rotate(180deg); }
+
+.basket-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+@media (max-width: 960px) { .basket-grid { grid-template-columns: 1fr; } }
+
+.basket-card {
+    background: var(--card-bg);
+    border: var(--card-border);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    box-shadow: var(--glass-shadow);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.basket-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+/* Coloured top-edge accent — driven purely by class, no inline style needed */
+.basket-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 1rem 1rem 0 0;
+}
+.basket-card.signal-bullish { border-color: rgba(74,222,128,0.25); }
+.basket-card.signal-bullish::before { background: var(--accent-optimal); }
+.basket-card.signal-neutral { border-color: rgba(251,191,36,0.2); }
+.basket-card.signal-neutral::before { background: var(--accent-marginal); }
+.basket-card.signal-bearish { border-color: rgba(248,113,113,0.25); }
+.basket-card.signal-bearish::before { background: var(--accent-poor); }
+
+.basket-meta-row {
+    display: flex;
+    gap: 1.25rem;
+    margin: 0.6rem 0 0.75rem;
+    flex-wrap: wrap;
+}
+.basket-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+.basket-meta-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-secondary);
+}
+.basket-meta-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+}
+.basket-divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin: 0.5rem 0 0.6rem;
+}
+.basket-ticker-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.8rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: background 0.1s;
+    border-radius: 4px;
+}
+.basket-ticker-row:last-of-type { border-bottom: none; }
+.basket-ticker-row:hover { background: rgba(255,255,255,0.04); padding-left: 0.3rem; }
+.basket-ticker-symbol {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 0.82rem;
+    min-width: 56px;
+}
+.basket-ticker-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 0.85rem;
+    min-width: 28px;
+    text-align: right;
+}
+.basket-ticker-chg {
+    font-size: 0.75rem;
+    min-width: 52px;
+    text-align: right;
+}
+.basket-ticker-regime {
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+    min-width: 60px;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.basket-missing {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-top: 0.5rem;
+    line-height: 1.5;
+}
+.basket-no-data {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 1rem 0;
+}
+</style>
+    </head>
+    <body>
+        
+    <nav class="top-nav">
+        <ul class="top-nav-list">
+            <li><a href="index.html" class="nav-item">Command Center</a></li><li><a href="sector_analysis.html" class="nav-item">Sector Analysis</a></li><li><a href="macro_drivers.html" class="nav-item">Macro Drivers</a></li><li><a href="sentiment.html" class="nav-item">Sentiment</a></li><li><a href="market_news.html" class="nav-item">Market News</a></li><li><a href="ai_memo.html" class="nav-item">AI Strategy</a></li><li><a href="ai_macro_memo.html" class="nav-item">Macro AI</a></li>
+        </ul>
+    </nav>
+    
+        <div class="container">
+            <nav class="breadcrumb"><a href="index.html">Command Center</a><span class="bc-sep">/</span><span class="bc-current">XBI</span></nav>
+
+            <div class="grid-cols-3 mb-4">
+                <!-- Main Status Card (hero treatment: coloured border + glow) -->
+                <div class="glass-card score-hero" style="display:flex; align-items:center; gap: 2rem; --hero-color:var(--accent-marginal);">
+                    
+    <div class="score-ring-container" style="width:100px; height:100px">
+        <svg role="img" aria-labelledby="gauge-title-100" width="100" height="100">
+            <title id="gauge-title-100">Score gauge: 60 out of 100</title>
+            <circle class="score-circle-bg" cx="50" cy="50" r="46"></circle>
+            <circle class="score-circle-fg" cx="50" cy="50" r="46"
+                    stroke="var(--accent-good)" stroke-dasharray="289.02628" stroke-dashoffset="115.610512"></circle>
+        </svg>
+        <div class="score-value">60</div>
+    </div>
+    
+                    <div>
+                        <h1 style="font-size:3rem; line-height:1; margin-bottom:0.5rem;">XBI</h1>
+                        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                            <span class="text-xl font-bold">$135.57</span>
+                            <span class="font-mono text-sm" style="color:var(--accent-optimal)">&#9650; +4.7%</span>
+                            <span class="badge badge-marginal">Acceptable</span>
+                        </div>
+                        <span class="text-sm text-muted">Weekly &middot; High Volatility</span>
+                    </div>
+                </div>
+
+                <!-- Score Breakdown -->
+                <div class="glass-card">
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1rem;">Score Breakdown</h3>
+                    
+        <div class="metric-item">
+            <span class="text-sm font-medium">Ema Proximity</span>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div class="progress-bar-bg"><div class="progress-bar-fg" style="width:100.0%; background:var(--accent-optimal);"></div></div>
+                <span class="text-sm font-mono text-muted">20.0/20</span>
+            </div>
+        </div>
+        
+        <div class="metric-item">
+            <span class="text-sm font-medium">Adx Stage</span>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div class="progress-bar-bg"><div class="progress-bar-fg" style="width:26.666666666666668%; background:var(--accent-poor);"></div></div>
+                <span class="text-sm font-mono text-muted">8.0/30</span>
+            </div>
+        </div>
+        
+        <div class="metric-item">
+            <span class="text-sm font-medium">Volume Conviction</span>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div class="progress-bar-bg"><div class="progress-bar-fg" style="width:68.0%; background:var(--accent-optimal);"></div></div>
+                <span class="text-sm font-mono text-muted">17.0/25</span>
+            </div>
+        </div>
+        
+        <div class="metric-item">
+            <span class="text-sm font-medium">Structure</span>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div class="progress-bar-bg"><div class="progress-bar-fg" style="width:100.0%; background:var(--accent-optimal);"></div></div>
+                <span class="text-sm font-mono text-muted">15.0/15</span>
+            </div>
+        </div>
+        
+        <div class="metric-item">
+            <span class="text-sm font-medium">Risk Reward</span>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div class="progress-bar-bg"><div class="progress-bar-fg" style="width:0.0%; background:var(--accent-poor);"></div></div>
+                <span class="text-sm font-mono text-muted">0.0/10</span>
+            </div>
+        </div>
+        
+                </div>
+
+                <!-- Risk & Targets (regime-aware) -->
+                <div class="glass-card">
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1rem;">Risk Management</h3>
+                    <div class="grid-cols-2" style="gap:1rem;">
+                        <div>
+                            <span class="text-xs text-muted block">ATR (14)</span>
+                            <span class="font-mono text-sm">$6.79</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-muted block">EMA20 Support</span>
+                            <span class="font-mono text-sm" style="color:var(--accent-info)">$122.68</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-muted block">EMA50 Trend</span>
+                            <span class="font-mono text-sm" style="color:#8b5cf6">$111.68</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-muted block">ADX</span>
+                            <span class="font-mono text-sm">43.5</span>
+                        </div>
+                    </div>
+                    <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.1);">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                            <span class="text-sm text-muted">Stop (2.5x ATR)</span>
+                            <span class="font-mono text-sm" style="color:var(--accent-poor)">$105.71</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span class="text-sm text-muted">Target (4.0x ATR)</span>
+                            <span class="font-mono text-sm" style="color:var(--accent-optimal)">$162.73</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:0.05em; margin:0;">Short Interest &amp; Squeeze Potential</h3>
+                <span class="badge badge-good">Low Squeeze Risk</span>
+            </div>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:1rem;">
+                <div>
+                    <span class="text-xs text-muted block">Float Short</span>
+                    <span class="font-mono" style="font-size:1.3rem; font-weight:700;">N/A</span>
+                </div>
+                <div>
+                    <span class="text-xs text-muted block">Days to Cover</span>
+                    <span class="font-mono" style="font-size:1.3rem; font-weight:700;">N/A</span>
+                </div>
+                <div>
+                    <span class="text-xs text-muted block">MoM Short Change</span>
+                    <span class="font-mono text-sm" style="color:var(--text-secondary); font-weight:600;">N/A</span>
+                </div>
+                <div>
+                    <span class="text-xs text-muted block">Squeeze Score</span>
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-top:4px;">
+                        <div class="progress-bar-bg" style="width:80px;"><div class="progress-bar-fg" style="width:0%; background:var(--accent-optimal);"></div></div>
+                        <span class="font-mono text-xs text-muted">0/100</span>
+                    </div>
+                </div>
+            </div>
+            <p class="text-xs text-muted" style="margin:0; padding-top:0.75rem; border-top:1px solid rgba(255,255,255,0.05);">Low short interest. A rally in this name is unlikely to have a squeeze component — fundamentals or sector rotation are the more probable drivers.</p>
+        </div>
+    
+            
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Relative Strength Rating</h3>
+                    <p class="text-xs text-muted" style="margin:0;">RS Rating compares how a stock has performed relative to the overall market over the past 12 months, with recent performance weighted more heavily. William O'Neil's research showed that the best-performing stocks had RS Ratings above 80 before their biggest price advances. A high RS Rating means the stock is already showing institutional accumulation — it is a market leader.</p>
+                </div>
+                <span class="badge badge-marginal">Average</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:2rem; flex-wrap:wrap; margin-bottom:.75rem;">
+                <div style="text-align:center;">
+                    <span class="text-xs text-muted block">RS Rating</span>
+                    <span class="font-mono" style="font-size:2rem; font-weight:700; color:var(--accent-marginal);">63</span>
+                    <span class="text-xs text-muted block">out of 99</span>
+                </div>
+                <div style="flex:1; min-width:180px;">
+                    <div class="progress-bar-bg" style="width:100%; margin-bottom:.5rem;"><div class="progress-bar-fg" style="width:63%; background:var(--accent-marginal);"></div></div>
+                    <p class="text-xs text-muted" style="margin:0;">At 63, XBI is performing roughly in line with the market. Not showing the kind of relative strength that precedes major breakouts.</p>
+                </div>
+            </div>
+        </div>
+            
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Earnings Calendar &amp; Binary Risk</h3>
+                    <p class="text-xs text-muted" style="margin:0;">Earnings events are binary — the stock will gap significantly up or down regardless of your technical analysis. Knowing when the next report is lets you size your position appropriately and avoid accidental exposure to a catalyst you haven't evaluated.</p>
+                </div>
+                <span class="badge badge-good">No Upcoming Earnings</span>
+            </div>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:.75rem;">
+                <div><span class="text-xs text-muted block">Next Earnings</span><span class="font-mono text-sm">—</span></div>
+                <div><span class="text-xs text-muted block">Days Away</span><span class="font-mono text-sm" style="color:var(--accent-optimal); font-weight:600;">N/A</span></div>
+                <div><span class="text-xs text-muted block">Implied Move (options)</span><span class="font-mono text-sm">N/A</span></div>
+                <div><span class="text-xs text-muted block">Avg EPS Surprise (4Q)</span><span class="font-mono text-sm">N/A</span></div>
+            </div>
+            <p class="text-xs text-muted" style="margin:0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">No confirmed upcoming earnings date for XBI. Verify against primary sources before entering a position. </p>
+        </div>
+
+            <!-- Two-column intelligence grid -->
+            <div class="grid-cols-2 mb-3">
+                <div>
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0;">Options &amp; Volatility Context</h3>
+                <span class="badge badge-info">N/A IV</span>
+            </div>
+            <p class="text-xs text-muted" style="margin:0 0 1rem 0;">The options market prices in the expected range of price movement. IV Rank (IVR) shows where current volatility sits relative to its 52-week range — 0 is the calmest it's been, 100 is the most fearful. The Put/Call Ratio measures whether traders are buying more protective puts (bearish) or speculative calls (bullish).</p>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:.75rem;">
+                <div>
+                    <span class="text-xs text-muted block">IV Rank (52W)</span>
+                    <div style="display:flex; align-items:center; gap:.75rem; margin-top:4px;">
+                        <div class="progress-bar-bg" style="width:80px;"><div class="progress-bar-fg" style="width:0%; background:var(--accent-optimal);"></div></div>
+                        <span class="font-mono text-sm">N/A/100</span>
+                    </div>
+                    <span class="text-xs text-muted">FAIR</span>
+                </div>
+                <div><span class="text-xs text-muted block">IV / HV Ratio</span><span class="font-mono text-sm">N/A</span></div>
+                <div><span class="text-xs text-muted block">Put/Call Ratio</span><span class="font-mono text-sm">0.15 — Complacent</span></div>
+                <div><span class="text-xs text-muted block">Options Implied Move</span><span class="font-mono text-sm">±3.1%</span></div>
+            </div>
+            <p class="text-xs text-muted" style="margin:0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">Options on XBI show normal conditions. IVR: N/A. P/C ratio: 0.15. No extreme fear or complacency detected — standard position sizing applies. The market is pricing a 3.1% move.</p>
+        </div></div>
+                <div>
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0;">Factor Profile</h3>
+                <span class="badge badge-info">Pure Momentum Play</span>
+            </div>
+            <p class="text-xs text-muted" style="margin:0 0 1rem 0;">Factor investing is the science of understanding WHY a stock is moving. Momentum tells you if institutions are already chasing it (trend confirmation). Quality tells you if the underlying business deserves the price (fundamental anchor). Value tells you if you are overpaying relative to earnings and cash flow (margin of safety). The strongest entries combine strong momentum (confirmation) with decent quality (sustainability) — paying a fair price for a high-quality business that is already trending.</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-bottom:.75rem;">
+                <div><span class="text-xs text-muted block">Momentum</span><div class="progress-bar-bg" style="width:100%;"><div class="progress-bar-fg" style="width:73.9%; background:var(--accent-optimal);"></div></div><span class="text-xs text-muted">Strong Momentum</span></div>
+                <div><span class="text-xs text-muted block">Quality</span><div class="progress-bar-bg" style="width:100%;"><div class="progress-bar-fg" style="width:0%; background:var(--accent-poor);"></div></div><span class="text-xs text-muted">Low Quality</span></div>
+                <div><span class="text-xs text-muted block">Value</span><div class="progress-bar-bg" style="width:100%;"><div class="progress-bar-fg" style="width:0%; background:var(--accent-poor);"></div></div><span class="text-xs text-muted">Expensive</span></div>
+            </div>
+            <p class="text-xs text-muted" style="margin:0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">State Street SPDR S&P Biotech E (XBI) factor profile: Pure Momentum Play | Alignment: MIXED. Momentum: Strong Momentum (74/100) — 12M-1M return +49.6%, 3M return +6.0%. Quality: Low Quality (0/100) — ROE N/A, Gross Margin N/A. Value: Expensive (0/100) — Fwd P/E N/A, P/FCF N/A. Strong momentum but weak quality signals — the move may lack fundamental backing. Manage risk carefully; momentum-only plays tend to be volatile.</p>
+        </div></div>
+            </div>
+            <div class="grid-cols-2 mb-3">
+                <div>
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Insider Transactions (Form 4)</h3>
+                    <p class="text-xs text-muted" style="margin:0;">Form 4 filings are public disclosures that corporate insiders (executives, directors, and >10% shareholders) must submit within 2 business days of buying or selling their company's stock. Open-market purchases — where insiders spend their own money at market price — are the most bullish signal because insiders have no incentive to buy unless they believe the stock is undervalued. Research shows companies with cluster buying (3+ insiders in 30 days) outperform the market by 6-8% over the following 6 months.</p>
+                </div>
+                <span class="badge badge-marginal">NEUTRAL</span>
+            </div>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:.75rem;">
+                <div><span class="text-xs text-muted block">Open-Market Buys (90d)</span><span class="font-mono" style="font-size:1.3rem; font-weight:700; color:var(--accent-optimal);">0</span></div>
+                <div><span class="text-xs text-muted block">Open-Market Sells (90d)</span><span class="font-mono" style="font-size:1.3rem; font-weight:700; color:var(--accent-poor);">0</span></div>
+                <div><span class="text-xs text-muted block">Unique Buyers</span><span class="font-mono text-sm">0</span></div>
+                <div><span class="text-xs text-muted block">Cluster Signal</span><span class="font-mono text-sm" style="color:var(--text-secondary);">—</span></div>
+            </div>
+            <p class="text-xs text-muted">No recent transactions on record.</p>
+            <p class="text-xs text-muted" style="margin:.75rem 0 0 0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">No significant insider buying or selling activity detected in the past 90 days. This is the most common reading — absence of signal, not a negative indicator.</p>
+        </div></div>
+                <div>
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Institutional Flow / Dark Pool Proxy</h3>
+                    <p class="text-xs text-muted" style="margin:0;">Dark pools are private trading venues where institutional investors execute large orders without tipping off the public market. They handle ~35-40% of all US equity volume. When a fund wants to accumulate a position over days or weeks, they leave a signature in the public data: high-volume sessions where the price range is unusually narrow — the institution is absorbing all available supply without letting price run. We track three proxy signals: (1) Quiet accumulation days (high vol + narrow range), (2) Block volume concentration (top-decile sessions), and (3) Volume-direction correlation (is sustained volume driving price up or down?).</p>
+                </div>
+                <span class="badge badge-optimal">ACCUMULATION (MODERATE)</span>
+            </div>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:.75rem;">
+                <div><span class="text-xs text-muted block">Quiet Absorption Days</span><span class="font-mono" style="font-size:1.3rem; font-weight:700; color:var(--accent-good);">0</span></div>
+                <div><span class="text-xs text-muted block">Vol–Price Correlation</span><span class="font-mono text-sm">+0.85</span></div>
+                <div><span class="text-xs text-muted block">Block Volume %</span><span class="font-mono text-sm">13.7%</span></div>
+            </div>
+            <div class="metric-item"><span class="text-xs">Dec 15, 2025 — $676.74</span><span class="badge badge-info text-xs">High Activity</span></div><div class="metric-item"><span class="text-xs">Mar 16, 2026 — $646.80</span><span class="badge badge-info text-xs">High Activity</span></div><div class="metric-item"><span class="text-xs">Mar 23, 2026 — $634.09</span><span class="badge badge-info text-xs">High Activity</span></div>
+            <p class="text-xs text-muted" style="margin:.75rem 0 0 0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">🔵 Moderate accumulation signal — 0 high-volume, narrow-range session(s) detected. Some evidence of institutional buying, but not yet a definitive pattern. Watch for this to develop further over the next 1-2 weeks.</p>
+        </div></div>
+            </div>
+            
+        <div class="glass-card mb-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <h3 class="text-sm text-muted" style="text-transform:uppercase; letter-spacing:.05em; margin:0 0 .25rem 0;">Volume Profile &amp; Price Levels</h3>
+                    <p class="text-xs text-muted" style="margin:0;">Volume Profile shows how much volume traded at each price level over a given period. The Point of Control (POC) is the price where the most volume traded — this is where institutions have the most money concentrated, and price tends to return to this level repeatedly. The Value Area is the price range containing 70% of all volume — similar to one standard deviation — and acts as a fair-value zone. Entering near the POC or Value Area Low gives you a high-probability location with institutional backing.</p>
+                </div>
+                <span class="badge badge-info" style="color:var(--accent-marginal);">Above Value Area</span>
+            </div>
+            <div class="grid-cols-2" style="gap:1rem; margin-bottom:.75rem;">
+                <div><span class="text-xs text-muted block">Point of Control (POC)</span><span class="font-mono text-sm" style="color:var(--accent-info);">$123.53</span></div>
+                <div><span class="text-xs text-muted block">Distance to POC</span><span class="font-mono text-sm">+9.9%</span></div>
+                <div><span class="text-xs text-muted block">Value Area High</span><span class="font-mono text-sm" style="color:var(--accent-optimal);">$131.33</span></div>
+                <div><span class="text-xs text-muted block">Value Area Low</span><span class="font-mono text-sm" style="color:var(--accent-poor);">$118.34</span></div>
+                <div><span class="text-xs text-muted block">Period VWAP</span><span class="font-mono text-sm">$120.99</span></div>
+            </div>
+            <p class="text-xs text-muted" style="margin:0; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05);">Price is above the Value Area at $135.77 — extended into premium territory above $131.33. Institutions accumulated most of their position at lower prices; the POC at $123.53 and VAL at $118.34 are first meaningful support on a pullback. Period VWAP is $120.99; anchored VWAP from 52-week low is $102.32.</p>
+        </div>
+
+            <!-- Chart Area -->
+            <div class="glass-card" style="padding:1rem;">
+                <div>                        <script type="text/javascript">window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.3.1.min.js" integrity="sha256-4rD3fugVb/nVJYUv5Ky3v+fYXoouHaBSP20WIJuEiWg=" crossorigin="anonymous"></script>                <div id="5afc3f8e-ff28-431e-a6cd-28dc88f9eb04" class="plotly-graph-div" style="height:800px; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("5afc3f8e-ff28-431e-a6cd-28dc88f9eb04")) {                    Plotly.newPlot(                        "5afc3f8e-ff28-431e-a6cd-28dc88f9eb04",                        [{"close":{"dtype":"f8","bdata":"AAAAoN6ZVEAAAACA5MNUQAAAACAeYVZAAAAAYPbrVUAAAACgha1WQAAAAEDlF1ZAAAAAQP8qVkAAAACg5LpWQAAAAGDQ0VZAAAAAQO35VkAAAABg8A5XQAAAAMCL1lZAAAAAgLykWEAAAABgTEhYQAAAAGA2SVlAAAAAYP8FWEAAAADAtcpXQAAAAIDfWFhAAAAAwExHWUAAAADAXDdZQAAAAGAvCVhAAAAAgCw0WUAAAACArE1ZQAAAAODyglhAAAAAYDdJWEAAAADA0JNYQAAAAKAj3VhAAAAAQEMyWEAAAADgbrlYQAAAAGB+8llAAAAAgA\u002ffVkAAAACgPfhXQAAAAMC\u002fz1hAAAAAICWxWEAAAADAKUNXQAAAACD+u1ZAAAAAgHTAVkAAAAAAPARXQAAAAMDcRlZAAAAAwCHpVUAAAABAbAdXQAAAACDQFFdAAAAAIKK5VkAAAAAgecRWQAAAAID21lZAAAAA4FAYVkAAAABgab5VQAAAAGCSs1VAAAAAIO+yVUAAAACggAVVQAAAACD4WFJAAAAAQLGDUkAAAACAt+lSQAAAACAv\u002fVNAAAAAIGzMVEAAAACADAdTQAAAAKDArlNAAAAAAAewU0AAAADAl7lTQAAAAEDi\u002fFRAAAAAgMzSVEAAAAAgAYVUQAAAAGAtrVRAAAAAANY7VUAAAAAgWa1VQAAAACCFfVVAAAAAIPnSVUAAAACA1mdVQAAAAODzR1VAAAAAAMCWVkAAAAAgDqZWQAAAAODRYVZAAAAAgDbIV0AAAABgH3JXQAAAAMCA0FdAAAAAQF1mWEAAAACAidBZQAAAACA0KVpAAAAAYHPcWkAAAAAAFgJbQAAAAICnFVxAAAAAIHImW0AAAACAlGhcQAAAAKD7EF1AAAAA4D+wXkAAAABgMsBeQAAAAOBVrl5AAAAA4HjBXkAAAABgWCRfQAAAAKBHYV5AAAAAAAAgX0AAAAAghQtfQAAAAKBHAWBAAAAAAAAwX0AAAADgo2BfQAAAAEAKt15AAAAAgOsxX0AAAAAgrtdfQAAAAAAAAF9AAAAAwB51XkAAAAAA1xNeQAAAAIDC5V1AAAAAYLgeYEAAAACAFC5gQAAAAIA98mBA"},"high":{"dtype":"f8","bdata":"Ywf6ZJwBVkCA6Q\u002ffcXdVQIlBu6OhzlZAt\u002fvzx7KiVkDNW5X\u002fhVdXQCN90FCXK1dA3+I07z2eVkACyrfco4ZXQPJrUZQ2uldACABWQh4LV0AXLFnwuoRXQIwD5aiVhFdAFNpRLWbmWEAnldwmw35ZQPMzvlVjq1lAkazpeylgWUC6BLhAPPJXQJIsxPbVdlhArJsFznx9WUCKZaylCYBZQCqYd2C2lVlAkQd6W0lAWUB2aVTPb8dZQC3CdCzTbllAjqnmhanRWECzAkc81JpYQA3Uu\u002fuuC1lAG5fC0XzVWEBCt5JdvMhYQPWQyoyu9VlAXT8Sb75EWkDlue7+1A9YQGITNJ9H91hACGW3d8PWWEBR84pGPeJYQDxDk4FVyldAV1GhQBggV0BEv5UdvR1XQHhynwMfg1dAWGFBoHdlVkBP8X09eU9XQH4Q+AP9m1dAbObCggCjV0CwEfn8nxFXQCiBL1KwYFdA9E43YyPTVkABDq0PZkJWQNUuk0lv+FVAcE8rLeEhVkDP+QPq5ChWQKWwp+4XV1RA7\u002f+ySaHrUkDKfTaJp1FTQPlIUyfZN1RAugFh1Zv7VEBmrUsOxcRUQIpU1Nm08VNAcjBytaRZVECsDEwROhJUQG3Ggrj\u002fCFVA6vfWGElpVUCyz0AQNOdUQGwTqh8l91RAT2ybmd1JVUBUoMOEvhJWQJ2YCehwL1ZA3oALAB8ZVkCNfnCRUvdVQEb6pVDbxlVAtbRie5OaVkAr46IYp+lWQICAYKOitlZAhdQJErHTV0C0p9xibtlXQGM4TFBVLFhAVdSgVgRuWEDOJfF8bvBZQMe\u002fZj0BulpAqmYkCAamW0CeEbh4O4tbQJZO1nyMNVxAVjAkLObjW0AXFgfxsb5cQEZ4Cxi4YF1AdaOrIAbEXkDAgsxmUPFeQOjXLxkeXV9AQVW10qMHX0AfQPrhTYVfQAAAAEDhGl9AAAAAANcjYEAAAACAFM5fQAAAAEDhgmBAAAAAgMI9YEAAAABgZjZgQAAAAEAzw19AAAAAYI+yX0AAAACAwmVgQAAAAADX019AAAAAIIUjYEAAAAAAKUxfQAAAAMD1aF9AAAAAYGZuYEAAAADgo6hgQAAAAAAAMGFA"},"low":{"dtype":"f8","bdata":"EYSU+uc1VECzuGsLRC5UQGPnr11f8lRAP+4GfqzOVUA2D3cbuCJWQHTGVFESDVZAVjMn0xqiVUDcL6AcozJWQAtf7dzpOlZAfBBfKfsOVkD+fr20h7tWQBer7wJie1ZATnmDihUFV0CtegBUbChYQNz41ID\u002fOFhAeHFpOg+QV0AKLa6CSKlWQJL2mhUMiVdAgoIQUhxFWEDD2ZRbed1YQBoZZYiyw1dAjEVoRL8SWEAWcIrNEvxYQO8phouPQlhAtoyyARgKWEBlRjjCR65XQPjLk2l1aFhAgKLQ1PPvV0DSk7Mvfx5YQE3+09BxYVhAtPs9L\u002fLSVkBvkzlKGZVWQOjeKnDfJFhAZ3R4+bIoWEDJNgGdtBJXQMx9D3cHE1ZA0EccQlWBVkA9tBfzZUJWQFuah9OaIFZAu099lQaFVUAIA+UtZxZWQNFHe+hw4lZAQLt+LOaHVkDph3U4q+RVQLgwlcBqqFZAV+I5iox5VUBvP0rndfBUQMnqVLkc+FRAqcmYhJRbVUBMPHO2FepUQGNpLzzTPlJAWZsTYJyaUEBTkZzS0mpSQKcuNE5fmVJAe1DSS+wCVEDZ4\u002fx9xtlSQNPf3Uyw21JAHgcRDbZtU0DC7KGTiXFTQPxUnNC4zFNAOVfn14KeVEDvONJ+Kk5UQK7f+MWhJlRAZ0B+4sRvVEBL9TWrQ65UQCONI4KIWFVAkS78mGpMVUBt99JsoQVVQENd1bvrDVVAKAO9EWogVUBBCiSpUvdVQEq2tysbElZAw6aNnYixVkC416CalUpXQN4TMLC9E1dAxL3yCuy\u002fV0CGSEz+9GtYQGTImRGPjVlAjj2tVrHFWUAWC1xbholaQA2rg\u002fnEYVtAo9JodMR8WkAo3Kyp2zpbQNPrD\u002fP6K1xAIRLHeFMuXUC3+9LFPFVdQCHefvDGEF5A9MJYtIXMXUDo2IGK8KBeQAAAACBcD15AAAAAgOuRXUAAAAAA12NeQAAAAKBHUV5AAAAAYI\u002fyXkAAAACA6xFeQAAAAAApbF5AAAAAYGaGXkAAAAAAAEBfQAAAAGBmNl5AAAAAgBQ+XkAAAACA6+FdQAAAAAApjF1AAAAAgOuRXUAAAAAgrpdfQAAAAIAURmBA"},"name":"Price","open":{"dtype":"f8","bdata":"NQ6ncSXvVUCDBlmIh8RUQK8wKkenAVVAGaCvx\u002fSHVkAqNNgNiiZWQLAJiptBulZAvwwC9a+NVkCpvpH1YltWQIIaZbx+fFZAEg\u002f1g1exVkAdK\u002fpOgTRXQJYTHHHVEVdAT1ti89sfV0DlaadDqa1YQJgHfW7sdFhAwD4IbKlGWUAKLa6CSKlWQB840b4V0VdAqf7XwiJTWEChbENnFmlZQJ+sQ7MMIVlAAKyjgrIpWECgYxRyfEpZQG9gK5WZVllAccmpl9VuWEAzm6qPK2BYQMkElLFPelhA6llER\u002f\u002fCWEBJhTAuj21YQGC90iQEnlhAAshvIGMZWkCLtYpj0\u002fJWQGxyV+HdUFhAeVaQhrW6WEBo+IO1PrZYQNxBuuApQ1dAzbgL7v27VkDYd3pU\u002fIVWQNBL+X1ZEFdAGGHQ8OwKVkAIA+UtZxZWQH0KnGMB7FZABfnB+4yPVkDuq5zp499WQGUrHrfj31ZAn1JQ1GLGVkBLIoF3OhpWQFgzPL0velVAktNH9p2cVUB0MdJ0BN1VQFmMmk+HTVRAAe1SYFqvUUA7vV8sLu5SQGRChZHkuVJAwxfDfCcbVEBLO8uVp7hUQOk2wnjmcFNAjARj8ul3U0A\u002fNj8osepTQIolqNL++VNAukxLEZ8uVUCwmxwL0NlUQPT4nhyojFRAaY5O2ZG9VEAgWSKxPSRVQNUw6Wk7oVVAB29DgumKVUBzkMEsE9hVQLquyhqQZlVAz9V\u002fNystVUAUCGcDppFWQEkKt\u002fqAo1ZAd3Bzeaa9VkAInNoy96hXQEFMfECSb1dA8t+3jV\u002fpV0AfQqqUXoBYQDBwMyC18VlA6g5ZCX8xWkBzWJw6Jx5bQF9W1p1saVtAdx\u002fWvkynW0DdSk+jpXpbQErDVYOvSFxA5j7HcbQ0XUDTsiuHr1xeQBfm8X4wL19AoCuPVDLAXkBQ21yOdLpeQAAAAIDrAV9AAAAAwB5VXkAAAABguP5eQAAAAEDhml5AAAAAANezX0AAAABAMwNfQAAAAMDMTF9AAAAAwMysXkAAAAAAKVxfQAAAAOBRKF9AAAAAwMwMX0AAAABAM9NeQAAAAGBmdl5AAAAAYLjuXUAAAADAzCRgQAAAAKCZSWBA"},"x":["2024-04-15T00:00:00.000000000","2024-04-22T00:00:00.000000000","2024-04-29T00:00:00.000000000","2024-05-06T00:00:00.000000000","2024-05-13T00:00:00.000000000","2024-05-20T00:00:00.000000000","2024-05-27T00:00:00.000000000","2024-06-03T00:00:00.000000000","2024-06-10T00:00:00.000000000","2024-06-17T00:00:00.000000000","2024-06-24T00:00:00.000000000","2024-07-01T00:00:00.000000000","2024-07-08T00:00:00.000000000","2024-07-15T00:00:00.000000000","2024-07-22T00:00:00.000000000","2024-07-29T00:00:00.000000000","2024-08-05T00:00:00.000000000","2024-08-12T00:00:00.000000000","2024-08-19T00:00:00.000000000","2024-08-26T00:00:00.000000000","2024-09-02T00:00:00.000000000","2024-09-09T00:00:00.000000000","2024-09-16T00:00:00.000000000","2024-09-23T00:00:00.000000000","2024-09-30T00:00:00.000000000","2024-10-07T00:00:00.000000000","2024-10-14T00:00:00.000000000","2024-10-21T00:00:00.000000000","2024-10-28T00:00:00.000000000","2024-11-04T00:00:00.000000000","2024-11-11T00:00:00.000000000","2024-11-18T00:00:00.000000000","2024-11-25T00:00:00.000000000","2024-12-02T00:00:00.000000000","2024-12-09T00:00:00.000000000","2024-12-16T00:00:00.000000000","2024-12-23T00:00:00.000000000","2024-12-30T00:00:00.000000000","2025-01-06T00:00:00.000000000","2025-01-13T00:00:00.000000000","2025-01-20T00:00:00.000000000","2025-01-27T00:00:00.000000000","2025-02-03T00:00:00.000000000","2025-02-10T00:00:00.000000000","2025-02-17T00:00:00.000000000","2025-02-24T00:00:00.000000000","2025-03-03T00:00:00.000000000","2025-03-10T00:00:00.000000000","2025-03-17T00:00:00.000000000","2025-03-24T00:00:00.000000000","2025-03-31T00:00:00.000000000","2025-04-07T00:00:00.000000000","2025-04-14T00:00:00.000000000","2025-04-21T00:00:00.000000000","2025-04-28T00:00:00.000000000","2025-05-05T00:00:00.000000000","2025-05-12T00:00:00.000000000","2025-05-19T00:00:00.000000000","2025-05-26T00:00:00.000000000","2025-06-02T00:00:00.000000000","2025-06-09T00:00:00.000000000","2025-06-16T00:00:00.000000000","2025-06-23T00:00:00.000000000","2025-06-30T00:00:00.000000000","2025-07-07T00:00:00.000000000","2025-07-14T00:00:00.000000000","2025-07-21T00:00:00.000000000","2025-07-28T00:00:00.000000000","2025-08-04T00:00:00.000000000","2025-08-11T00:00:00.000000000","2025-08-18T00:00:00.000000000","2025-08-25T00:00:00.000000000","2025-09-01T00:00:00.000000000","2025-09-08T00:00:00.000000000","2025-09-15T00:00:00.000000000","2025-09-22T00:00:00.000000000","2025-09-29T00:00:00.000000000","2025-10-06T00:00:00.000000000","2025-10-13T00:00:00.000000000","2025-10-20T00:00:00.000000000","2025-10-27T00:00:00.000000000","2025-11-03T00:00:00.000000000","2025-11-10T00:00:00.000000000","2025-11-17T00:00:00.000000000","2025-11-24T00:00:00.000000000","2025-12-01T00:00:00.000000000","2025-12-08T00:00:00.000000000","2025-12-15T00:00:00.000000000","2025-12-22T00:00:00.000000000","2025-12-29T00:00:00.000000000","2026-01-05T00:00:00.000000000","2026-01-12T00:00:00.000000000","2026-01-19T00:00:00.000000000","2026-01-26T00:00:00.000000000","2026-02-02T00:00:00.000000000","2026-02-09T00:00:00.000000000","2026-02-16T00:00:00.000000000","2026-02-23T00:00:00.000000000","2026-03-02T00:00:00.000000000","2026-03-09T00:00:00.000000000","2026-03-16T00:00:00.000000000","2026-03-23T00:00:00.000000000","2026-03-30T00:00:00.000000000","2026-04-06T00:00:00.000000000","2026-04-13T00:00:00.000000000"],"type":"candlestick","xaxis":"x","yaxis":"y"},{"line":{"color":"#f59e0b","width":1.5},"name":"EMA_20","x":["2024-04-15T00:00:00.000000000","2024-04-22T00:00:00.000000000","2024-04-29T00:00:00.000000000","2024-05-06T00:00:00.000000000","2024-05-13T00:00:00.000000000","2024-05-20T00:00:00.000000000","2024-05-27T00:00:00.000000000","2024-06-03T00:00:00.000000000","2024-06-10T00:00:00.000000000","2024-06-17T00:00:00.000000000","2024-06-24T00:00:00.000000000","2024-07-01T00:00:00.000000000","2024-07-08T00:00:00.000000000","2024-07-15T00:00:00.000000000","2024-07-22T00:00:00.000000000","2024-07-29T00:00:00.000000000","2024-08-05T00:00:00.000000000","2024-08-12T00:00:00.000000000","2024-08-19T00:00:00.000000000","2024-08-26T00:00:00.000000000","2024-09-02T00:00:00.000000000","2024-09-09T00:00:00.000000000","2024-09-16T00:00:00.000000000","2024-09-23T00:00:00.000000000","2024-09-30T00:00:00.000000000","2024-10-07T00:00:00.000000000","2024-10-14T00:00:00.000000000","2024-10-21T00:00:00.000000000","2024-10-28T00:00:00.000000000","2024-11-04T00:00:00.000000000","2024-11-11T00:00:00.000000000","2024-11-18T00:00:00.000000000","2024-11-25T00:00:00.000000000","2024-12-02T00:00:00.000000000","2024-12-09T00:00:00.000000000","2024-12-16T00:00:00.000000000","2024-12-23T00:00:00.000000000","2024-12-30T00:00:00.000000000","2025-01-06T00:00:00.000000000","2025-01-13T00:00:00.000000000","2025-01-20T00:00:00.000000000","2025-01-27T00:00:00.000000000","2025-02-03T00:00:00.000000000","2025-02-10T00:00:00.000000000","2025-02-17T00:00:00.000000000","2025-02-24T00:00:00.000000000","2025-03-03T00:00:00.000000000","2025-03-10T00:00:00.000000000","2025-03-17T00:00:00.000000000","2025-03-24T00:00:00.000000000","2025-03-31T00:00:00.000000000","2025-04-07T00:00:00.000000000","2025-04-14T00:00:00.000000000","2025-04-21T00:00:00.000000000","2025-04-28T00:00:00.000000000","2025-05-05T00:00:00.000000000","2025-05-12T00:00:00.000000000","2025-05-19T00:00:00.000000000","2025-05-26T00:00:00.000000000","2025-06-02T00:00:00.000000000","2025-06-09T00:00:00.000000000","2025-06-16T00:00:00.000000000","2025-06-23T00:00:00.000000000","2025-06-30T00:00:00.000000000","2025-07-07T00:00:00.000000000","2025-07-14T00:00:00.000000000","2025-07-21T00:00:00.000000000","2025-07-28T00:00:00.000000000","2025-08-04T00:00:00.000000000","2025-08-11T00:00:00.000000000","2025-08-18T00:00:00.000000000","2025-08-25T00:00:00.000000000","2025-09-01T00:00:00.000000000","2025-09-08T00:00:00.000000000","2025-09-15T00:00:00.000000000","2025-09-22T00:00:00.000000000","2025-09-29T00:00:00.000000000","2025-10-06T00:00:00.000000000","2025-10-13T00:00:00.000000000","2025-10-20T00:00:00.000000000","2025-10-27T00:00:00.000000000","2025-11-03T00:00:00.000000000","2025-11-10T00:00:00.000000000","2025-11-17T00:00:00.000000000","2025-11-24T00:00:00.000000000","2025-12-01T00:00:00.000000000","2025-12-08T00:00:00.000000000","2025-12-15T00:00:00.000000000","2025-12-22T00:00:00.000000000","2025-12-29T00:00:00.000000000","2026-01-05T00:00:00.000000000","2026-01-12T00:00:00.000000000","2026-01-19T00:00:00.000000000","2026-01-26T00:00:00.000000000","2026-02-02T00:00:00.000000000","2026-02-09T00:00:00.000000000","2026-02-16T00:00:00.000000000","2026-02-23T00:00:00.000000000","2026-03-02T00:00:00.000000000","2026-03-09T00:00:00.000000000","2026-03-16T00:00:00.000000000","2026-03-23T00:00:00.000000000","2026-03-30T00:00:00.000000000","2026-04-06T00:00:00.000000000","2026-04-13T00:00:00.000000000"],"y":{"dtype":"f8","bdata":"AAAAoN6ZVEDP8zwv351UQK9iBv3YyFRAemXtpJLkVEBK+uJ\u002fFxBVQCtQCkk3KVVA9iP9O8RBVUC6LC7wrmVVQGtlEcpciFVAYUNxHo+rVUD2PJeeZ81VQNLhSwOo5lVAjZuBZIUpVkDtmMrRNl1WQCx+w7pzpFZAiYpbgR\u002fGVkACKKjc8N5WQGMwWzXvAldAu2jMETU6V0BUg93AsmpXQHFeBdDKeVdAWs9Bf+yjV0CO+BaweMxXQJlOdqjZ3VdAKQprWBPoV0ANwNqGbvhXQG1YoaE2DlhA0EMkjKURWEBnAC1XoCFYQNeeoj\u002fmTVhAJGslXvYqWEC\u002fVMC5ISZYQKGJDyhJNlhADN4BlfxBWEAvW6y9tylYQBJ3\u002fQPjBlhAEMHATMznV0CIZa4UINJXQLgSMDF7rFdALeBD3X6BV0DgjYad3nVXQI6MbUigbFdAseCTRJRbV0BXjrYoME1XQBITH7ftQVdA0zWiopUlV0B2YXqoYANXQMB8n2Rl41ZAoaHlUWbGVkDPtgzHpZtWQKN0SADGM1ZAAQjgZ9zZVUABOCxqOpJVQNB7xg2na1VAW8W\u002f3nxcVUB3LFi9liNVQGw0K6IUAFVA9JDFVRPgVEBXj6aQB8RUQLxEu7lxyVRAMD6dzFXKVEATLAhzu8NUQPmtmYmVwVRABoUpJzrNVEBbeJ9vkuJUQMAjRzdU8VRArnXGotEGVUCqdi0NDxBVQGku7MthFVVAd8hbbxU6VUBT8sxnv1xVQA7P0ZecdVVAn01ciT2uVUAKOsHaRtlVQIM0x\u002fwzCVZAtDu0ZNZCVkByEaO8eZlWQNXSJYlO8FZALpo6hfBPV0C8Wop4DKpXQFUhuhfSFVhA604iAIxgWEBnR+7z1cJYQOPSplnNK1lACo5+KVKyWUA67k0WjC1aQAR2gylWm1pAipshCn4AW0BkNxJDbmVbQE4+QaEtrltA\u002fR\u002fBSCkCXEA6r+sHMkxcQKIkT9C0plxAk\u002fxfNovkXEDzv9DYHyFdQHqh7XTIR11AGZL7dXZ2XUBgkCDDe7BdQJS\u002fr\u002flv0F1A9JTDGB\u002fgXUDdDDcKDOVdQNQXxGod5V1AaszJ7EkeXkBglLZ08VReQFcMXJrBq15A"},"type":"scatter","xaxis":"x","yaxis":"y"},{"line":{"color":"#3b82f6","width":1.5},"name":"EMA_50","x":["2024-04-15T00:00:00.000000000","2024-04-22T00:00:00.000000000","2024-04-29T00:00:00.000000000","2024-05-06T00:00:00.000000000","2024-05-13T00:00:00.000000000","2024-05-20T00:00:00.000000000","2024-05-27T00:00:00.000000000","2024-06-03T00:00:00.000000000","2024-06-10T00:00:00.000000000","2024-06-17T00:00:00.000000000","2024-06-24T00:00:00.000000000","2024-07-01T00:00:00.000000000","2024-07-08T00:00:00.000000000","2024-07-15T00:00:00.000000000","2024-07-22T00:00:00.000000000","2024-07-29T00:00:00.000000000","2024-08-05T00:00:00.000000000","2024-08-12T00:00:00.000000000","2024-08-19T00:00:00.000000000","2024-08-26T00:00:00.000000000","2024-09-02T00:00:00.000000000","2024-09-09T00:00:00.000000000","2024-09-16T00:00:00.000000000","2024-09-23T00:00:00.000000000","2024-09-30T00:00:00.000000000","2024-10-07T00:00:00.000000000","2024-10-14T00:00:00.000000000","2024-10-21T00:00:00.000000000","2024-10-28T00:00:00.000000000","2024-11-04T00:00:00.000000000","2024-11-11T00:00:00.000000000","2024-11-18T00:00:00.000000000","2024-11-25T00:00:00.000000000","2024-12-02T00:00:00.000000000","2024-12-09T00:00:00.000000000","2024-12-16T00:00:00.000000000","2024-12-23T00:00:00.000000000","2024-12-30T00:00:00.000000000","2025-01-06T00:00:00.000000000","2025-01-13T00:00:00.000000000","2025-01-20T00:00:00.000000000","2025-01-27T00:00:00.000000000","2025-02-03T00:00:00.000000000","2025-02-10T00:00:00.000000000","2025-02-17T00:00:00.000000000","2025-02-24T00:00:00.000000000","2025-03-03T00:00:00.000000000","2025-03-10T00:00:00.000000000","2025-03-17T00:00:00.000000000","2025-03-24T00:00:00.000000000","2025-03-31T00:00:00.000000000","2025-04-07T00:00:00.000000000","2025-04-14T00:00:00.000000000","2025-04-21T00:00:00.000000000","2025-04-28T00:00:00.000000000","2025-05-05T00:00:00.000000000","2025-05-12T00:00:00.000000000","2025-05-19T00:00:00.000000000","2025-05-26T00:00:00.000000000","2025-06-02T00:00:00.000000000","2025-06-09T00:00:00.000000000","2025-06-16T00:00:00.000000000","2025-06-23T00:00:00.000000000","2025-06-30T00:00:00.000000000","2025-07-07T00:00:00.000000000","2025-07-14T00:00:00.000000000","2025-07-21T00:00:00.000000000","2025-07-28T00:00:00.000000000","2025-08-04T00:00:00.000000000","2025-08-11T00:00:00.000000000","2025-08-18T00:00:00.000000000","2025-08-25T00:00:00.000000000","2025-09-01T00:00:00.000000000","2025-09-08T00:00:00.000000000","2025-09-15T00:00:00.000000000","2025-09-22T00:00:00.000000000","2025-09-29T00:00:00.000000000","2025-10-06T00:00:00.000000000","2025-10-13T00:00:00.000000000","2025-10-20T00:00:00.000000000","2025-10-27T00:00:00.000000000","2025-11-03T00:00:00.000000000","2025-11-10T00:00:00.000000000","2025-11-17T00:00:00.000000000","2025-11-24T00:00:00.000000000","2025-12-01T00:00:00.000000000","2025-12-08T00:00:00.000000000","2025-12-15T00:00:00.000000000","2025-12-22T00:00:00.000000000","2025-12-29T00:00:00.000000000","2026-01-05T00:00:00.000000000","2026-01-12T00:00:00.000000000","2026-01-19T00:00:00.000000000","2026-01-26T00:00:00.000000000","2026-02-02T00:00:00.000000000","2026-02-09T00:00:00.000000000","2026-02-16T00:00:00.000000000","2026-02-23T00:00:00.000000000","2026-03-02T00:00:00.000000000","2026-03-09T00:00:00.000000000","2026-03-16T00:00:00.000000000","2026-03-23T00:00:00.000000000","2026-03-30T00:00:00.000000000","2026-04-06T00:00:00.000000000","2026-04-13T00:00:00.000000000"],"y":{"dtype":"f8","bdata":"AAAAoN6ZVEChoKCAhJtUQBhepEpOrVRA5deJWs25VECW9wsmZs1UQGNw\u002fBJc2lRAeOlRpo\u002fnVECNHLhL4\u002flUQM56RxBlDFVAwTnRvL8fVUAFv4IOKzNVQJzLqkedQ1VAVXgDbYplVUCJXw35goJVQDjK\u002feNrqFVAwzpYZivAVUBrLr5LqdRVQJksKq3s7VVAUqNGDYwPVkD\u002fsBbiOS9WQEvmLg\u002fQQVZAEavIQGVfVkA5gXV10XxWQF+zPhUjkVZA4zg3ImWiVkBi8BbY5rVWQObX49WEy1ZAOJiKV5bZVkB3ySWeZ+xWQPAg99zCCldAph+dJAwJV0BoHr90bRJXQF9FXSLkI1dAC6djQHgzV0ApS+zMFTRXQJusiCpgL1dATx5RnAYrV0BqaMYsgSlXQAcZN92dIFdAsr0CzWYUV0Bg1DSB5BNXQHY1pr7tE1dAMAb1P2MQV0ABFZYgaQ1XQHBVs4NGC1dAlM8uZL8BV0Bwx\u002fpZEfVWQIWmpch16FZAjzGpYlLcVkDBUma628lWQAXS5EBGnVZA3d3gRR10VkAq1aDAkVBWQBQTJ404OVZAQf6YQuoqVkCPOs8SZAtWQJmNOvqt81VAwDwzufLcVUCge3K0e8dVQNaF9cOJv1VAsJmgFkG2VUBPOYaeSKpVQGWMF6FboFVAiSyjd2qcVUD8XDN0FJ1VQDk7E57Xm1VAtAafFgGeVUCPJPNM4ZtVQNDSILyWmFVAh8VbUI6iVUCCd6N7u6xVQFr6iHXVs1VATbScILbIVUBo2uHrZNlVQCgi\u002fLwf7VVAVKNW+fQFVkCwYHbWBCxWQA6FOrsQVFZAXgcGF5KBVkBLPnlwxK5WQNU2Lor\u002f5FZA8HU7vbgPV0DiAhsBZ0VXQOglTP2Uf1dAKuMC2cPHV0C\u002fV5Qkvg1YQE5UXJpGUFhAxBS4PfOQWEASMgY199JYQPgMHyC+CllAozmCxM9HWUDUqgm5roFZQByfXsj4wllAINpLiXH5WUA9fOS+ry9aQIGa774mXVpA1\u002fip7qaNWkDKo\u002fhPwMJaQJrZ5FtP7VpAnl1Z58AQW0CJ8GkB\u002fi5bQN6qR+08SltAWNE6pe57W0ClSwHg4axbQEnkpkVM61tA"},"type":"scatter","xaxis":"x","yaxis":"y"},{"line":{"color":"#cbd5e1","width":1.5},"name":"ADX","x":["2024-04-15T00:00:00.000000000","2024-04-22T00:00:00.000000000","2024-04-29T00:00:00.000000000","2024-05-06T00:00:00.000000000","2024-05-13T00:00:00.000000000","2024-05-20T00:00:00.000000000","2024-05-27T00:00:00.000000000","2024-06-03T00:00:00.000000000","2024-06-10T00:00:00.000000000","2024-06-17T00:00:00.000000000","2024-06-24T00:00:00.000000000","2024-07-01T00:00:00.000000000","2024-07-08T00:00:00.000000000","2024-07-15T00:00:00.000000000","2024-07-22T00:00:00.000000000","2024-07-29T00:00:00.000000000","2024-08-05T00:00:00.000000000","2024-08-12T00:00:00.000000000","2024-08-19T00:00:00.000000000","2024-08-26T00:00:00.000000000","2024-09-02T00:00:00.000000000","2024-09-09T00:00:00.000000000","2024-09-16T00:00:00.000000000","2024-09-23T00:00:00.000000000","2024-09-30T00:00:00.000000000","2024-10-07T00:00:00.000000000","2024-10-14T00:00:00.000000000","2024-10-21T00:00:00.000000000","2024-10-28T00:00:00.000000000","2024-11-04T00:00:00.000000000","2024-11-11T00:00:00.000000000","2024-11-18T00:00:00.000000000","2024-11-25T00:00:00.000000000","2024-12-02T00:00:00.000000000","2024-12-09T00:00:00.000000000","2024-12-16T00:00:00.000000000","2024-12-23T00:00:00.000000000","2024-12-30T00:00:00.000000000","2025-01-06T00:00:00.000000000","2025-01-13T00:00:00.000000000","2025-01-20T00:00:00.000000000","2025-01-27T00:00:00.000000000","2025-02-03T00:00:00.000000000","2025-02-10T00:00:00.000000000","2025-02-17T00:00:00.000000000","2025-02-24T00:00:00.000000000","2025-03-03T00:00:00.000000000","2025-03-10T00:00:00.000000000","2025-03-17T00:00:00.000000000","2025-03-24T00:00:00.000000000","2025-03-31T00:00:00.000000000","2025-04-07T00:00:00.000000000","2025-04-14T00:00:00.000000000","2025-04-21T00:00:00.000000000","2025-04-28T00:00:00.000000000","2025-05-05T00:00:00.000000000","2025-05-12T00:00:00.000000000","2025-05-19T00:00:00.000000000","2025-05-26T00:00:00.000000000","2025-06-02T00:00:00.000000000","2025-06-09T00:00:00.000000000","2025-06-16T00:00:00.000000000","2025-06-23T00:00:00.000000000","2025-06-30T00:00:00.000000000","2025-07-07T00:00:00.000000000","2025-07-14T00:00:00.000000000","2025-07-21T00:00:00.000000000","2025-07-28T00:00:00.000000000","2025-08-04T00:00:00.000000000","2025-08-11T00:00:00.000000000","2025-08-18T00:00:00.000000000","2025-08-25T00:00:00.000000000","2025-09-01T00:00:00.000000000","2025-09-08T00:00:00.000000000","2025-09-15T00:00:00.000000000","2025-09-22T00:00:00.000000000","2025-09-29T00:00:00.000000000","2025-10-06T00:00:00.000000000","2025-10-13T00:00:00.000000000","2025-10-20T00:00:00.000000000","2025-10-27T00:00:00.000000000","2025-11-03T00:00:00.000000000","2025-11-10T00:00:00.000000000","2025-11-17T00:00:00.000000000","2025-11-24T00:00:00.000000000","2025-12-01T00:00:00.000000000","2025-12-08T00:00:00.000000000","2025-12-15T00:00:00.000000000","2025-12-22T00:00:00.000000000","2025-12-29T00:00:00.000000000","2026-01-05T00:00:00.000000000","2026-01-12T00:00:00.000000000","2026-01-19T00:00:00.000000000","2026-01-26T00:00:00.000000000","2026-02-02T00:00:00.000000000","2026-02-09T00:00:00.000000000","2026-02-16T00:00:00.000000000","2026-02-23T00:00:00.000000000","2026-03-02T00:00:00.000000000","2026-03-09T00:00:00.000000000","2026-03-16T00:00:00.000000000","2026-03-23T00:00:00.000000000","2026-03-30T00:00:00.000000000","2026-04-06T00:00:00.000000000","2026-04-13T00:00:00.000000000"],"y":{"dtype":"f8","bdata":"AAAAAAAA+H8AAAAAAABZQLOqsWJ77VhAx+3oYkncWEAy\u002fEQkQdNYQF+C2oJKoVhAqbrBVWPJV0DbZVocH0dXQCSJWPnX2FZA54OdOMdDVkC0rzVcHdZVQEW9Iz8XNFVAUrwRtVPkVEDwC5v\u002fna1UQCEuVGzrf1RALIuimGnoU0DI5sa6yuhSQFmE1rVtHFJAh0AYfLCTUUDyFCiHLRVRQEQMgmQqL1BA1uMYZCqzTkC1kVkXLGhNQCG0ocWXsUtAV8TbnaL1SUDBk8xqIx9IQDZF6a\u002fWrEZAoNmrS+ATRUCUrCkTIJhDQIXSyO\u002f\u002f1EJAuN8di\u002fe4QUDOY+wc1s1AQIrQuxL2cT9AsA9q7sxvPUDPClBgTiU8QBIKUgd6ujtA9S1mIkdXO0AxXEvnhSs7QPdASJGAgzpAMCR79QRmOkCnik4ECzg5QKLT++IFzjdA0Um3XfnSNkDsloOFRHk2QJiBxYIkyDVAFxk0RGAWNkBziOWOZbw2QG2UHAuPVjdAWySQ7wCtN0CbddBVAlM4QGenQWRrWjpA2SMdr9TKPECNM2yKr5U+QPmA1pigPz9A4BNqd5wYP0DtNxtQNYU\u002fQEOQdmIM6j9A0Fq2hQjbP0B4u7o4F80\u002fQMwZ+3Z2wD5A8b3ZeylrPUBqmutO6Gk8QLD8NqnimDtApy20trB9OkC2LqUlWK04QP13GyGR8TZARxT8JulSNUC0NyAH5Bs0QJlYZiAW+zJArRqU+4M8MkBsZcc3otoxQIuYG0u+fzFA9wRklFAyMkBmOSD639wyQKFFFjnqwDNAjE6ne5DKNEAi+NIXLcI2QCldy3Ug+zhAs1vAO+dvO0ChbEhhxLc9QI51r5ijDEBAdj4dLah6QECTFU0ySxdBQCvzPe2CzEFA5VLLvXm2QkCH6OJeLZdDQIy3+5WReURArZGGblsZRUD8eJ7PgMVFQIUzFjHM+kVA+378531sRkDoexukENZGQLkxLMcOcUdA1mwpw\u002foASED3hFTj\u002fudHQF4bodzL0EdAB6dDDUG7R0Adrk0uue5HQFzekYPObEdAFwS+6CAWR0AfkKP92YtGQCu\u002fzVmj1kVAQLvhmvyiRUAHQ8Pj35FFQAXl9E89wkVA"},"type":"scatter","xaxis":"x2","yaxis":"y2"},{"marker":{"color":["#ef4444","#ef4444","#22c55e","#ef4444","#22c55e","#ef4444","#ef4444","#22c55e","#22c55e","#22c55e","#ef4444","#ef4444","#22c55e","#ef4444","#22c55e","#ef4444","#22c55e","#22c55e","#22c55e","#ef4444","#ef4444","#22c55e","#22c55e","#ef4444","#ef4444","#22c55e","#22c55e","#ef4444","#22c55e","#22c55e","#ef4444","#22c55e","#22c55e","#ef4444","#ef4444","#ef4444","#22c55e","#22c55e","#ef4444","#ef4444","#22c55e","#22c55e","#22c55e","#ef4444","#ef4444","#ef4444","#ef4444","#22c55e","#22c55e","#ef4444","#ef4444","#22c55e","#ef4444","#22c55e","#22c55e","#ef4444","#22c55e","#22c55e","#ef4444","#22c55e","#ef4444","#ef4444","#22c55e","#22c55e","#22c55e","#ef4444","#22c55e","#ef4444","#ef4444","#22c55e","#22c55e","#ef4444","#22c55e","#ef4444","#22c55e","#22c55e","#22c55e","#22c55e","#22c55e","#ef4444","#22c55e","#ef4444","#22c55e","#22c55e","#22c55e","#22c55e","#ef4444","#22c55e","#22c55e","#ef4444","#22c55e","#22c55e","#22c55e","#ef4444","#22c55e","#ef4444","#22c55e","#22c55e","#ef4444","#ef4444","#ef4444","#ef4444","#22c55e","#22c55e","#22c55e"]},"name":"Volume","x":["2024-04-15T00:00:00.000000000","2024-04-22T00:00:00.000000000","2024-04-29T00:00:00.000000000","2024-05-06T00:00:00.000000000","2024-05-13T00:00:00.000000000","2024-05-20T00:00:00.000000000","2024-05-27T00:00:00.000000000","2024-06-03T00:00:00.000000000","2024-06-10T00:00:00.000000000","2024-06-17T00:00:00.000000000","2024-06-24T00:00:00.000000000","2024-07-01T00:00:00.000000000","2024-07-08T00:00:00.000000000","2024-07-15T00:00:00.000000000","2024-07-22T00:00:00.000000000","2024-07-29T00:00:00.000000000","2024-08-05T00:00:00.000000000","2024-08-12T00:00:00.000000000","2024-08-19T00:00:00.000000000","2024-08-26T00:00:00.000000000","2024-09-02T00:00:00.000000000","2024-09-09T00:00:00.000000000","2024-09-16T00:00:00.000000000","2024-09-23T00:00:00.000000000","2024-09-30T00:00:00.000000000","2024-10-07T00:00:00.000000000","2024-10-14T00:00:00.000000000","2024-10-21T00:00:00.000000000","2024-10-28T00:00:00.000000000","2024-11-04T00:00:00.000000000","2024-11-11T00:00:00.000000000","2024-11-18T00:00:00.000000000","2024-11-25T00:00:00.000000000","2024-12-02T00:00:00.000000000","2024-12-09T00:00:00.000000000","2024-12-16T00:00:00.000000000","2024-12-23T00:00:00.000000000","2024-12-30T00:00:00.000000000","2025-01-06T00:00:00.000000000","2025-01-13T00:00:00.000000000","2025-01-20T00:00:00.000000000","2025-01-27T00:00:00.000000000","2025-02-03T00:00:00.000000000","2025-02-10T00:00:00.000000000","2025-02-17T00:00:00.000000000","2025-02-24T00:00:00.000000000","2025-03-03T00:00:00.000000000","2025-03-10T00:00:00.000000000","2025-03-17T00:00:00.000000000","2025-03-24T00:00:00.000000000","2025-03-31T00:00:00.000000000","2025-04-07T00:00:00.000000000","2025-04-14T00:00:00.000000000","2025-04-21T00:00:00.000000000","2025-04-28T00:00:00.000000000","2025-05-05T00:00:00.000000000","2025-05-12T00:00:00.000000000","2025-05-19T00:00:00.000000000","2025-05-26T00:00:00.000000000","2025-06-02T00:00:00.000000000","2025-06-09T00:00:00.000000000","2025-06-16T00:00:00.000000000","2025-06-23T00:00:00.000000000","2025-06-30T00:00:00.000000000","2025-07-07T00:00:00.000000000","2025-07-14T00:00:00.000000000","2025-07-21T00:00:00.000000000","2025-07-28T00:00:00.000000000","2025-08-04T00:00:00.000000000","2025-08-11T00:00:00.000000000","2025-08-18T00:00:00.000000000","2025-08-25T00:00:00.000000000","2025-09-01T00:00:00.000000000","2025-09-08T00:00:00.000000000","2025-09-15T00:00:00.000000000","2025-09-22T00:00:00.000000000","2025-09-29T00:00:00.000000000","2025-10-06T00:00:00.000000000","2025-10-13T00:00:00.000000000","2025-10-20T00:00:00.000000000","2025-10-27T00:00:00.000000000","2025-11-03T00:00:00.000000000","2025-11-10T00:00:00.000000000","2025-11-17T00:00:00.000000000","2025-11-24T00:00:00.000000000","2025-12-01T00:00:00.000000000","2025-12-08T00:00:00.000000000","2025-12-15T00:00:00.000000000","2025-12-22T00:00:00.000000000","2025-12-29T00:00:00.000000000","2026-01-05T00:00:00.000000000","2026-01-12T00:00:00.000000000","2026-01-19T00:00:00.000000000","2026-01-26T00:00:00.000000000","2026-02-02T00:00:00.000000000","2026-02-09T00:00:00.000000000","2026-02-16T00:00:00.000000000","2026-02-23T00:00:00.000000000","2026-03-02T00:00:00.000000000","2026-03-09T00:00:00.000000000","2026-03-16T00:00:00.000000000","2026-03-23T00:00:00.000000000","2026-03-30T00:00:00.000000000","2026-04-06T00:00:00.000000000","2026-04-13T00:00:00.000000000"],"y":{"dtype":"i4","bdata":"VOaeA1DPaQN4sV8DHGWpAnyL6wL4bycCCOc7ArC9ywJslWoCmCL4AfiIJwJU5HABPOGyArz2vQIAvFoC4OrXAoy02gIUHqkBrAj5AUDRnAFYgMYBqEipAaxi5AJI+lYCmElJAozZ3gEQuugBrCzaARyT6gHkTd8CoJdfBDjAaAPIvv4BSMGFAoR6WQKMsh0D1CeFAbj3owFsuh0CiEQ1A9TgKgKEs8ACqMCoAtg1wgKcj\u002fUBSFOPAuSALgNYqH8CVN\u002fyAcSpAwL85u8EmNA6B5R4fQIAe5UD3DOsAkhDwARY6TIEDIPcAjRv4QI0IBwD0CtMAwzbSAIkqOoCcI0jApgzBAMgMUID7Kv2ArhuZwN4d6kCcNUqA7hDcAIw58gBZKqoAmBdrgJEhc8CWOPuAvxsOQNscVEDgM5sA\u002fzxRgJ83iQDLGHYA4zQ+QMQ8ncDJFsBAtQRtwMAVJUCZEKYAqCMkAHEbt8BuNvWA5wa9gIgwmYCzPRLAhh\u002fBgMMaRACAOktApCbswJI0CUDyIYSAxBuxQLABR4DTK5wA4x6VgKFx2YB"},"type":"bar","xaxis":"x3","yaxis":"y3"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"rgb(17,17,17)","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#f2f5fa"},"error_y":{"color":"#f2f5fa"},"marker":{"line":{"color":"rgb(17,17,17)","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#A2B1C6","gridcolor":"#506784","linecolor":"#506784","minorgridcolor":"#506784","startlinecolor":"#A2B1C6"},"baxis":{"endlinecolor":"#A2B1C6","gridcolor":"#506784","linecolor":"#506784","minorgridcolor":"#506784","startlinecolor":"#A2B1C6"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"line":{"color":"#283442"}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"marker":{"line":{"color":"#283442"}},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#506784"},"line":{"color":"rgb(17,17,17)"}},"header":{"fill":{"color":"#2a3f5f"},"line":{"color":"rgb(17,17,17)"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#f2f5fa","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#f2f5fa"},"geo":{"bgcolor":"rgb(17,17,17)","lakecolor":"rgb(17,17,17)","landcolor":"rgb(17,17,17)","showlakes":true,"showland":true,"subunitcolor":"#506784"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"dark"},"paper_bgcolor":"rgb(17,17,17)","plot_bgcolor":"rgb(17,17,17)","polar":{"angularaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"bgcolor":"rgb(17,17,17)","radialaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"},"yaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"},"zaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"}},"shapedefaults":{"line":{"color":"#f2f5fa"}},"sliderdefaults":{"bgcolor":"#C8D4E3","bordercolor":"rgb(17,17,17)","borderwidth":1,"tickwidth":0},"ternary":{"aaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"baxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"bgcolor":"rgb(17,17,17)","caxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""}},"title":{"x":0.05},"updatemenudefaults":{"bgcolor":"#506784","borderwidth":0},"xaxis":{"automargin":true,"gridcolor":"#283442","linecolor":"#506784","ticks":"","title":{"standoff":15},"zerolinecolor":"#283442","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#283442","linecolor":"#506784","ticks":"","title":{"standoff":15},"zerolinecolor":"#283442","zerolinewidth":2}}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"matches":"x3","showticklabels":false,"rangeslider":{"visible":false},"showgrid":true,"gridcolor":"rgba(255,255,255,0.05)"},"yaxis":{"anchor":"x","domain":[0.436,1.0],"showgrid":true,"gridcolor":"rgba(255,255,255,0.05)"},"xaxis2":{"anchor":"y2","domain":[0.0,1.0],"matches":"x3","showticklabels":false,"rangeslider":{"visible":false},"showgrid":true,"gridcolor":"rgba(255,255,255,0.05)"},"yaxis2":{"anchor":"x2","domain":[0.218,0.406],"showgrid":true,"gridcolor":"rgba(255,255,255,0.05)"},"xaxis3":{"anchor":"y3","domain":[0.0,1.0],"rangeslider":{"visible":false},"showgrid":true,"gridcolor":"rgba(255,255,255,0.05)"},"yaxis3":{"anchor":"x3","domain":[0.0,0.188],"showgrid":true,"gridcolor":"rgba(255,255,255,0.05)"},"shapes":[{"line":{"color":"rgba(255,255,255,0.3)","dash":"dash"},"type":"line","x0":0,"x1":1,"xref":"x2 domain","y0":25,"y1":25,"yref":"y2"}],"margin":{"l":10,"r":10,"t":10,"b":10},"font":{"family":"Inter, sans-serif","color":"#94a3b8"},"paper_bgcolor":"rgba(0,0,0,0)","plot_bgcolor":"rgba(0,0,0,0)","height":800,"showlegend":false},                        {"displayModeBar": false, "responsive": true}                    )                };            </script>        </div>
+            </div>
+        </div>
+        
+<script>
+// ── Sortable Tables ────────────────────────────────────────────────────────
+function initSortableTables() {
+    document.querySelectorAll('.modern-table').forEach(table => {
+        const headers = table.querySelectorAll('th.sortable');
+        headers.forEach((header, colIndex) => {
+            header.addEventListener('click', () => {
+                const tbody = table.querySelector('tbody');
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                const isAsc = header.classList.contains('asc');
+                headers.forEach(h => h.classList.remove('asc', 'desc'));
+                header.classList.add(isAsc ? 'desc' : 'asc');
+                rows.sort((a, b) => {
+                    let aVal = a.cells[colIndex].textContent.trim();
+                    let bVal = b.cells[colIndex].textContent.trim();
+                    const aNum = parseFloat(aVal.replace(/[^0-9.-]/g, ''));
+                    const bNum = parseFloat(bVal.replace(/[^0-9.-]/g, ''));
+                    if (!isNaN(aNum) && !isNaN(bNum)) return isAsc ? bNum - aNum : aNum - bNum;
+                    return isAsc ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
+                });
+                rows.forEach(row => tbody.appendChild(row));
+            });
+        });
+    });
+}
+
+// ── Search / Filter ────────────────────────────────────────────────────────
+function initSearch() {
+    const searchInput = document.getElementById('stock-search');
+    if (!searchInput) return;
+    searchInput.addEventListener('input', e => {
+        const query = e.target.value.toLowerCase();
+        const items = document.querySelectorAll('.stock-card, .modern-table tbody tr');
+        items.forEach(item => {
+            const ticker = item.dataset.ticker?.toLowerCase() || item.textContent.toLowerCase();
+            item.classList.toggle('hidden', !ticker.includes(query));
+        });
+        const visible = document.querySelectorAll('.stock-card:not(.hidden), .modern-table tbody tr:not(.hidden)').length;
+        const countEl = document.getElementById('visible-count');
+        if (countEl) countEl.textContent = visible;
+        // Empty-state feedback
+        const emptyState = document.getElementById('search-empty-state');
+        if (emptyState) emptyState.classList.toggle('hidden', visible > 0);
+    });
+}
+
+// ── Filter Buttons ─────────────────────────────────────────────────────────
+function initFilterButtons() {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const filter = btn.dataset.filter;
+            const isActive = btn.classList.contains('active');
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            if (!isActive) btn.classList.add('active');
+            document.querySelectorAll('.stock-card').forEach(card => {
+                if (!filter || isActive)         { card.classList.remove('hidden'); }
+                else if (filter === 'top5')       { card.classList.toggle('hidden', parseInt(card.dataset.rank) > 5); }
+                else if (filter === 'trade-ready'){ card.classList.toggle('hidden', card.dataset.tradeReady !== 'true'); }
+            });
+            const visible = document.querySelectorAll('.stock-card:not(.hidden)').length;
+            const countEl = document.getElementById('visible-count');
+            if (countEl) countEl.textContent = visible;
+        });
+    });
+}
+
+// ── SVG Chart Tooltips ─────────────────────────────────────────────────────
+function initChartTooltips() {
+    const tooltip = document.createElement('div');
+    tooltip.className = 'chart-tooltip';
+    document.body.appendChild(tooltip);
+    document.querySelectorAll('svg.interactive-chart').forEach(chart => {
+        chart.addEventListener('mousemove', e => {
+            const rect = chart.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const data = chart.dataset.values ? JSON.parse(chart.dataset.values) : null;
+            if (data && data.length > 0) {
+                const idx = Math.floor((x / rect.width) * data.length);
+                const point = data[Math.min(idx, data.length - 1)];
+                if (point) {
+                    tooltip.innerHTML = `
+                        <div><strong>${point.date || ''}</strong></div>
+                        <div>Price: $${point.price?.toFixed(2) || '&mdash;'}</div>
+                        ${point.ema20 ? `<div style="color:#f59e0b">EMA20: $${point.ema20.toFixed(2)}</div>` : ''}
+                        ${point.ema50 ? `<div style="color:#8b5cf6">EMA50: $${point.ema50.toFixed(2)}</div>` : ''}
+                    `;
+                    tooltip.style.left = (e.clientX + 15) + 'px';
+                    tooltip.style.top  = (e.clientY - 10) + 'px';
+                    tooltip.classList.add('visible');
+                }
+            }
+        });
+        chart.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
+    });
+}
+
+// ── Watchlist ──────────────────────────────────────────────────────────────
+function initWatchlist() {
+    const serverList = window.__SERVER_WATCHLIST__ || [];
+    let watchlist = JSON.parse(localStorage.getItem('ema_watchlist') || '[]');
+    serverList.forEach(t => { if (!watchlist.includes(t)) watchlist.push(t); });
+    localStorage.setItem('ema_watchlist', JSON.stringify(watchlist));
+    document.querySelectorAll('.watchlist-btn, .cand-watchlist-btn').forEach(btn => {
+        if (watchlist.includes(btn.dataset.ticker)) {
+            btn.textContent = '★';
+            btn.style.color = '#fbbf24';
+        }
+    });
+}
+
+function toggleWatchlist(btn) {
+    const ticker = btn.dataset.ticker;
+    let watchlist = JSON.parse(localStorage.getItem('ema_watchlist') || '[]');
+    const idx = watchlist.indexOf(ticker);
+    if (idx === -1) {
+        watchlist.push(ticker);
+        btn.textContent = '★';
+        btn.style.color = '#fbbf24';
+    } else {
+        watchlist.splice(idx, 1);
+        btn.textContent = '☆';
+        btn.style.color = 'rgba(255,255,255,0.2)';
+    }
+    localStorage.setItem('ema_watchlist', JSON.stringify(watchlist));
+    document.querySelectorAll(`.watchlist-btn[data-ticker="${ticker}"], .cand-watchlist-btn[data-ticker="${ticker}"]`).forEach(b => {
+        b.textContent = btn.textContent;
+        b.style.color = btn.style.color;
+    });
+}
+
+function exportWatchlist() {
+    const watchlist = JSON.parse(localStorage.getItem('ema_watchlist') || '[]');
+    const blob = new Blob([JSON.stringify(watchlist, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'watchlist.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+// ── Advanced Filters ───────────────────────────────────────────────────────
+function initAdvancedFilters() {
+    const sectorSel = document.getElementById('cand-sector-filter');
+    if (sectorSel) {
+        const sectors = new Set();
+        document.querySelectorAll('#candidates-table tbody tr').forEach(r => {
+            if (r.dataset.sector) sectors.add(r.dataset.sector);
+        });
+        Array.from(sectors).sort().forEach(s => {
+            const o = document.createElement('option');
+            o.value = s; o.textContent = s; sectorSel.appendChild(o);
+        });
+    }
+
+    function applyCandFilter() {
+        const minScore = parseInt(document.getElementById('cand-score-filter')?.value || '0');
+        const regime   = document.getElementById('cand-regime-filter')?.value || '';
+        const sector   = document.getElementById('cand-sector-filter')?.value || '';
+        let visible = 0;
+        document.querySelectorAll('#candidates-table tbody tr').forEach(row => {
+            const show = parseFloat(row.dataset.entryScore || '0') >= minScore
+                && (regime === '' || (row.dataset.regime || '').toUpperCase().includes(regime))
+                && (sector === '' || row.dataset.sector === sector);
+            row.classList.toggle('hidden', !show);
+            if (show) visible++;
+        });
+        const el = document.getElementById('cand-visible-count');
+        if (el) el.textContent = visible;
+    }
+
+    ['cand-score-filter', 'cand-regime-filter', 'cand-sector-filter'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', applyCandFilter);
+    });
+
+    document.getElementById('proj-conf-filter')?.addEventListener('change', function() {
+        const val = this.value;
+        let vis = 0;
+        document.querySelectorAll('#projections-table tbody tr').forEach(row => {
+            const show = val === '' || row.dataset.confidence === val;
+            row.classList.toggle('hidden', !show);
+            if (show) vis++;
+        });
+        const el = document.getElementById('proj-visible-count');
+        if (el) el.textContent = vis;
+    });
+}
+
+// ── Bootstrap (guarded — each feature only runs if its DOM anchor exists) ──
+document.addEventListener('DOMContentLoaded', () => {
+    // Set --nav-height CSS variable so .regime-bar sticky offset is exact
+    const nav = document.querySelector('.top-nav');
+    if (nav) {
+        document.documentElement.style.setProperty('--nav-height', nav.offsetHeight + 'px');
+    }
+
+    if (document.querySelector('.modern-table th.sortable')) {
+        console.info('[EMA] initSortableTables');
+        initSortableTables();
+    }
+    if (document.getElementById('stock-search')) {
+        console.info('[EMA] initSearch');
+        initSearch();
+    }
+    if (document.querySelectorAll('.filter-btn').length) {
+        console.info('[EMA] initFilterButtons');
+        initFilterButtons();
+    }
+    if (document.querySelectorAll('svg.interactive-chart').length) {
+        console.info('[EMA] initChartTooltips');
+        initChartTooltips();
+    }
+    if (document.getElementById('cand-score-filter') || document.getElementById('proj-conf-filter')) {
+        console.info('[EMA] initAdvancedFilters');
+        initAdvancedFilters();
+    }
+    if (document.querySelectorAll('.watchlist-btn, .cand-watchlist-btn').length) {
+        console.info('[EMA] initWatchlist');
+        initWatchlist();
+    }
+});
+</script>
+
+    </body>
+    </html>
+    
