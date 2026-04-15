@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 # Import shared UI components from the framework
 from src.utils.html_utils import CSS_DARK_THEME, INTERACTIVE_JS, generate_top_nav
 
-# Load environment variables from .env file
-load_dotenv()
+# Load environment variables from .env file (resolve to project root)
+load_dotenv(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '.env')), override=True)
 
 from src.config import DISCLAIMER_TOP, DISCLAIMER_BOTTOM, AI_MODEL, AI_MAX_TOKENS, AI_TEMPERATURE
 

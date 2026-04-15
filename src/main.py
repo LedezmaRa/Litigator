@@ -307,6 +307,11 @@ def main():
         webbrowser.open(f"file://{os.path.abspath('reports/sentiment.html')}")
         return
 
+    # Standalone mode: generate only AI memos (no full ticker re-run)
+    if (args.ai_memo or args.ai_macro_memo) and not args.sectors and not args.ticker:
+        _run_sectors(ai_memo=args.ai_memo, ai_macro_memo=args.ai_macro_memo)
+        return
+
     # ── Full pipeline: sectors + tickers + sentiment + news ──
 
     # 1. Sector analysis (sector_analysis.html, sector_*.html, macro_drivers.html)
